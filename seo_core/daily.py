@@ -152,6 +152,36 @@ def pull_gsc(cfg: dict, site: dict, start: str, end: str, errors: list) -> dict[
     return days
 
 
+def exact_users_file(cfg: dict, site_id: str) -> Path:
+    return data_dir(cfg) / "daily" / f"{site_id}.exact_users.json"
+
+
+def pull_exact_users(cfg: dict, site: dict, last: dt.date, errors: list) -> dict:
+    """Unique users can't be added up day by day, so pull the exact totals from GA4 for the
+    standard rolling views: last 7 / 28 days up to `last` and the periods just before them."""
+    pid = site.get("ga4_property_id")
+    if not pid:
+        return {}
+    organic = {"field": "sessionDefaultChannelGroup", "match": "EXACT", "value": "Organic Search"}
+    out: dict[str, dict] = {}
+    for n in (7, 28):
+        for k in (0, 1):  # current period, previous period
+            end = last - dt.timedelta(days=n * k)
+            start = end - dt.timedelta(days=n - 1)
+            key = f"{_iso(start)}_{_iso(end)}"
+            rec = {}
+            for name, flt in (("all", None), ("organic", organic)):
+                try:
+                    rows = g.ga4_report(cfg, pid, _iso(start), _iso(end), ["totalUsers", "activeUsers"], filter_spec=flt, limit=1)
+                    r = rows[0] if rows else {}
+                    rec[name] = {"totalUsers": int(r.get("totalUsers") or 0), "activeUsers": int(r.get("activeUsers") or 0)}
+                except Exception as e:
+                    errors.append({"source": "GA4", "table": "exact_users", "range": [_iso(start), _iso(end)], "error": f"{type(e).__name__}: {e}"})
+            if rec:
+                out[key] = rec
+    return out
+
+
 def refresh(site_ids: list[str] | None = None, days: int | None = None, force: bool = False,
             progress: dict | None = None) -> dict:
     """Pull every missing day (and re-pull the last few days) for the configured window."""
@@ -205,6 +235,9 @@ def refresh(site_ids: list[str] | None = None, days: int | None = None, force: b
                        "ga": ga.get(k, {}), "gsc": gs.get(k, {})}
                 (sdir / f"{k}.json").write_text(json.dumps(rec, separators=(",", ":"), default=str))
                 written += 1
+        exact = pull_exact_users(cfg, site, yesterday, errors)
+        if exact:
+            exact_users_file(cfg, site["id"]).write_text(json.dumps({"pulled_on": _iso(dt.datetime.now(tz).date()), "ranges": exact}))
         summary["sites"][site["id"]] = {"days_pulled": written, "days_in_window": window, "errors": errors[:20]}
     return summary
 
@@ -253,6 +286,12 @@ def payload(cfg: dict, site_ids: list[str]) -> str | None:
                         rows = t["rows"]
                     for row in rows:
                         dst["rows"].append([di] + [sid(v) if isinstance(v, str) else v for v in row])
+        ef = exact_users_file(cfg, site_id)
+        if ef.exists():
+            try:
+                site["exact_users"] = json.loads(ef.read_text()).get("ranges", {})
+            except Exception:
+                pass
         out["sites"][site_id] = site
     if not out["sites"]:
         return None

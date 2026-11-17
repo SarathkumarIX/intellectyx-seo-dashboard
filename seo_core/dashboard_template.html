@@ -37,7 +37,11 @@ h1{font-size:26px;margin:0 0 6px;font-weight:700;letter-spacing:-.015em;color:#f
 .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--brand)}
 .hright{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 .wplabel{font-size:11px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.06em}
-#hleft{flex:1 1 420px;min-width:0}
+#hleft{flex:1 1 380px;min-width:0;max-width:560px}
+#period{display:flex;flex-wrap:wrap;align-items:baseline;column-gap:10px;row-gap:2px;margin-top:2px}
+#period .plab{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--brand)}
+#period .pdates{font-size:15px;font-weight:600;color:#fff}
+#period .pcmp{flex-basis:100%;font-size:12.5px;color:#c9d6b5}
 .rangebox{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;justify-content:flex-end}
 .rangebox[hidden]{display:none}
 .rangebox label{display:flex;flex-direction:column;font-size:12px;color:#c9d6b5;font-weight:600;gap:4px}
@@ -85,6 +89,21 @@ h1{font-size:26px;margin:0 0 6px;font-weight:700;letter-spacing:-.015em;color:#f
 .calfoot{margin-top:8px;font-size:11.5px;color:#9fb08a;text-align:center}
 .rangemsg:empty{display:none}
 @media (max-width:700px){.hright{align-items:flex-start}.pnav{justify-content:flex-start}.rangemsg{text-align:left}}
+.infobar{display:flex;align-items:flex-start;gap:10px;background:var(--brand-t);border:1px solid var(--brand-t2);border-radius:12px;padding:10px 12px 10px 14px;font-size:13px;color:var(--ink2);margin-bottom:18px}
+.infobar[hidden]{display:none}
+.ibicon{flex:none;color:var(--brand);display:inline-flex;margin-top:1px}
+.ibtext{flex:1;min-width:0}
+.ibline{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.iblink{appearance:none;font:inherit;font-size:12.5px;font-weight:700;color:var(--brand);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.ibdetails{margin:6px 0 0;padding-left:18px}
+.ibdetails[hidden]{display:none}
+.ibdetails li{margin:2px 0}
+.ibwarn{margin-top:6px;color:var(--serious, #e8a33d);font-weight:600}
+.ibclose{flex:none;appearance:none;display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:8px;border:0;background:transparent;color:var(--ink2);cursor:pointer}
+.ibclose:hover{background:rgba(144,195,34,.18);color:var(--ink)}
+.ibclose:focus-visible,.iblink:focus-visible,.noteopen:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+.noteopen{appearance:none;font:inherit;font-size:12px;font-weight:600;color:var(--brand);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.noteopen[hidden]{display:none}
 .histnote{background:var(--brand-t);border:1px solid var(--brand-t2);border-left:4px solid var(--brand);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--ink2);margin-bottom:18px}
 .sitechip{display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:600;color:#fff;background:rgba(144,195,34,.14);border:1px solid rgba(144,195,34,.4);border-radius:999px;padding:5px 12px 5px 8px}
 .sitechip i{width:18px;height:18px;border-radius:50%;background:var(--brand);display:inline-flex;align-items:center;justify-content:center;color:var(--brand-ink);font-style:normal;font-size:11px}
@@ -269,6 +288,7 @@ tr.pdetail[hidden]{display:none}
       <div class="pnav" id="pnav"></div>
       <div class="rangemsg" id="rangemsg"></div>
       <div class="sub" id="generated"></div>
+      <button type="button" class="noteopen" id="noteopen" hidden>About these numbers</button>
     </div>
   </header>
   <nav class="tabs" role="tablist" id="tabs"></nav>
@@ -522,6 +542,7 @@ function weekPairs(daily, cur0, key){
   return out;
 }
 // Day-by-day totals for the dates in view (a single day shows the 14 days up to it), newest first.
+function uLabel(base, k){ return k && k.avg ? base + " (avg. per day)" : base; }
 function dayByDayCard(s){
   if (!DAILY || !DAILY.sites || !DAILY.sites[s.id]) return null;
   var site = DAILY.sites[s.id], a = R.period.current[0], b = R.period.current[1], one = a === b;
@@ -611,7 +632,7 @@ function buildSite(s){
     var kp = function(k, kind){ if (!k || k.current === null || k.current === undefined) return k && k.na ? "- (single day only)" : "-"; var t = fmt(k.current, kind); if (k.previous !== null && k.previous !== undefined) t += " (prev " + fmt(k.previous, kind) + (k.change_pct !== null && k.change_pct !== undefined ? ", " + (k.change_pct > 0 ? "+" : "") + k.change_pct + "%" : "") + ")"; return t; };
     var auto = [];
     if (gsc.kpis) auto.push("Search Console - Clicks " + kp(gsc.kpis.clicks) + " · Impressions " + kp(gsc.kpis.impressions) + " · CTR " + kp(gsc.kpis.ctr_pct, "pct") + " · Avg. position " + kp(gsc.kpis.avg_position, "pos"));
-    if (ga.kpis) auto.push("Google Analytics - " + (ga.kpis.totalUsers && ga.kpis.totalUsers.na ? "" : "Users " + kp(ga.kpis.totalUsers) + " · ") + "Sessions " + kp(ga.kpis.sessions) + " · Organic sessions " + kp((ga.organic_kpis||{}).sessions) + " · Key events " + kp(ga.kpis.key_events));
+    if (ga.kpis) auto.push("Google Analytics - " + (ga.kpis.totalUsers && ga.kpis.totalUsers.na ? "" : uLabel("Users", ga.kpis.totalUsers) + " " + kp(ga.kpis.totalUsers) + " · ") + "Sessions " + kp(ga.kpis.sessions) + " · Organic sessions " + kp((ga.organic_kpis||{}).sessions) + " · Key events " + kp(ga.kpis.key_events));
     if (auto.length){ sum.appendChild($("div",{cls:"desc",text: s.custom ? "Automatic summary from the data for the selected dates." : "Automatic summary from the data (no written summary for this week)."})); sum.appendChild($("ul",null, auto.map(function(t){ return $("li",{text:t}); }))); }
     else sum.appendChild($("div",{cls:"empty",text:"No data for this week."}));
   }
@@ -629,7 +650,7 @@ function buildSite(s){
   if (ga.kpis){
     var ok = ga.organic_kpis || {};
     var ka = srcCard("kpis-ga-"+s.id, "ga", "Google Analytics 4", period);
-    ka.appendChild($("div",{cls:"kpis"},[ga.kpis.totalUsers && (ga.kpis.totalUsers.current === null || ga.kpis.totalUsers.current === undefined) ? null : kpiCard("Users", ga.kpis.totalUsers), kpiCard("Sessions", ga.kpis.sessions),
+    ka.appendChild($("div",{cls:"kpis"},[ga.kpis.totalUsers && (ga.kpis.totalUsers.current === null || ga.kpis.totalUsers.current === undefined) ? null : kpiCard(uLabel("Users", ga.kpis.totalUsers), ga.kpis.totalUsers), kpiCard("Sessions", ga.kpis.sessions),
       kpiCard("Organic sessions", ok.sessions), kpiCard("Engagement rate", ga.kpis.engagement_rate_pct, "pct"),
       kpiCard("Key events", ga.kpis.key_events), kpiCard("AI-assistant sessions", (ga.ai_referrals||{}).sessions)]));
     O.appendChild(ka);
@@ -776,7 +797,8 @@ function buildSite(s){
     var aetsCard = $("div",{cls:"kpi"},[$("div",{cls:"l",text:"Avg. engagement time per session"}),$("div",{cls:"v",text:secs(aets.current)}),$("div",{cls:"d"},[$("span",{cls:"flat",text:"previous week " + secs(aets.previous)})])]);
     function esu(au, k, which){ var e = k && k[which]; return (typeof e === "number" && au) ? Math.round(e / au * 100) / 100 : null; }
     A.appendChild(card("ga-summary-"+s.id, "Summary", [$("div",{cls:"kpis kpis9"},[
-      kpiCard("Total users", ga.kpis.totalUsers), kpiCard("New users", ga.kpis.newUsers), kpiCard("Active users", mk(xc.activeUsers, xp.activeUsers)),
+      kpiCard(uLabel("Total users", ga.kpis.totalUsers), ga.kpis.totalUsers), kpiCard("New users", ga.kpis.newUsers),
+      kpiCard(uLabel("Active users", ga.kpis.activeUsers), ga.kpis.activeUsers || mk(xc.activeUsers, xp.activeUsers)),
       kpiCard("Sessions", ga.kpis.sessions), kpiCard("Engaged sessions", ga.kpis.engagedSessions), kpiCard("Engagement rate", ga.kpis.engagement_rate_pct, "pct"),
       aetsCard, kpiCard("Views", ga.kpis.screenPageViews),
       kpiCard("Key events", ga.kpis.key_events)])],
@@ -1050,16 +1072,26 @@ function customGA(site, cur, prev, nDays, base){
   var tc = T("totals", 0, cur)[0] || {}, tp = prev ? (T("totals", 0, prev)[0] || {}) : null;
   var oc = T("organic", 0, cur)[0] || {}, op = prev ? (T("organic", 0, prev)[0] || {}) : null;
   var P = function(o, k){ return o ? (o[k] || 0) : null; };
-  var NA = {current:null, previous:null, na:"single day only"};
-  function block(c, p){
+  // unique users: exact for a single day and for ranges GA4 was asked about directly (last 7 / 28 days);
+  // for any other range, the average per day (the same person can visit on several days)
+  var key = function(r){ return r ? site.days[r[0]] + "_" + site.days[r[1]] : ""; };
+  var EX = site.exact_users || {}, exC = EX[key(cur)], exP = prev ? EX[key(prev)] : null, exact = !single && !!exC;
+  function users(c, p, seg, field){
+    if (single) return mk(c[field] || 0, P(p, field));
+    if (exact) return mk(exC[seg] ? exC[seg][field] : null, exP && exP[seg] ? exP[seg][field] : null);
+    var avg = function(o){ return o ? Math.round((o[field] || 0) / nDays) : null; };
+    var k = mk(avg(c), avg(p)); k.avg = true; return k;
+  }
+  function block(c, p, seg){
     var er = function(o){ return o && o.sessions ? Math.round(o.engagedSessions / o.sessions * 1000) / 10 : (o ? 0 : null); };
     return {sessions: mk(c.sessions || 0, P(p,"sessions")), newUsers: mk(c.newUsers || 0, P(p,"newUsers")),
-      totalUsers: single ? mk(c.totalUsers || 0, P(p,"totalUsers")) : NA,
+      totalUsers: users(c, p, seg, "totalUsers"), activeUsers: users(c, p, seg, "activeUsers"),
       engagedSessions: mk(c.engagedSessions || 0, P(p,"engagedSessions")), engagement_rate_pct: mk(er(c), er(p)),
       averageSessionDuration: mk(r1(c.averageSessionDuration), p ? r1(p.averageSessionDuration) : null),
       screenPageViews: mk(c.screenPageViews || 0, P(p,"screenPageViews")), key_events: mk(c[ke] || 0, P(p, ke))};
   }
-  var ga = {status:"ok", property_id: (base && base.property_id) || "", kpis: block(tc, tp), organic_kpis: block(oc, op), trend: base ? base.trend : null};
+  var ga = {status:"ok", property_id: (base && base.property_id) || "", trend: base ? base.trend : null};
+  ga.kpis = block(tc, tp, "all"); ga.organic_kpis = block(oc, op, "organic"); ga.users_mode = single || exact ? "exact" : "avg";
   function withPrev(rows, prows, keyFn, mets){
     var pi = indexBy(prows, keyFn);
     rows.forEach(function(r){ var q = pi[keyFn(r)]; mets.forEach(function(m){ r["prev_" + m] = prev ? (q ? q[m] || 0 : 0) : null; }); });
@@ -1234,15 +1266,46 @@ var hasDaily = false, LATEST = null, DMIN = null, PS = {m: null};
 function fmtDay(d){ var x = new Date(d + "T00:00:00Z"); return x.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}); }
 function dayBounds(){ var mn = null, mx = null; if (DAILY) Object.keys(DAILY.sites).forEach(function(k){ var ds = DAILY.sites[k].days; if (!ds.length) return; if (!mn || ds[0] < mn) mn = ds[0]; if (!mx || ds[ds.length-1] > mx) mx = ds[ds.length-1]; }); return [mn, mx]; }
 var tabs = document.getElementById("tabs"), panels = document.getElementById("panels"), foot = document.getElementById("foot");
+// slim, closable info bar; closing hides it in this browser until "About these numbers" is clicked
+var NOTE_KEY = "ixseo.infobar.hidden";
+function notesHidden(){ try { return localStorage.getItem(NOTE_KEY) === "1"; } catch(e){ return !!window.__ixNoteHidden; } }
+function setNotesHidden(v){ try { if (v) localStorage.setItem(NOTE_KEY, "1"); else localStorage.removeItem(NOTE_KEY); } catch(e){} window.__ixNoteHidden = v; }
+var INFO = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="7.25" stroke="currentColor" stroke-width="1.6"/><path d="M9 8v4.5M9 5.6v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+function infoBar(summary, details, warnings){
+  var bar = $("div",{cls:"infobar",role:"note"}), ic = $("span",{cls:"ibicon"}); ic.innerHTML = INFO;
+  var txt = $("div",{cls:"ibtext"}), line = $("div",{cls:"ibline"},[$("span",{text:summary})]);
+  txt.appendChild(line);
+  if (details.length){
+    var more = $("button",{type:"button",cls:"iblink","aria-expanded":"false",text:"Details"}), box = $("ul",{cls:"ibdetails",hidden:""}, details.map(function(t){ return $("li",{text:t}); }));
+    more.addEventListener("click", function(){ var open = box.hidden; box.hidden = !open; more.textContent = open ? "Hide details" : "Details"; more.setAttribute("aria-expanded", open ? "true" : "false"); });
+    line.appendChild(more); txt.appendChild(box);
+  }
+  (warnings || []).forEach(function(w){ txt.appendChild($("div",{cls:"ibwarn",text:w})); });
+  var x = $("button",{type:"button",cls:"ibclose",title:"Hide this note","aria-label":"Hide this note"}); x.innerHTML = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  x.addEventListener("click", function(){ setNotesHidden(true); syncNotes(); });
+  bar.appendChild(ic); bar.appendChild(txt); bar.appendChild(x);
+  bar.hidden = notesHidden();
+  return bar;
+}
+function syncNotes(){
+  var h = notesHidden();
+  Array.prototype.forEach.call(document.querySelectorAll(".infobar"), function(b){ b.hidden = h; });
+  var r = document.getElementById("noteopen"); if (r) r.hidden = !h || !document.querySelector(".infobar");
+}
 function render(){
   tabs.textContent = ""; panels.textContent = ""; foot.textContent = "";
   var chip = document.getElementById("sitechip"); chip.textContent = "";
   if (R.custom){
-    panels.appendChild($("div",{cls:"histnote"},[
-      $("div",{text:(R.viewLabel || "Custom range") + ": Search Console and Google Analytics figures are added up from the day-by-day data (refreshed every day) for these dates, compared with " + (R.period.days === 1 ? "the same day one week earlier" : "the " + R.period.days + " days just before") + ". " +
-        (R.period.days === 1 ? "User counts are exact for this single day." : "User counts (Total users, Active users and the 'per active user' figures) are shown only when a single day is picked, because the same person can visit on several days.") +
-        " Indexing, Core Web Vitals and SEMrush show the latest weekly check (" + rangeTxt(D.weeks[0].period.current) + "); the written insights are in the weekly reports."})].concat((R.gaps||[]).map(function(t){ return $("div",{text:t, style:"margin-top:6px"}); }))));
-  } else if (R.history) panels.appendChild($("div",{cls:"histnote",text:"Past week from history: Search Console and Google Analytics figures are for this week's dates. Indexing checks, Core Web Vitals and SEMrush are captured only during each weekly run, so they are not available for this week."}));
+    var avgU = R.period.days > 1 && R.sites.some(function(x){ return x.ga4 && x.ga4.users_mode === "avg"; });
+    panels.appendChild(infoBar(
+      "Figures for these dates are added up from the daily Search Console and GA4 data." + (avgU ? " Users are shown as an average per day." : ""),
+      ["Compared with " + (R.period.days === 1 ? "the same day one week earlier" : "the " + R.period.days + " days just before") + ".",
+       R.period.days === 1 ? "User counts are exact for this single day." : avgU
+         ? "Total and active users are an average per day here, because the same person can visit on several days. Exact counts are shown for a single day, the last 7 days, the last 28 days and the weekly reports."
+         : "Total and active users are GA4's exact counts for these dates.",
+       "Indexing, Core Web Vitals and SEMrush show the latest weekly check (" + rangeTxt(D.weeks[0].period.current) + "). The written insights are in the weekly reports."],
+      R.gaps || []));
+  } else if (R.history) panels.appendChild(infoBar("Past weekly report: indexing, Core Web Vitals and SEMrush were not captured for this week.", [], []));
   R.sites.forEach(function(s, i){
     var b = $("button",{cls:"tab",role:"tab",id:"tab-"+s.id,"aria-selected": i===0 ? "true" : "false","aria-controls":"panel-"+s.id,text:s.label});
     var panel = buildSite(s); if (i) panel.hidden = true;
@@ -1258,13 +1321,21 @@ function render(){
   if (R.sites.length === 1) chip.appendChild($("div",{cls:"sitechip"},[$("i",{text:"◉"}), "Website: " + R.sites[0].label]));
   foot.appendChild($("div",{text:"Sources: Google Search Console API, Google Analytics Data API (GA4), PageSpeed Insights API (Chrome UX Report), SEMrush. Notes:"}));
   foot.appendChild($("ul",{cls:"notes"}, (R.custom ? D.weeks[0].notes || [] : R.notes || []).map(function(n){ return $("li",{text:n}); })));
+  syncNotes();
 }
 function show(idx){
   R = D.weeks[idx]; R.title = D.title;
   document.getElementById("title").textContent = D.title || "SEO Weekly Dashboard";
-  document.getElementById("period").textContent = (idx === 0 ? "Latest weekly report: " : "Week: ") + rangeTxt(R.period.current) + "  ·  compared with the previous 7 days: " + rangeTxt(R.period.previous);
+  setPeriod(idx === 0 ? "Latest weekly report" : "Weekly report", rangeTxt(R.period.current), "vs " + rangeTxt(R.period.previous));
   document.getElementById("generated").textContent = R.generated_at ? "Data updated " + fmtDate(String(R.generated_at).slice(0,10)) : "";
   render();
+}
+// header line: small label, the dates in bold, and the comparison period on its own short line
+function setPeriod(label, dates, cmp){
+  var el = document.getElementById("period"); el.textContent = "";
+  el.appendChild($("span",{cls:"plab",text:label}));
+  el.appendChild($("span",{cls:"pdates",text:dates}));
+  if (cmp) el.appendChild($("span",{cls:"pcmp",text:cmp}));
 }
 function showLatest(n){ return showRange(addDays(LATEST, -(n - 1)), LATEST, "Last " + n + " days"); }
 function showRange(a, b, label){
@@ -1272,13 +1343,12 @@ function showRange(a, b, label){
   if (!a || !b){ rmsg.textContent = "Pick a start date and an end date."; return; }
   if (a > b){ var t = a; a = b; b = t; }
   // a range that is exactly a saved week opens that week's full report
-  for (var i = 0; i < D.weeks.length; i++){ var pc = D.weeks[i].period.current; if (pc[0] === a && pc[1] === b){ show(i); if (label) document.getElementById("period").textContent = label + " (full weekly report): " + rangeTxt(pc) + "  ·  compared with the previous 7 days: " + rangeTxt(D.weeks[i].period.previous); return; } }
+  for (var i = 0; i < D.weeks.length; i++){ var pc = D.weeks[i].period.current; if (pc[0] === a && pc[1] === b){ show(i); if (label) setPeriod(label + " · weekly report", rangeTxt(pc), "vs " + rangeTxt(D.weeks[i].period.previous)); return; } }
   var C = buildCustom(a, b);
   if (!C){ rmsg.textContent = "There is no stored data for every day from " + fmtDate(a) + " to " + fmtDate(b) + ". Choose dates between " + fmtDate(DMIN) + " and " + fmtDate(LATEST) + "."; return false; }
   R = C; C.viewLabel = label || (C.period.days === 1 ? "Selected day" : "Custom range");
-  document.getElementById("period").textContent = C.period.days === 1
-    ? C.viewLabel + ": " + fmtDay(a) + "  ·  compared with the same day last week: " + fmtDay(C.period.previous[0])
-    : C.viewLabel + ": " + rangeTxt(C.period.current) + " (" + C.period.days + " days)  ·  compared with the previous " + C.period.days + " days: " + rangeTxt(C.period.previous);
+  if (C.period.days === 1) setPeriod(C.viewLabel, fmtDay(a), "vs " + fmtDay(C.period.previous[0]) + " (same day last week)");
+  else setPeriod(C.viewLabel, rangeTxt(C.period.current) + " · " + C.period.days + " days", "vs " + rangeTxt(C.period.previous));
   document.getElementById("generated").textContent = "Data updated " + fmtDate(C.generated_at) + " · weekly report: " + rangeTxt(D.weeks[0].period.current);
   render();
 }
@@ -1402,6 +1472,7 @@ function go(st){
   renderNav(); saveHash();
   if (sc !== false) window.scrollTo({top:0});
 }
+document.getElementById("noteopen").addEventListener("click", function(){ setNotesHidden(false); syncNotes(); });
 seg.addEventListener("click", function(e){
   var b = e.target.closest("button[data-m]"); if (!b) return;
   var m = b.getAttribute("data-m"); if (m === PS.m) return;
