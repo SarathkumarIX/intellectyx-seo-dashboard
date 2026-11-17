@@ -37,10 +37,6 @@ h1{font-size:26px;margin:0 0 6px;font-weight:700;letter-spacing:-.015em;color:#f
 .tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--brand)}
 .hright{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
 .wplabel{font-size:11px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.06em}
-.weekpick{appearance:none;-webkit-appearance:none;font:inherit;font-size:14px;font-weight:600;color:#fff;background:rgba(255,255,255,.08) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2390c322' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center;border:1px solid rgba(144,195,34,.45);border-radius:10px;padding:10px 40px 10px 14px;min-width:300px;cursor:pointer}
-.weekpick:focus{outline:2px solid var(--brand);outline-offset:1px}
-.weekpick:hover{border-color:var(--brand)}
-.weekpick option{color:#141b0d;background:#fff}
 #hleft{flex:1 1 420px;min-width:0}
 .rangebox{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;justify-content:flex-end}
 .rangebox[hidden]{display:none}
@@ -49,9 +45,33 @@ h1{font-size:26px;margin:0 0 6px;font-weight:700;letter-spacing:-.015em;color:#f
 .rangebox input:focus{outline:2px solid var(--brand);outline-offset:1px}
 .rangebox button{font:inherit;font-size:14px;font-weight:700;color:var(--brand-ink);background:var(--brand);border:0;border-radius:10px;padding:9px 20px;cursor:pointer;box-shadow:0 4px 14px rgba(144,195,34,.35);transition:transform .12s, background .12s}
 .rangebox button:hover{background:#a3d43a;transform:translateY(-1px)}
-.rangemsg{font-size:12.5px;color:#ffb4a8;max-width:420px;text-align:right}
+.rangemsg{font-size:12.5px;color:#ffb4a8;max-width:460px;text-align:right}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px;padding:4px;background:rgba(0,0,0,.28);border:1px solid rgba(144,195,34,.35);border-radius:12px}
+.seg[hidden]{display:none}
+.seg button{appearance:none;font:inherit;font-size:13px;font-weight:600;color:#dfe8d2;background:transparent;border:0;border-radius:9px;padding:7px 13px;cursor:pointer;white-space:nowrap;transition:background .12s,color .12s}
+.seg button:hover{background:rgba(144,195,34,.16);color:#fff}
+.seg button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);box-shadow:0 2px 10px rgba(144,195,34,.35)}
+.seg button:focus-visible{outline:2px solid #fff;outline-offset:1px}
+.seg button[hidden]{display:none}
+.pnav{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end;min-height:38px}
+.pnbtn{appearance:none;display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;border:1px solid rgba(144,195,34,.45);background:rgba(255,255,255,.08);color:#fff;cursor:pointer}
+.pnbtn:hover:not(:disabled){background:rgba(144,195,34,.22)}
+.pnbtn:disabled{opacity:.35;cursor:default}
+.pnbtn:focus-visible,.pchip:focus-visible,.pchip:focus-within{outline:2px solid var(--brand);outline-offset:1px}
+.pchip{position:relative;appearance:none;display:inline-flex;align-items:center;gap:8px;height:38px;font:inherit;font-size:14px;font-weight:600;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(144,195,34,.45);border-radius:10px;padding:0 14px;cursor:pointer;white-space:nowrap}
+.pchip:hover{background:rgba(144,195,34,.18)}
+.pchip.static{cursor:default}.pchip.static:hover{background:rgba(255,255,255,.08)}
+.pchip svg{flex:none;color:var(--brand)}
+.pchip small{font-size:11.5px;font-weight:600;color:#c9d6b5}
+.pchip .tag{font-size:11px;font-weight:700;color:var(--brand-ink);background:var(--brand);border-radius:6px;padding:1px 6px}
+.pchip input[type=date]{position:absolute;left:0;bottom:0;width:100%;height:100%;opacity:0;pointer-events:none;color-scheme:dark}
+.pchip select{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;font:inherit}
+.pchip select option{color:#141b0d;background:#fff}
+.pnav .sep{color:#c9d6b5;font-size:12.5px;font-weight:600}
+.papply{appearance:none;font:inherit;font-size:14px;font-weight:700;color:var(--brand-ink);background:var(--brand);border:0;border-radius:10px;height:38px;padding:0 18px;cursor:pointer;box-shadow:0 4px 14px rgba(144,195,34,.35)}
+.papply:hover{background:#a3d43a}
 .rangemsg:empty{display:none}
-@media (max-width:700px){.hright{align-items:flex-start}.weekpick{min-width:0;width:100%}}
+@media (max-width:700px){.hright{align-items:flex-start}.pnav{justify-content:flex-start}.rangemsg{text-align:left}}
 .histnote{background:var(--brand-t);border:1px solid var(--brand-t2);border-left:4px solid var(--brand);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--ink2);margin-bottom:18px}
 .sitechip{display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:600;color:#fff;background:rgba(144,195,34,.14);border:1px solid rgba(144,195,34,.4);border-radius:999px;padding:5px 12px 5px 8px}
 .sitechip i{width:18px;height:18px;border-radius:50%;background:var(--brand);display:inline-flex;align-items:center;justify-content:center;color:var(--brand-ink);font-style:normal;font-size:11px}
@@ -225,13 +245,15 @@ tr.pdetail[hidden]{display:none}
       <div id="sitechip"></div>
     </div>
     <div class="hright">
-      <label class="wplabel" for="weekpick">Report period</label>
-      <select id="weekpick" class="weekpick"></select>
-      <div class="rangebox" id="rangebox" hidden>
-        <label>From <input type="date" id="dfrom"></label>
-        <label>To <input type="date" id="dto"></label>
-        <button type="button" id="dapply">Apply</button>
+      <div class="wplabel" id="plabel">Report period</div>
+      <div class="seg" id="seg" role="group" aria-label="Report period">
+        <button type="button" data-m="day">Day</button>
+        <button type="button" data-m="week">Week</button>
+        <button type="button" data-m="d7">Last 7 days</button>
+        <button type="button" data-m="d28">Last 28 days</button>
+        <button type="button" data-m="custom">Custom</button>
       </div>
+      <div class="pnav" id="pnav"></div>
       <div class="rangemsg" id="rangemsg"></div>
       <div class="sub" id="generated"></div>
     </div>
@@ -1185,30 +1207,20 @@ function periodWording(root){
   });
 }
 function fmtDate(d){ var x = new Date(d + "T00:00:00Z"); return x.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}); }
-function rangeTxt(p){ return fmtDate(p[0]) + " – " + fmtDate(p[1]); }
-var pick = document.getElementById("weekpick"), hasDaily = false, LATEST = null;
-function fmtDay(d){ var x = new Date(d + "T00:00:00Z"); return x.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}); }
-function latestDay(){ var mx = null; if (DAILY) Object.keys(DAILY.sites).forEach(function(k){ var ds = DAILY.sites[k].days; if (ds.length && (!mx || ds[ds.length-1] > mx)) mx = ds[ds.length-1]; }); return mx; }
-function addOpt(parent, v, t){ var o = document.createElement("option"); o.value = v; o.textContent = t; parent.appendChild(o); }
-function fillPicker(){
-  pick.textContent = "";
-  LATEST = latestDay(); hasDaily = !!LATEST;
-  if (LATEST){
-    var gl = document.createElement("optgroup"); gl.label = "Latest data (updated every day)";
-    addOpt(gl, "d1", "Latest day · " + fmtDay(LATEST));
-    addOpt(gl, "d7", "Last 7 days · " + rangeTxt([addDays(LATEST, -6), LATEST]));
-    addOpt(gl, "d28", "Last 28 days · " + rangeTxt([addDays(LATEST, -27), LATEST]));
-    pick.appendChild(gl);
-  }
-  var gw = document.createElement("optgroup"); gw.label = "Weekly reports (Mon-Sun, with insights)";
-  D.weeks.forEach(function(w, i){ addOpt(gw, String(i), "Week · " + rangeTxt(w.period.current)); });
-  pick.appendChild(gw);
-  if (hasDaily){ var go = document.createElement("optgroup"); go.label = "Other"; addOpt(go, "custom", "Pick a day or dates…"); pick.appendChild(go); }
-  if (D.weeks.length < 2 && !hasDaily) pick.disabled = true;
+// dates: "Nov 16, 2026", "Mon, Nov 16, 2026", ranges "Nov 10 – 16, 2026" / "Oct 20 – Nov 16, 2026"
+function rangeTxt(p){ return fmtRange(p[0], p[1]); }
+function fmtRange(a, b){
+  if (a === b) return fmtDate(a);
+  var A = new Date(a + "T00:00:00Z"), B = new Date(b + "T00:00:00Z");
+  var mon = function(x){ return x.toLocaleDateString("en-US",{month:"short",timeZone:"UTC"}); };
+  if (A.getUTCFullYear() !== B.getUTCFullYear()) return fmtDate(a) + " – " + fmtDate(b);
+  if (A.getUTCMonth() === B.getUTCMonth()) return mon(A) + " " + A.getUTCDate() + " – " + B.getUTCDate() + ", " + B.getUTCFullYear();
+  return mon(A) + " " + A.getUTCDate() + " – " + mon(B) + " " + B.getUTCDate() + ", " + B.getUTCFullYear();
 }
-function showLatest(n){ showRange(addDays(LATEST, -(n - 1)), LATEST, n === 1 ? "Latest day" : "Last " + n + " days", true); }
+var hasDaily = false, LATEST = null, DMIN = null, PS = {m: null};
+function fmtDay(d){ var x = new Date(d + "T00:00:00Z"); return x.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}); }
+function dayBounds(){ var mn = null, mx = null; if (DAILY) Object.keys(DAILY.sites).forEach(function(k){ var ds = DAILY.sites[k].days; if (!ds.length) return; if (!mn || ds[0] < mn) mn = ds[0]; if (!mx || ds[ds.length-1] > mx) mx = ds[ds.length-1]; }); return [mn, mx]; }
 var tabs = document.getElementById("tabs"), panels = document.getElementById("panels"), foot = document.getElementById("foot");
-var rbox = document.getElementById("rangebox"), dfrom = document.getElementById("dfrom"), dto = document.getElementById("dto"), rmsg = document.getElementById("rangemsg");
 function render(){
   tabs.textContent = ""; panels.textContent = ""; foot.textContent = "";
   var chip = document.getElementById("sitechip"); chip.textContent = "";
@@ -1238,17 +1250,18 @@ function show(idx){
   R = D.weeks[idx]; R.title = D.title;
   document.getElementById("title").textContent = D.title || "SEO Weekly Dashboard";
   document.getElementById("period").textContent = (idx === 0 ? "Latest weekly report: " : "Week: ") + rangeTxt(R.period.current) + "  ·  compared with the previous 7 days: " + rangeTxt(R.period.previous);
-  document.getElementById("generated").textContent = "Data pulled " + (R.generated_at || "").replace("T"," ").slice(0,16) + " UTC";
+  document.getElementById("generated").textContent = R.generated_at ? "Data updated " + fmtDate(String(R.generated_at).slice(0,10)) : "";
   render();
 }
-function showRange(a, b, label, keepPick){
+function showLatest(n){ return showRange(addDays(LATEST, -(n - 1)), LATEST, "Last " + n + " days"); }
+function showRange(a, b, label){
   rmsg.textContent = "";
   if (!a || !b){ rmsg.textContent = "Pick a start date and an end date."; return; }
-  if (a > b){ var t = a; a = b; b = t; dfrom.value = a; dto.value = b; }
+  if (a > b){ var t = a; a = b; b = t; }
   // a range that is exactly a saved week opens that week's full report
-  for (var i = 0; i < D.weeks.length; i++){ var pc = D.weeks[i].period.current; if (pc[0] === a && pc[1] === b){ if (!keepPick) pick.value = String(i); rbox.hidden = true; show(i); if (label) document.getElementById("period").textContent = label + " (full weekly report): " + rangeTxt(pc) + "  ·  compared with the previous 7 days: " + rangeTxt(D.weeks[i].period.previous); return; } }
+  for (var i = 0; i < D.weeks.length; i++){ var pc = D.weeks[i].period.current; if (pc[0] === a && pc[1] === b){ show(i); if (label) document.getElementById("period").textContent = label + " (full weekly report): " + rangeTxt(pc) + "  ·  compared with the previous 7 days: " + rangeTxt(D.weeks[i].period.previous); return; } }
   var C = buildCustom(a, b);
-  if (!C){ rmsg.textContent = "There is no stored data for every day from " + fmtDate(a) + " to " + fmtDate(b) + ". Choose dates between " + fmtDate(dfrom.min) + " and " + fmtDate(dfrom.max) + "."; return; }
+  if (!C){ rmsg.textContent = "There is no stored data for every day from " + fmtDate(a) + " to " + fmtDate(b) + ". Choose dates between " + fmtDate(DMIN) + " and " + fmtDate(LATEST) + "."; return false; }
   R = C; C.viewLabel = label || (C.period.days === 1 ? "Selected day" : "Custom range");
   document.getElementById("period").textContent = C.period.days === 1
     ? C.viewLabel + ": " + fmtDay(a) + "  ·  compared with the same day last week: " + fmtDay(C.period.previous[0])
@@ -1256,24 +1269,96 @@ function showRange(a, b, label, keepPick){
   document.getElementById("generated").textContent = "Data updated " + fmtDate(C.generated_at) + " · weekly report: " + rangeTxt(D.weeks[0].period.current);
   render();
 }
-pick.addEventListener("change", function(){
-  rmsg.textContent = "";
-  if (/^d\d+$/.test(pick.value)){ rbox.hidden = true; showLatest(parseInt(pick.value.slice(1), 10)); window.scrollTo({top:0}); return; }
-  if (pick.value !== "custom"){ rbox.hidden = true; show(parseInt(pick.value, 10)); window.scrollTo({top:0}); return; }
-  rbox.hidden = false;
-  loadDaily().then(function(d){
-    if (!d){ rmsg.textContent = DAILY_ERR; return; }
-    var mn = null, mx = null;
-    Object.keys(d.sites).forEach(function(k){ var ds = d.sites[k].days; if (!ds.length) return; if (!mn || ds[0] < mn) mn = ds[0]; if (!mx || ds[ds.length-1] > mx) mx = ds[ds.length-1]; });
-    dfrom.min = dto.min = mn; dfrom.max = dto.max = mx;
-    if (!dfrom.value) dfrom.value = addDays(mx, -6) < mn ? mn : addDays(mx, -6);
-    if (!dto.value) dto.value = mx;
-    rmsg.textContent = ""; var hint = $("span",{text:"Data available " + fmtDate(mn) + " – " + fmtDate(mx), style:"color:#c9d6b5"}); rmsg.appendChild(hint);
-  });
+// ---------- report period control: one mode at a time; arrows step through days / weeks
+var seg = document.getElementById("seg"), pnav = document.getElementById("pnav"), rmsg = document.getElementById("rangemsg");
+function chev(dir){ return '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="' + (dir < 0 ? 'M10 3.5 5.5 8 10 12.5' : 'M6 3.5 10.5 8 6 12.5') + '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'; }
+var CAL = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="2" y="3" width="12" height="11" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M2 6.5h12M5.5 1.5v3M10.5 1.5v3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+var DOWN = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function navBtn(dir, label, disabled, fn){ var b = $("button",{type:"button",cls:"pnbtn",title:label,"aria-label":label}); b.innerHTML = chev(dir); b.disabled = !!disabled; b.addEventListener("click", fn); return b; }
+function clampDay(d){ return d < DMIN ? DMIN : d > LATEST ? LATEST : d; }
+// a chip that shows the date in one fixed format and opens the browser's calendar
+function dateChip(prefix, value, onPick){
+  var c = $("button",{type:"button",cls:"pchip",title:"Pick a date"}), inp = $("input",{type:"date",min:DMIN,max:LATEST,value:value,tabindex:"-1","aria-hidden":"true"});
+  c.innerHTML = CAL; c.appendChild($("span",{text:(prefix ? prefix + " " : "") + fmtDay(value)})); c.appendChild(inp);
+  c.addEventListener("click", function(){ try { inp.showPicker(); } catch(e){ inp.style.pointerEvents = "auto"; inp.focus(); } });
+  inp.addEventListener("change", function(){ if (inp.value) onPick(clampDay(inp.value)); });
+  return c;
+}
+function staticChip(text, small){ var c = $("span",{cls:"pchip static"}); c.innerHTML = CAL; c.appendChild($("span",{text:text})); if (small) c.appendChild($("small",{text:small})); return c; }
+function renderNav(){
+  pnav.textContent = ""; rmsg.textContent = "";
+  Array.prototype.forEach.call(seg.children, function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-m") === PS.m ? "true" : "false"); });
+  if (PS.m === "day"){
+    pnav.appendChild(navBtn(-1, "Previous day", PS.d <= DMIN, function(){ go({m:"day", d:addDays(PS.d, -1)}); }));
+    var dc = dateChip("", PS.d, function(d){ go({m:"day", d:d}); });
+    if (PS.d === LATEST) dc.appendChild($("span",{cls:"tag",text:"Latest"}));
+    pnav.appendChild(dc);
+    pnav.appendChild(navBtn(1, "Next day", PS.d >= LATEST, function(){ go({m:"day", d:addDays(PS.d, 1)}); }));
+  } else if (PS.m === "week"){
+    pnav.appendChild(navBtn(-1, "Previous week", PS.i >= D.weeks.length - 1, function(){ go({m:"week", i:PS.i + 1}); }));
+    var wc = $("label",{cls:"pchip",title:"Choose a week"}); wc.innerHTML = CAL;
+    wc.appendChild($("span",{text:rangeTxt(D.weeks[PS.i].period.current)}));
+    if (PS.i === 0) wc.appendChild($("span",{cls:"tag",text:"Latest"}));
+    var dn = $("span"); dn.innerHTML = DOWN; wc.appendChild(dn);
+    var sel = $("select",{"aria-label":"Week"});
+    D.weeks.forEach(function(w, i){ var o = $("option",{value:String(i),text:rangeTxt(w.period.current) + (i === 0 ? "  (latest)" : "")}); if (i === PS.i) o.selected = true; sel.appendChild(o); });
+    sel.addEventListener("change", function(){ go({m:"week", i:parseInt(sel.value, 10)}); });
+    wc.appendChild(sel); pnav.appendChild(wc);
+    pnav.appendChild(navBtn(1, "Next week", PS.i <= 0, function(){ go({m:"week", i:PS.i - 1}); }));
+  } else if (PS.m === "d7" || PS.m === "d28"){
+    var n = PS.m === "d7" ? 7 : 28;
+    pnav.appendChild(staticChip(rangeTxt([addDays(LATEST, -(n - 1)), LATEST]), "updates daily"));
+  } else if (PS.m === "custom"){
+    if (!PS.a) PS.a = addDays(LATEST, -13); if (!PS.b) PS.b = LATEST;
+    PS.a = clampDay(PS.a); PS.b = clampDay(PS.b);
+    var fa = dateChip("From", PS.a, function(d){ PS.a = d; if (d > PS.b) PS.b = d; renderNav(); });
+    var fb = dateChip("To", PS.b, function(d){ PS.b = d; if (d < PS.a) PS.a = d; renderNav(); });
+    var ap = $("button",{type:"button",cls:"papply",text:"Apply"});
+    ap.addEventListener("click", function(){ go({m:"custom", a:PS.a, b:PS.b, apply:true}); });
+    pnav.appendChild(fa); pnav.appendChild($("span",{cls:"sep",text:"to"})); pnav.appendChild(fb); pnav.appendChild(ap);
+    rmsg.appendChild($("span",{text:"Data available " + fmtRange(DMIN, LATEST), style:"color:#c9d6b5"}));
+  }
+}
+function saveHash(){
+  var h = PS.m === "day" ? "day=" + PS.d : PS.m === "week" ? "week=" + D.weeks[PS.i].period.current[0] : PS.m === "custom" ? "range=" + PS.a + "_" + PS.b : PS.m;
+  try { history.replaceState(null, "", "#" + h); } catch(e){}
+}
+function readHash(){
+  var h = "", m; try { h = decodeURIComponent((location.hash || "").slice(1)); } catch(e){}
+  if (hasDaily && (h === "d7" || h === "d28")) return {m:h};
+  if (hasDaily && (m = /^day=(\d{4}-\d\d-\d\d)$/.exec(h))) return {m:"day", d:clampDay(m[1])};
+  if ((m = /^week=(\d{4}-\d\d-\d\d)$/.exec(h))){ for (var i = 0; i < D.weeks.length; i++) if (D.weeks[i].period.current[0] === m[1]) return {m:"week", i:i}; }
+  if (hasDaily && (m = /^range=(\d{4}-\d\d-\d\d)_(\d{4}-\d\d-\d\d)$/.exec(h))) return {m:"custom", a:clampDay(m[1]), b:clampDay(m[2]), apply:true};
+  return null;
+}
+function go(st){
+  var prev = PS; PS = st;
+  if (st.m === "custom" && !st.apply){ renderNav(); return; }  // pick dates first, then Apply
+  var ok = true;
+  if (st.m === "day") ok = showRange(st.d, st.d, st.d === LATEST ? "Latest day" : "Day") !== false;
+  else if (st.m === "week") show(st.i);
+  else if (st.m === "d7") ok = showLatest(7) !== false;
+  else if (st.m === "d28") ok = showLatest(28) !== false;
+  else if (st.m === "custom") ok = showRange(st.a, st.b, st.a === st.b ? "Day" : "Custom range") !== false;
+  if (!ok){ var msg = rmsg.textContent; PS = prev; renderNav(); rmsg.textContent = msg; return; }
+  delete PS.apply; var sc = PS.scroll; delete PS.scroll;
+  renderNav(); saveHash();
+  if (sc !== false) window.scrollTo({top:0});
+}
+seg.addEventListener("click", function(e){
+  var b = e.target.closest("button[data-m]"); if (!b) return;
+  var m = b.getAttribute("data-m"); if (m === PS.m) return;
+  if (m === "day") go({m:"day", d:LATEST});
+  else if (m === "week") go({m:"week", i:0});
+  else if (m === "custom") go({m:"custom", a: R && R.period ? R.period.current[0] : null, b: R && R.period ? R.period.current[1] : null});
+  else go({m:m});
 });
-document.getElementById("dapply").addEventListener("click", function(){
-  loadDaily().then(function(d){ if (!d){ rmsg.textContent = DAILY_ERR; return; } showRange(dfrom.value, dto.value); window.scrollTo({top:0}); });
-});
+function initPeriod(){
+  var bd = dayBounds(); DMIN = bd[0]; LATEST = bd[1]; hasDaily = !!LATEST;
+  Array.prototype.forEach.call(seg.children, function(b){ b.hidden = !hasDaily && b.getAttribute("data-m") !== "week"; });
+  if (!hasDaily && D.weeks.length < 2) seg.hidden = true;
+  go(Object.assign(readHash() || (hasDaily ? {m:"d7"} : {m:"week", i:0}), {scroll:false}));
+}
 function gunzipB64(b64){
   var bin = atob(b64), u8 = new Uint8Array(bin.length);
   for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
@@ -1297,8 +1382,7 @@ function boot(d){
   document.getElementById("title").textContent = D.title || "SEO Dashboard";
   // open on the latest data (last 7 days up to yesterday); fall back to the latest weekly report
   loadDaily().then(function(){
-    fillPicker();
-    if (LATEST){ pick.value = "d7"; showLatest(7); } else { pick.value = "0"; show(0); }
+    initPeriod();
   });
 }
 (function(){
