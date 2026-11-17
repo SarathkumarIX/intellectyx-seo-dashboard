@@ -1,0 +1,41 @@
+{
+  "timezone": "Asia/Kolkata",
+  "brand_regex": "(?i)intellectyx|intelectyx|intellectix|intellect yx",
+  "ai_source_regex": "chatgpt|openai|perplexity|gemini|bard|copilot|claude|anthropic|deepseek|grok|you\\.com|meta\\.ai|mistral",
+  "thresholds": {
+    "min_impressions_query": 50,
+    "min_impressions_page": 100,
+    "striking_distance_min_pos": 4.0,
+    "striking_distance_max_pos": 20.0,
+    "low_ctr_ratio": 0.5,
+    "min_sessions_landing": 20,
+    "low_engagement_ratio": 0.6,
+    "drop_pct_alert": 20.0,
+    "max_audit_age_days": 8,
+    "inspect_top_pages": 15,
+    "inspect_sitemap_urls": 60,
+    "trend_weeks": 12
+  },
+  "daily_window_days": 112,
+  "sites": [
+    {
+      "id": "intellectyx-com",
+      "label": "intellectyx.com",
+      "url": "https://www.intellectyx.com/",
+      "gsc_property": "https://www.intellectyx.com/",
+      "ga4_property_id": "355441476",
+      "enabled": true
+    },
+    {
+      "id": "intellectyx-ai",
+      "label": "intellectyx.ai",
+      "url": "https://www.intellectyx.ai/",
+      "gsc_property": "https://www.intellectyx.ai/",
+      "ga4_property_id": "",
+      "enabled": false
+    }
+  ],
+  "dashboard": {
+    "title": "Intellectyx SEO Weekly Dashboard"
+  }
+}

@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#90c322;--brand-d:#6f9a12;--brand-dd:#4f6e0b;--brand-ink:#16210a;--brand-t:#f3f9e6;--brand-t2:#e5f2c8;
+  --page:#f4f6f1;--card:#ffffff;--card2:#f9fbf6;--ink:#141b0d;--ink2:#4b5543;--muted:#98a28c;--line:#e3e8da;--thbg:#f3f8e8;--rowalt:#fbfcf8;--hover:#f1f8e2;
+  --s1:#7aa819;--s2:#a3adb8;--good:#12b76a;--good-ink:#067647;--warn:#fdb022;--serious:#f97066;--crit:#d92d20;--accent:#90c322;
+  --gsc:#2a78d6;--ga:#f79009;--sem:#7a5af8;--shadow:0 1px 2px rgba(16,24,40,.05),0 1px 3px rgba(16,24,40,.06);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root{--page:#0c0f09;--card:#141a10;--card2:#192015;--ink:#f1f5ea;--ink2:#b0baa4;--muted:#717c66;--line:#273021;--thbg:#1b2416;--rowalt:#161d12;--hover:#1f2a17;
+  --brand-t:#1c2812;--brand-t2:#253618;--brand-dd:#b6e05a;
+  --s1:#9fd12f;--s2:#6f7a86;--good-ink:#47cd89;--crit:#f04438;--shadow:0 1px 3px rgba(0,0,0,.4);color-scheme:dark}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:14px/1.55 Poppins,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1360px;margin:0 auto;padding:28px 28px 64px}
+header.top{position:relative;overflow:hidden;display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between;margin-bottom:18px;
+  background:radial-gradient(120% 140% at 100% 0%,rgba(144,195,34,.35) 0%,rgba(144,195,34,0) 55%),linear-gradient(125deg,#121b09 0%,#1b2a0e 55%,#25390f 100%);
+  border:1px solid #2c3f16;border-radius:20px;padding:26px 28px;box-shadow:0 10px 30px rgba(20,33,8,.18);color:#f3f8ea}
+header.top::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;background:linear-gradient(90deg,var(--brand),#c4e57a 60%,var(--brand))}
+header.top .sub{color:#c9d6b5}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brand);margin-bottom:8px}
+.eyebrow::before{content:"";width:18px;height:3px;border-radius:2px;background:var(--brand)}
+h1{font-size:26px;margin:0 0 6px;font-weight:700;letter-spacing:-.015em;color:#fff}
+.sub{color:var(--ink2);font-size:13px}
+.tabs{display:flex;gap:24px;flex-wrap:wrap;margin:0 0 18px;border-bottom:1px solid var(--line)}
+.tabs[hidden]{display:none}
+.tab{appearance:none;border:0;background:none;font:inherit;font-size:15px;font-weight:600;color:var(--ink2);padding:10px 2px;border-bottom:3px solid transparent;margin-bottom:-1px;cursor:pointer}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--brand)}
+.hright{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.wplabel{font-size:11px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.06em}
+.weekpick{appearance:none;-webkit-appearance:none;font:inherit;font-size:14px;font-weight:600;color:#fff;background:rgba(255,255,255,.08) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2390c322' stroke-width='2' fill='none'/%3E%3C/svg%3E") no-repeat right 14px center;border:1px solid rgba(144,195,34,.45);border-radius:10px;padding:10px 40px 10px 14px;min-width:300px;cursor:pointer}
+.weekpick:focus{outline:2px solid var(--brand);outline-offset:1px}
+.weekpick:hover{border-color:var(--brand)}
+.weekpick option{color:#141b0d;background:#fff}
+#hleft{flex:1 1 420px;min-width:0}
+.rangebox{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;justify-content:flex-end}
+.rangebox[hidden]{display:none}
+.rangebox label{display:flex;flex-direction:column;font-size:12px;color:#c9d6b5;font-weight:600;gap:4px}
+.rangebox input{font:inherit;font-size:14px;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(144,195,34,.45);border-radius:10px;padding:8px 10px;color-scheme:dark}
+.rangebox input:focus{outline:2px solid var(--brand);outline-offset:1px}
+.rangebox button{font:inherit;font-size:14px;font-weight:700;color:var(--brand-ink);background:var(--brand);border:0;border-radius:10px;padding:9px 20px;cursor:pointer;box-shadow:0 4px 14px rgba(144,195,34,.35);transition:transform .12s, background .12s}
+.rangebox button:hover{background:#a3d43a;transform:translateY(-1px)}
+.rangemsg{font-size:12.5px;color:#ffb4a8;max-width:420px;text-align:right}
+.rangemsg:empty{display:none}
+@media (max-width:700px){.hright{align-items:flex-start}.weekpick{min-width:0;width:100%}}
+.histnote{background:var(--brand-t);border:1px solid var(--brand-t2);border-left:4px solid var(--brand);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--ink2);margin-bottom:18px}
+.sitechip{display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-size:13px;font-weight:600;color:#fff;background:rgba(144,195,34,.14);border:1px solid rgba(144,195,34,.4);border-radius:999px;padding:5px 12px 5px 8px}
+.sitechip i{width:18px;height:18px;border-radius:50%;background:var(--brand);display:inline-flex;align-items:center;justify-content:center;color:var(--brand-ink);font-style:normal;font-size:11px}
+.panel[hidden]{display:none}
+.status{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;color:var(--ink2);background:var(--card)}
+.dot{width:8px;height:8px;border-radius:50%}
+.subnav{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 20px;position:sticky;top:0;background:var(--page);padding:10px 0;z-index:4;border-bottom:1px solid var(--line)}
+.subnav button{appearance:none;font:inherit;font-size:13.5px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink2);border-radius:999px;padding:8px 18px;cursor:pointer;transition:all .15s}
+.subnav button:hover{border-color:var(--brand);color:var(--ink)}
+.subnav button[aria-pressed="true"]{background:var(--brand);color:var(--brand-ink);border-color:var(--brand);box-shadow:0 4px 12px rgba(144,195,34,.3)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.card>h2{display:flex;align-items:center;gap:10px;font-size:17px;margin:0 0 4px;font-weight:700;letter-spacing:-.01em}
+.card>h2::before{content:"";width:4px;height:18px;border-radius:2px;background:var(--brand)}
+.kcard>h2::before{display:none}
+.card>.desc{margin:0 0 16px}
+.desc{font-size:12.5px;color:var(--ink2);margin:2px 0 12px;max-width:1000px}
+.headline{font-size:17px;font-weight:600;margin:6px 0 12px;line-height:1.45}
+.summary ul{margin:0;padding-left:20px}.summary li{margin:6px 0;color:var(--ink2)}
+.kgroup-title{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;margin:18px 0 10px}
+.kgroup-title:first-of-type{margin-top:8px}
+.kgroup-title::before{content:"";width:10px;height:10px;border-radius:3px;background:var(--accent)}
+.kgroup-title.gsc::before{background:var(--gsc)}.kgroup-title.ga::before{background:var(--ga)}.kgroup-title.sem::before{background:var(--sem)}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+@media (max-width:1180px){.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:820px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:560px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kcard{border-top:3px solid var(--brand);padding-top:18px}
+.kcard{background:linear-gradient(180deg,var(--brand-t) 0,var(--card) 90px)}
+.khead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.khead h2{font-size:16px;margin:0;font-weight:700}
+.kdot{width:10px;height:10px;border-radius:3px;background:var(--accent)}
+.kcard.gsc .kdot{background:var(--gsc)}.kcard.ga .kdot{background:var(--ga)}.kcard.sem .kdot{background:var(--sem)}
+.ksub{font-size:12.5px;color:var(--muted);margin-left:auto}
+.ksubline{font-size:12.5px;color:var(--muted);margin:-8px 0 14px}
+.kpi{position:relative;display:flex;flex-direction:column;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0;transition:border-color .15s, box-shadow .15s}
+.kpis9 .kpi:nth-child(n+7){grid-column:span 2}
+@media (max-width:1180px){.kpis9 .kpi:nth-child(n+7){grid-column:auto}}
+.kpis7{grid-template-columns:repeat(7,minmax(0,1fr));gap:12px}
+.kpis7 .kpi{padding:14px 14px}
+.kpis7 .kpi .v{font-size:24px}
+.kpis7 .kpi .l{line-height:1.45;min-height:2.9em}
+.kpis7 .kpi .d{font-size:11.5px}
+@media (max-width:1180px){.kpis7{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:820px){.kpis7{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:560px){.kpis7{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi:hover{border-color:var(--brand);box-shadow:0 4px 14px rgba(144,195,34,.15)}
+.kpi .l{font-size:12.5px;color:var(--ink2);font-weight:500}
+.kpi .l{min-height:2.6em}
+.kpi .v{font-size:26px;font-weight:700;margin:4px 0 2px;letter-spacing:-.02em}
+.kpi .d{font-size:12px;color:var(--ink2)}
+.up{color:var(--good-ink)}.down{color:var(--crit)}.flat{color:var(--muted)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:20px}
+.grid2>.card{margin-bottom:0}
+.grid2{margin-bottom:20px}
+@media (max-width:560px){.grid2{grid-template-columns:1fr}.wrap{padding:16px}}
+.block{border-top:1px solid var(--line);padding-top:20px;margin-top:26px}
+.card>h2+.block,.card>.desc+.block,.card>h2+.stack>.block:first-child,.card>.desc+.stack>.block:first-child,.card>.kpis+.block{border-top:0;padding-top:4px;margin-top:6px}
+.card>.kpis+.block{margin-top:18px}
+.tblwrap{margin-bottom:2px}
+.block h3{font-size:14.5px;margin:0 0 2px;font-weight:700;color:var(--ink)}
+.headrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.headrow>.headtxt{min-width:0;flex:1 1 auto}
+.headrow>.headtxt>.desc{margin:2px 0 0}
+.headrow>.headtxt>h2{margin:0}
+.card>.headrow>.headtxt>h2{display:flex;align-items:center;gap:10px}
+.card>.headrow>.headtxt>h2::before{content:"";width:4px;height:18px;border-radius:2px;background:var(--brand)}
+@media (max-width:640px){.headrow>.tsearchrow{width:100%;justify-content:flex-start}.headrow .tsearch{width:100%}}
+.issues{list-style:none;margin:0;padding:0}
+.issues li{display:grid;grid-template-columns:72px 1fr;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.issues li:first-child{border-top:0}
+.sev{font-size:10.5px;font-weight:700;border-radius:6px;padding:3px 0;text-align:center;height:fit-content;letter-spacing:.04em;color:#fff}
+.sev.high{background:var(--crit)}.sev.medium{background:var(--serious)}.sev.low{background:var(--warn);color:#101828}.sev.info{background:var(--good)}
+.it{font-weight:600}.idet{color:var(--ink2);font-size:13px;word-break:break-word;margin-top:2px}.iact{font-size:13px;margin-top:6px;background:var(--card2);border-left:3px solid var(--accent);padding:6px 10px;border-radius:0 8px 8px 0}
+.src{font-size:11px;color:var(--muted);margin-left:8px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;margin-top:10px}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
+th{position:sticky;top:0;text-align:left;font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--brand-dd);background:var(--thbg);border-bottom:1px solid var(--line);padding:11px 16px;white-space:nowrap}
+td{border-bottom:1px solid var(--line);padding:11px 16px;vertical-align:top}
+td.url{min-width:230px}
+tbody td:first-child:not(.n){min-width:150px}
+table th.n{white-space:normal;min-width:84px;max-width:140px;line-height:1.35}
+th{vertical-align:bottom}
+tr.total td{font-weight:700;background:var(--brand-t)!important;border-bottom:1px solid var(--brand-t2)}
+tbody tr:nth-child(even) td{background:var(--rowalt)}
+tbody tr:hover td{background:var(--hover)}
+tbody tr:last-child td{border-bottom:0}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td.url{max-width:520px;word-break:break-word;font-weight:500}
+details{border-top:1px solid var(--line);padding-top:6px;margin-top:6px}
+summary{cursor:pointer;font-weight:600;padding:8px 0}
+.empty{color:var(--muted);font-size:13px;padding:14px 16px;border:1px dashed var(--line);border-radius:12px;margin-top:10px}
+.chart{position:relative;margin-top:6px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.legend{display:flex;gap:16px;font-size:12px;color:var(--ink2);margin:2px 0 8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:14px;height:3px;border-radius:2px;display:inline-block}
+.tip{position:absolute;pointer-events:none;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12px;box-shadow:0 8px 24px rgba(0,0,0,.18);white-space:nowrap;display:none;z-index:5}
+.notes{font-size:12px;color:var(--ink2)}.notes li{margin:4px 0}
+.errors{font-size:12px;color:var(--crit);margin-top:8px}
+.actions td:first-child{white-space:nowrap;font-weight:700}
+footer{color:var(--ink2);font-size:12px;margin-top:24px;background:var(--card);border:1px solid var(--line);border-top:3px solid var(--brand);border-radius:16px;padding:16px 22px}
+.rating{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:2px 8px;color:#fff;white-space:nowrap}
+.rating.good{background:var(--good)}.rating.ni{background:var(--warn);color:#101828}.rating.poor{background:var(--crit)}.rating.none{background:var(--muted)}
+.cwvhead{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0 0}
+.tsearchrow{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px}
+.headrow>.tsearchrow{margin-top:0;flex:0 1 auto}
+.tpager{white-space:nowrap}
+.tpager[hidden]{display:none}
+.tpinfo{min-width:0;padding:0 2px;font-variant-numeric:tabular-nums}
+.pbtn.pico{width:34px;min-width:34px;height:34px;padding:0;display:inline-flex;align-items:center;justify-content:center;color:var(--ink)}
+.pbtn.pico:hover:not(:disabled){color:var(--brand)}
+.tpager{gap:6px}
+.tsearchrow .psize{margin-left:0}
+.tsearch{font:inherit;font-size:13px;color:var(--ink);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:7px 12px;min-width:260px}
+.tsearch:focus{outline:2px solid var(--brand);outline-offset:1px}
+.pager{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:10px;font-size:12.5px;color:var(--ink2)}
+.pctl{display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pnums{display:inline-flex;align-items:center;gap:6px}
+.pbtn,.pnum{appearance:none;font:inherit;font-size:12.5px;font-weight:600;min-width:32px;height:30px;padding:0 10px;border:1px solid var(--line);background:var(--card);color:var(--ink2);border-radius:8px;cursor:pointer}
+.pbtn:hover:not(:disabled),.pnum:hover{border-color:var(--brand);color:var(--ink)}
+.pbtn:disabled{opacity:.4;cursor:default}
+.pnum.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.pdots{padding:0 2px;color:var(--muted)}
+.psize{appearance:none;-webkit-appearance:none;font:inherit;font-size:12.5px;font-weight:600;height:30px;margin-left:4px;border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:0 32px 0 12px;cursor:pointer;
+  background:var(--card) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2390c322' stroke-width='1.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center}
+.psize:hover{border-color:var(--brand)}
+.psize:focus{outline:2px solid var(--brand);outline-offset:1px}
+.ptbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin:12px 0 4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{appearance:none;font:inherit;font-size:12.5px;font-weight:600;border:1px solid var(--line);background:var(--card);color:var(--ink2);border-radius:999px;padding:5px 12px;cursor:pointer}
+.chip:hover{border-color:var(--brand)}
+.chip.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.chip{display:inline-flex;align-items:center;gap:7px}
+.chip .cnt{font-size:11.5px;font-weight:700;background:rgba(144,195,34,.22);color:var(--ink);border:1px solid rgba(144,195,34,.45);border-radius:999px;padding:0 7px;min-width:20px;line-height:18px;text-align:center}
+.chip.on .cnt{background:rgba(0,0,0,.2);border-color:transparent;color:var(--brand-ink)}
+.chip:focus{outline:none}.chip:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.ptbar{justify-content:flex-start;flex-wrap:nowrap;align-items:center}
+.ptbar>.chips{flex:1 1 auto;min-width:0}
+.ptlabel{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.ptnote{font-size:13px;color:var(--ink2)}
+.ptnoterow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:10px 0 10px;min-height:30px}
+.ptslot>.tsearchrow{margin-top:0}
+.ptsearch{font:inherit;font-size:13px;color:var(--ink);background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:7px 12px;min-width:260px}
+.ptsearch:focus{outline:2px solid var(--brand);outline-offset:1px}
+.morebtn{appearance:none;font:inherit;font-size:13px;font-weight:600;margin-top:12px;border:1px solid var(--brand);background:var(--brand-t);color:var(--brand-dd);border-radius:10px;padding:8px 16px;cursor:pointer}
+.kw{font-weight:600;color:var(--ink);min-width:220px}
+.ptpages tbody tr.prow td:first-child{min-width:0;width:28px;padding-right:0}
+.kwtags{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.kwtag{font-size:11px;border:1px solid var(--line);border-radius:6px;padding:0 6px;color:var(--ink2);background:var(--card2)}
+.intents{display:inline-flex;gap:3px}
+.intent{font-size:10.5px;font-weight:700;border-radius:4px;padding:1px 5px}
+.i-i{background:#dbeafe;color:#1e40af}.i-c{background:#fef3c7;color:#92400e}.i-t{background:#dcfce7;color:#166534}.i-n{background:#ede9fe;color:#5b21b6}
+.tagnew{font-size:11px;font-weight:700;color:var(--good-ink);background:rgba(18,183,106,.12);border-radius:5px;padding:1px 6px}
+.taglost{font-size:11px;font-weight:700;color:var(--crit);background:rgba(217,45,32,.1);border-radius:5px;padding:1px 6px}
+td a{color:var(--brand-dd);text-decoration:none}td a:hover{text-decoration:underline}
+.ptpages tr.prow{cursor:pointer}
+.tog{color:var(--brand-dd);font-size:12px}
+tr.pdetail td{background:var(--brand-t)!important;padding:4px 16px 14px}
+tr.pdetail[hidden]{display:none}
+.note{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:12px;padding:12px 16px;font-size:13px;color:var(--ink2);margin-bottom:18px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div id="hleft">
+      <div class="eyebrow">Intellectyx · SEO performance</div>
+      <h1 id="title"></h1>
+      <div class="sub" id="period"></div>
+      <div id="sitechip"></div>
+    </div>
+    <div class="hright">
+      <label class="wplabel" for="weekpick">Report period</label>
+      <select id="weekpick" class="weekpick"></select>
+      <div class="rangebox" id="rangebox" hidden>
+        <label>From <input type="date" id="dfrom"></label>
+        <label>To <input type="date" id="dto"></label>
+        <button type="button" id="dapply">Apply</button>
+      </div>
+      <div class="rangemsg" id="rangemsg"></div>
+      <div class="sub" id="generated"></div>
+    </div>
+  </header>
+  <nav class="tabs" role="tablist" id="tabs"></nav>
+  <main id="panels"></main>
+  <footer id="foot"></footer>
+</div>
+<div class="tip" id="tip"></div>
+<script type="text/plain" id="daily-data">__DAILY__</script>
+<script id="report-data" type="text/plain" data-enc="gzip-b64">__DATA__</script>
+<script>
+(function(){
+"use strict";
+var D = null, R = null;  // filled in by boot() once the compressed report data is decoded
+var $ = function(tag, attrs, kids){
+  var e = document.createElement(tag);
+  if (attrs) for (var k in attrs){ if (k === "text") e.textContent = attrs[k]; else if (k === "cls") e.className = attrs[k]; else e.setAttribute(k, attrs[k]); }
+  (kids || []).forEach(function(c){ if (c != null) e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+  return e;
+};
+var nf = new Intl.NumberFormat("en-US");
+function fmt(v, kind){
+  if (v === null || v === undefined || v === "") return "-";
+  if (typeof v !== "number") return String(v);
+  if (kind === "pct") return v.toFixed(1) + "%";
+  if (kind === "pos") return v.toFixed(1);
+  if (kind === "sec") return Math.round(v) + "s";
+  if (kind === "ratio") return v.toFixed(2);
+  if (Math.abs(v) >= 1000) return nf.format(Math.round(v));
+  return Number.isInteger(v) ? nf.format(v) : v.toFixed(2);
+}
+function delta(k, lowerIsBetter, kind){
+  if (k && k.na) return $("span",{cls:"flat",text:k.na});
+  if (!k || k.previous === null || k.previous === undefined || k.current === null || k.current === undefined) return $("span",{cls:"flat",text:"no prior data"});
+  var abs = k.change_abs, p = k.change_pct;
+  if (!abs) return $("span",{cls:"flat",text:"no change vs prev week"});
+  var good = lowerIsBetter ? abs < 0 : abs > 0;
+  var arrow = abs > 0 ? "▲ " : "▼ ";
+  var txt = (kind === "pos" || kind === "pct") ? (abs > 0 ? "+" : "") + abs.toFixed(kind==="pos"?1:2) + (kind==="pct"?" pts":"")
+            : (p !== null && p !== undefined ? (p > 0 ? "+" : "") + p + "%" : (abs > 0 ? "+" : "") + fmt(abs));
+  return $("span",{cls: good ? "up" : "down", text: arrow + txt + " vs prev (" + fmt(k.previous, kind) + ")"});
+}
+function kpiCard(label, k, kind, lowerIsBetter){
+  return $("div",{cls:"kpi"},[$("div",{cls:"l",text:label}),$("div",{cls:"v",text:fmt(k && k.current, kind)}),$("div",{cls:"d"},[delta(k, lowerIsBetter, kind)])]);
+}
+function semKpi(label, value, change, kind, lowerIsBetter, note){
+  var c = change === null || change === undefined || change === "" ? null : String(change);
+  var n = c ? parseFloat(c.replace(/[^0-9+\-.]/g,"")) : NaN;
+  var cls = !c || !n ? "flat" : ((n > 0) !== !!lowerIsBetter ? "up" : "down");
+  var d = $("span",{cls:cls,text: c ? ((n>0?"▲ ":n<0?"▼ ":"") + c + " " + (note || "vs prior")) : (note === undefined ? "no change reported" : note)});
+  return $("div",{cls:"kpi"},[$("div",{cls:"l",text:label}),$("div",{cls:"v",text: value === null || value === undefined ? "-" : (typeof value === "number" ? fmt(value, kind) : String(value))}),$("div",{cls:"d"},[d])]);
+}
+function prevDiff(cur, prev){ if (typeof cur !== "number" || typeof prev !== "number") return null; var d = Math.round((cur - prev)*100)/100; return (d>0?"+":"") + d; }
+var PAGE = 25;
+function table(cols, rows, empty, total, opts){
+  if (!rows || !rows.length) return $("div",{cls:"empty",text: empty || "Nothing to show this week."});
+  if (rows.length > PAGE) return pagedTable(cols, rows, total, opts);
+  return tableCore(cols, rows, total, rows);
+}
+function tableCore(cols, rows, total, allRows){
+  cols.forEach(function(c){ if (/^Change|change vs/.test(c.label || "")) c.n = c.n || 2; });
+  // drop numeric columns that have no value in any row (e.g. user counts for multi-day ranges)
+  cols = cols.filter(function(c, i){
+    if (!c.n || i === 0) return true;
+    return allRows.some(function(r){ var v = typeof c.get === "function" ? c.get(r) : r[c.key];
+      return v instanceof Node || (v !== null && v !== undefined && v !== "" && v !== "-"); });
+  });
+  var thead = $("tr",null,cols.map(function(c){ return $("th",{cls:c.n?"n":"",text:c.label}); }));
+  var all = total ? [Object.assign({__total:true}, total)].concat(rows) : rows;
+  var body = all.map(function(r){
+    if (r.__total) return $("tr",{cls:"total"},cols.map(function(c, i){
+      if (i === 0) return $("td",{text:"Total"});
+      if (!c.n) return $("td",{text:""});
+      var v = typeof c.get === "function" ? c.get(r) : r[c.key];
+      var td = $("td",{cls:"n"}); if (v instanceof Node) td.appendChild(v); else td.textContent = fmt(v, c.kind); return td;
+    }));
+    return $("tr",null,cols.map(function(c){
+      var v = typeof c.get === "function" ? c.get(r) : r[c.key];
+      var td = $("td",{cls:(c.n?"n ":"")+(c.url?"url":"")});
+      if (v instanceof Node) td.appendChild(v); else td.textContent = c.n ? fmt(v, c.kind) : (v === null || v === undefined ? "-" : String(v));
+      return td;
+    }));
+  });
+  var tw = $("div",{cls:"tblwrap"},[$("table",null,[$("thead",null,[thead]),$("tbody",null,body)])]);
+  if (R && R.custom) periodWording(tw);
+  return tw;
+}
+// Shows every row, PAGE at a time, with page controls and a rows-per-page choice.
+// Arrow-only page button (used above tables)
+function arrowBtn(dir){
+  var b = $("button",{type:"button",cls:"pbtn pico",title:dir < 0 ? "Previous page" : "Next page","aria-label":dir < 0 ? "Previous page" : "Next page"});
+  b.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="' + (dir < 0 ? 'M10 3.5 5.5 8 10 12.5' : 'M6 3.5 10.5 8 6 12.5') + '" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  return b;
+}
+function pagedTable(cols, allRows, total, opts){
+  var wrap = $("div",{cls:"paged"}), host = $("div"), st = {page:0, size:PAGE}, rows = allRows;
+  var find = $("input",{type:"search",cls:"tsearch",placeholder:"Search these " + fmt(allRows.length) + " rows"});
+  find.addEventListener("input", function(){
+    var q = find.value.trim().toLowerCase();
+    rows = !q ? allRows : allRows.filter(function(r){ return Object.keys(r).some(function(k){ var v = r[k]; return typeof v === "string" && v.toLowerCase().indexOf(q) >= 0; }); });
+    st.page = 0; draw();
+  });
+  var bar = $("div",{cls:"pager"});
+  var info = $("span",{cls:"pinfo"}), prev = $("button",{type:"button",cls:"pbtn",text:"‹ Prev"}), next = $("button",{type:"button",cls:"pbtn",text:"Next ›"});
+  var pages = $("span",{cls:"pnums"}), sizeSel = $("select",{cls:"psize",title:"Rows per page"});
+  // compact pager next to the search box, so users can page without scrolling to the bottom
+  var tprev = arrowBtn(-1), tnext = arrowBtn(1);
+  var tpages = $("span");
+  var tpager = $("span",{cls:"pctl tpager"},[tprev, tnext]);
+  [25, 50, 100, 250].forEach(function(n){ var o = $("option",{value:String(n),text:n + " rows"}); sizeSel.appendChild(o); });
+  var allO = $("option",{value:"all",text:"All rows"}); sizeSel.appendChild(allO);
+  function pageCount(){ return st.size === "all" ? 1 : Math.ceil(rows.length / st.size); }
+  function draw(){
+    var n = pageCount(); if (st.page >= n) st.page = n - 1; if (st.page < 0) st.page = 0;
+    var a = st.size === "all" ? 0 : st.page * st.size, b = st.size === "all" ? rows.length : Math.min(rows.length, a + st.size);
+    host.textContent = "";
+    if (!rows.length){ host.appendChild($("div",{cls:"empty",text:"No rows match."})); info.textContent = "0 of " + fmt(allRows.length) + " rows"; prev.disabled = next.disabled = tprev.disabled = tnext.disabled = true; pages.textContent = ""; tpages.textContent = ""; tpager.hidden = true; return; }
+    var t = tableCore(cols, rows.slice(a, b), st.page === 0 && rows === allRows ? total : null, allRows);
+    host.appendChild(t);
+    info.textContent = "Rows " + fmt(a + 1) + "–" + fmt(b) + " of " + fmt(rows.length) + (rows === allRows ? "" : " (filtered from " + fmt(allRows.length) + ")");
+    prev.disabled = tprev.disabled = st.page === 0; next.disabled = tnext.disabled = st.page >= n - 1;
+    tpager.hidden = n < 2;
+    pages.textContent = ""; tpages.textContent = "";
+    var nums = [];
+    for (var i = 0; i < n; i++){ if (i < 2 || i > n - 3 || Math.abs(i - st.page) <= 1) nums.push(i); else if (nums[nums.length-1] !== -1) nums.push(-1); }
+    [[pages, true]].forEach(function(t){
+      nums.forEach(function(i){
+        if (i === -1){ t[0].appendChild($("span",{cls:"pdots",text:"…"})); return; }
+        var bt = $("button",{type:"button",cls:"pnum" + (i === st.page ? " on" : ""),text:String(i + 1)});
+        bt.addEventListener("click", function(){ st.page = i; draw(); if (t[1]) toTop(); });
+        t[0].appendChild(bt);
+      });
+    });
+  }
+  // after paging from the bottom bar, bring the top of the table back into view
+  function toTop(){
+    var el = wrap.closest(".block, .card") || wrap, y = el.getBoundingClientRect().top;
+    if (y < 0) window.scrollTo({top: window.scrollY + y - 90, behavior: "smooth"});
+  }
+  prev.addEventListener("click", function(){ st.page--; draw(); toTop(); });
+  next.addEventListener("click", function(){ st.page++; draw(); toTop(); });
+  tprev.addEventListener("click", function(){ st.page--; draw(); });
+  tnext.addEventListener("click", function(){ st.page++; draw(); });
+  sizeSel.addEventListener("change", function(){ st.size = sizeSel.value === "all" ? "all" : parseInt(sizeSel.value, 10); st.page = 0; draw(); });
+  bar.appendChild(info); bar.appendChild($("span",{cls:"pctl"},[prev, pages, next, sizeSel]));
+  wrap.appendChild($("div",{cls:"tsearchrow"},(opts && opts.noSearch ? [] : [find]).concat([tpager]))); wrap.appendChild(host); wrap.appendChild(bar);
+  draw();
+  return wrap;
+}
+function shortUrl(u){ try { var x = new URL(u); return x.pathname + x.search; } catch(e){ return u; } }
+function chg(cur, prev){ if (prev === null || prev === undefined || cur === null || cur === undefined) return "-"; var d = (cur||0) - (prev||0); var s = $("span",{cls: d>0?"up":d<0?"down":"flat", text:(d>0?"+":"")+fmt(d)}); return s; }
+function section(title, kids, open){
+  var d = $("details", open ? {open:""} : null, [$("summary",{text:title})].concat(kids));
+  return d;
+}
+
+// ---------- line chart with crosshair tooltip (single y-axis) ----------
+var tip = document.getElementById("tip");
+function lineChart(points, series, opts){
+  opts = opts || {};
+  var box = $("div",{cls:"chart"});
+  if (!points || !points.length){ box.appendChild($("div",{cls:"empty",text:"No trend data."})); return box; }
+  if (series.length > 1) box.appendChild($("div",{cls:"legend"}, series.map(function(s){ return $("span",null,[$("i",{cls:"sw",style:"background:"+s.color}), s.label]); })));
+  var W = 600, H = 220, m = {l:48,r:16,t:10,b:28};
+  var ys = []; points.forEach(function(p){ series.forEach(function(s){ var v = p[s.key]; if (typeof v === "number") ys.push(v); }); });
+  if (!ys.length){ box.appendChild($("div",{cls:"empty",text:"No data."})); return box; }
+  var ymin = opts.invert ? Math.min.apply(null, ys) : 0, ymax = Math.max.apply(null, ys.concat([1]));
+  if (opts.invert){ var pad = (ymax - ymin) * 0.1 || 1; ymin = Math.max(0, ymin - pad); ymax += pad; } else { ymax *= 1.1; }
+  var x = function(i){ return m.l + (points.length === 1 ? (W-m.l-m.r)/2 : i * (W-m.l-m.r)/(points.length-1)); };
+  var y = function(v){ var t = (v - ymin)/(ymax - ymin || 1); return opts.invert ? m.t + t*(H-m.t-m.b) : H - m.b - t*(H-m.t-m.b); };
+  var NS = "http://www.w3.org/2000/svg";
+  var svg = document.createElementNS(NS,"svg"); svg.setAttribute("viewBox","0 0 "+W+" "+H); svg.setAttribute("role","img");
+  svg.setAttribute("aria-label", opts.title || "trend chart");
+  function el(n, a){ var e = document.createElementNS(NS,n); for (var k in a) e.setAttribute(k,a[k]); svg.appendChild(e); return e; }
+  for (var g=0; g<=4; g++){
+    var v = ymin + (ymax-ymin)*g/4, yy = y(v);
+    el("line",{x1:m.l,x2:W-m.r,y1:yy,y2:yy,stroke:"var(--line)","stroke-width":1});
+    var t = el("text",{x:m.l-6,y:yy+4,"text-anchor":"end","font-size":11,fill:"var(--muted)"}); t.textContent = fmt(opts.invert || (ymax - ymin) < 8 ? Math.round(v*10)/10 : Math.round(v));
+  }
+  var step = Math.max(1, Math.ceil(points.length/6));
+  var xk = opts.xKey || "week", xl = opts.xLabel || function(p){ return String(p[xk]).slice(5); };
+  points.forEach(function(p,i){ if (i % step === 0 || (i === points.length-1 && (points.length-1) % step >= step/2)){ var t = el("text",{x:x(i),y:H-8,"text-anchor":"middle","font-size":11,fill:"var(--muted)"}); t.textContent = xl(p); }});
+  series.forEach(function(s, si){
+    var d = "", fx = null, lx = null; points.forEach(function(p,i){ var v = p[s.key]; if (typeof v !== "number") return; if (fx === null) fx = x(i); lx = x(i); d += (d ? "L" : "M") + x(i).toFixed(1) + "," + y(v).toFixed(1); });
+    if (si === 0 && !opts.invert && d && fx !== lx) el("path",{d: d + "L" + lx.toFixed(1) + "," + (H-m.b) + "L" + fx.toFixed(1) + "," + (H-m.b) + "Z", fill:s.color, "fill-opacity":0.1, stroke:"none"});
+    el("path",{d:d,fill:"none",stroke:s.color,"stroke-width":si === 0 ? 2.5 : 2,"stroke-dasharray": si === 0 ? "" : "5 4","stroke-linejoin":"round","stroke-linecap":"round"});
+    var li = points.length-1, lv = points[li][s.key];
+    if (typeof lv === "number"){ el("circle",{cx:x(li),cy:y(lv),r:4,fill:s.color,stroke:"var(--card)","stroke-width":2}); }
+  });
+  var cross = el("line",{x1:0,x2:0,y1:m.t,y2:H-m.b,stroke:"var(--muted)","stroke-width":1,"stroke-dasharray":"3 3",visibility:"hidden"});
+  var hit = el("rect",{x:m.l,y:m.t,width:W-m.l-m.r,height:H-m.t-m.b,fill:"transparent"});
+  function move(ev){
+    var rect = svg.getBoundingClientRect(); var px = (ev.clientX - rect.left) * W / rect.width;
+    var i = Math.round((px - m.l) / ((W-m.l-m.r)/Math.max(1,points.length-1))); i = Math.max(0, Math.min(points.length-1, i));
+    cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("visibility","visible");
+    tip.textContent = ""; tip.appendChild($("div",{text: opts.tipTitle ? opts.tipTitle(points[i]) : "Week of " + points[i].week, style:"font-weight:600"}));
+    series.forEach(function(s){ tip.appendChild($("div",null,[$("i",{cls:"sw",style:"background:"+s.color+";margin-right:6px"}), s.label + ": " + fmt(points[i][s.key], s.kind)])); });
+    tip.style.display = "block";
+    var tx = ev.clientX + 14, ty = ev.clientY + 14;
+    if (tx + tip.offsetWidth > window.innerWidth - 8) tx = ev.clientX - tip.offsetWidth - 14;
+    tip.style.left = (tx + window.scrollX) + "px"; tip.style.top = (ty + window.scrollY) + "px";
+  }
+  hit.addEventListener("mousemove", move); hit.addEventListener("touchstart", function(e){ move(e.touches[0]); }, {passive:true});
+  hit.addEventListener("mouseleave", function(){ tip.style.display = "none"; cross.setAttribute("visibility","hidden"); });
+  box.appendChild(svg);
+  return box;
+}
+
+// ---------- panels ----------
+function desc(t){ return $("div",{cls:"desc",text:t}); }
+// Title (+ description) on the left and the table's search box on the right, in one row.
+function headRow(h, d, first){
+  var sr = first && first.classList && first.classList.contains("paged") ? first.querySelector(":scope > .tsearchrow") : null;
+  if (!sr) return [h, d];
+  sr.parentNode.removeChild(sr);
+  return [$("div",{cls:"headrow"},[$("div",{cls:"headtxt"},[h, d]), sr])];
+}
+function card(id, title, kids, d){ kids = [].concat(kids); var first = kids.filter(Boolean)[0]; return $("div",{cls:"card",id:id}, headRow($("h2",{text:title}), d ? desc(d) : null, first).concat(kids)); }
+function sub(title, d, kid){ return $("div",{cls:"block"}, headRow($("h3",{text:title}), d ? desc(d) : null, kid).concat([kid])); }
+function rating(r){ var c = {"Good":"good","Needs improvement":"ni","Poor":"poor"}[r] || "none"; return $("span",{cls:"rating "+c,text:r||"No data"}); }
+function pct(v){ return typeof v === "number" ? Math.round(v*1000)/10 : v; }
+function mk(c, p){ return {current:c, previous:p, change_abs:(typeof c==="number"&&typeof p==="number")?Math.round((c-p)*100)/100:null, change_pct:(typeof c==="number"&&typeof p==="number"&&p)?Math.round((c-p)/p*1000)/10:null}; }
+function secs(v){ if (typeof v !== "number" || !isFinite(v)) return "-"; v = Math.floor(v); return v >= 60 ? Math.floor(v/60) + "m " + ("0" + (v%60)).slice(-2) + "s" : v + "s"; }
+function ratio(a, b){ return (typeof a === "number" && typeof b === "number" && b) ? (Math.round(a / b * 100) / 100).toFixed(2) : "-"; }
+function num(v){ return typeof v === "number" ? v : null; }
+/* GA4 standard session columns: Active users, (New users), Sessions, Δ, Engaged sessions, Engagement rate,
+   Avg. engagement time per session (= userEngagementDuration / sessions), Key events */
+function sessCols(ke, o){
+  o = o || {};
+  var eng = function(r){ return num(r.engagedSessions) != null ? r.engagedSessions : num(r.engaged_sessions); };
+  var kev = function(r){ return num(r[ke]) != null ? r[ke] : num(r.key_events); };
+  var c = [{key:"activeUsers",label:"Active users",n:1}];
+  if (o.newUsers) c.push({key:"newUsers",label:"New users",n:1});
+  c.push({key:"sessions",label:"Sessions",n:1});
+  if (!o.noDelta) c.push({label:"Sessions change vs previous week",get:function(r){ return r.prev_sessions == null ? "-" : chg(r.sessions, r.prev_sessions); }});
+  c.push({label:"Engaged sessions",n:1,get:function(r){ return fmt(eng(r)); }});
+  c.push({label:"Engagement rate",n:1,get:function(r){ var e = eng(r); return fmt(r.sessions && e != null ? Math.round(e / r.sessions * 1000) / 10 : (num(r.engagementRate) != null ? pct(r.engagementRate) : null), "pct"); }});
+  c.push({label:"Bounce rate",n:1,get:function(r){ var e = eng(r); return fmt(r.sessions && e != null ? Math.round((1 - e / r.sessions) * 1000) / 10 : (num(r.engagementRate) != null ? Math.round((1 - r.engagementRate) * 1000) / 10 : null), "pct"); }});
+  c.push({label:"Avg. engagement time per session",n:1,get:function(r){ return secs(r.sessions && num(r.userEngagementDuration) != null ? r.userEngagementDuration / r.sessions : null); }});
+  c.push({label:"Key events",n:1,get:function(r){ return fmt(kev(r)); }});
+  return c;
+}
+function dayLabel(d){ var x = new Date(d + "T00:00:00Z"); return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][x.getUTCDay()] + " " + d.slice(5); }
+function weekPairs(daily, cur0, key){
+  // align the current period and the previous period day by day
+  var out = []; var start = new Date(cur0 + "T00:00:00Z"), n = R.period.days || 7;
+  var by = {}; (daily||[]).forEach(function(r){ by[r.date] = r; });
+  for (var i = 0; i < n; i++){
+    var d = new Date(start.getTime() + i*86400000).toISOString().slice(0,10), pd = new Date(start.getTime() + (i-n)*86400000).toISOString().slice(0,10);
+    var o = {day: dayLabel(d), date: d}; o.cur = by[d] ? by[d][key] : null; o.prev = by[pd] ? by[pd][key] : null; out.push(o);
+  }
+  return out;
+}
+// Day-by-day totals for the dates in view (a single day shows the 14 days up to it), newest first.
+function dayByDayCard(s){
+  if (!DAILY || !DAILY.sites || !DAILY.sites[s.id]) return null;
+  var site = DAILY.sites[s.id], a = R.period.current[0], b = R.period.current[1], one = a === b;
+  if (one) a = addDays(b, -13);
+  var lo = site.days.indexOf(a), hi = site.days.indexOf(b);
+  if (hi < 0) return null; if (lo < 0) lo = 0;
+  var ke = site.key_event_metric || "keyEvents";
+  function byDay(src, name){
+    var t = (site[src] || {})[name], m = {}; if (!t) return m;
+    var c = {}; t.cols.forEach(function(k, i){ c[k] = i; });
+    t.rows.forEach(function(r){ if (r[0] < lo || r[0] > hi) return; var o = {}; Object.keys(c).forEach(function(k){ o[k] = r[1 + c[k]]; }); m[r[0]] = o; });
+    return m;
+  }
+  var gt = byDay("ga", "totals"), go = byDay("ga", "organic"), st = byDay("gsc", "totals"), rows = [];
+  for (var i = hi; i >= lo; i--){
+    var d = site.days[i], g = gt[i], o = go[i], q = st[i];
+    rows.push({date: d, clicks: q ? q.clicks : null, impressions: q ? q.impressions : null,
+      ctr: q && q.impressions ? q.clicks / q.impressions * 100 : null, position: q ? q.position : null,
+      users: g ? g.totalUsers : null, sessions: g ? g.sessions : null, organic: o ? o.sessions : (g ? 0 : null),
+      er: g && g.sessions ? g.engagedSessions / g.sessions * 100 : null, ke: g ? g[ke] : null});
+  }
+  if (!rows.length) return null;
+  var dayCell = function(r){ var x = new Date(r.date + "T00:00:00Z"), t = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][x.getUTCDay()] + ", " + ymdLabel(r.date);
+    return one && r.date === b ? $("strong",{text:t + " (selected)"}) : t; };
+  var dec = function(v, dp, suf){ return typeof v === "number" ? v.toFixed(dp) + (suf || "") : "-"; };
+  var cols = [{label:"Date",get:dayCell},
+    {label:"Clicks",n:1,get:function(r){ return fmt(r.clicks); }},{label:"Impressions",n:1,get:function(r){ return fmt(r.impressions); }},
+    {label:"CTR",n:1,get:function(r){ return dec(r.ctr, 2, "%"); }},{label:"Avg. position",n:1,get:function(r){ return dec(r.position, 1); }},
+    {label:"Users",n:1,get:function(r){ return fmt(r.users); }},{label:"Sessions",n:1,get:function(r){ return fmt(r.sessions); }},
+    {label:"Organic sessions",n:1,get:function(r){ return fmt(r.organic); }},{label:"Engagement rate",n:1,get:function(r){ return dec(r.er, 1, "%"); }},
+    {label:"Key events",n:1,get:function(r){ return fmt(r.ke); }}];
+  var gsLast = null; Object.keys(st).forEach(function(k){ var d = site.days[k]; if (!gsLast || d > gsLast) gsLast = d; });
+  var note = "Search Console (Clicks to Avg. position) and Google Analytics (Users to Key events) for each day" + (one ? " in the two weeks up to the selected day" : "") + ", newest first. The latest 2-3 days can still change slightly as Google finishes processing them." +
+    (gsLast && gsLast < b ? " Search Console has published data up to " + fmtDate(gsLast) + " so far." : "");
+  return card("daybyday-"+s.id, "Day by day", [table(cols, rows)], note);
+}
+function dailyChart(daily, key, label, kind){
+  if (R.period.days === 1) return $("div",{cls:"empty",text:"Single day selected."});  // a one-point chart adds nothing
+  var cu = R.custom;
+  return lineChart(weekPairs(daily, R.period.current[0], key), [{key:"cur",label: cu ? "Selected period" : "This week",color:"var(--s1)",kind:kind},{key:"prev",label: cu ? "Previous period" : "Previous week",color:"var(--s2)",kind:kind}],
+    {xKey:"day", xLabel:function(p){ return (R.period.days || 7) > 7 ? p.date.slice(5) : p.day.slice(0,3); }, tipTitle:function(p){ return p.day + (cu ? " vs the same day of the previous period" : " vs previous week"); }, title: label});
+}
+function statusPill(name, state, okLabel){
+  var c = {ok:"var(--good)", partial:"var(--warn)", stale:"var(--warn)", not_configured:"var(--muted)", no_exports:"var(--serious)", error:"var(--crit)"}[state] || "var(--muted)";
+  var label = {ok:okLabel || "connected", partial:"partial data", stale:"export out of date", not_configured:"not connected", no_exports:"no data", not_captured:"not captured this week", custom:"weekly only", error:"error"}[state] || state || "n/a";
+  return $("span",{cls:"pill"},[$("i",{cls:"dot",style:"background:"+c}), name + ": " + label]);
+}
+function issueList(items, withAction){
+  if (!items || !items.length) return $("div",{cls:"empty",text:"None this week."});
+  return $("ul",{cls:"issues"}, items.map(function(it){
+    var sev = (it.severity || "info").toLowerCase();
+    var body = $("div",null,[$("div",{cls:"it"},[it.title || "", it.source ? $("span",{cls:"src",text:it.source}) : null]), it.detail ? $("div",{cls:"idet",text:it.detail}) : null,
+      withAction && it.action ? $("div",{cls:"iact"},[$("strong",{text:"Fix: "}), it.action]) : null]);
+    return $("li",null,[$("span",{cls:"sev "+sev,text:sev.toUpperCase()}), body]);
+  }));
+}
+var REC_STRIKING = "Optimise the ranking page for this query: use it in the title, H1 and opening paragraph, answer it directly, and add internal links with this anchor text.";
+var REC_LOWCTR = "Rewrite the title and meta description so they match the searcher's query and promise a clear benefit.";
+var REC_LOSER = "Open this page in Search Console → Performance and compare queries week over week; refresh the content for the queries that lost position.";
+
+function buildSite(s){
+  var p = $("section",{cls:"panel",id:"panel-"+s.id,role:"tabpanel"});
+  var gsc = s.gsc || {}, ga = s.ga4 || {}, sr = s.semrush || {}, ins = s.insights || {}, gx = ga.extra || {};
+  var srState = sr.status === "ok" ? (sr.stale ? "stale" : "ok") : sr.status;
+  var B = sr.status === "ok" ? sr.current.browser : null, PB = sr.status === "ok" && sr.previous ? (sr.previous.browser || {}) : {};
+  var hasSem = sr.status === "ok" && ((B && !B.error) || (sr.current && (sr.current.files||[]).length));
+  p.appendChild($("div",{cls:"status"},[statusPill("Search Console", gsc.status), statusPill("GA4", ga.status), hasSem || sr.status === "no_exports" || sr.status === "error" ? statusPill("SEMrush", srState, "loaded") : null,
+    B && B.captured_at ? $("span",{cls:"pill",text:"SEMrush read: " + B.captured_at.slice(0,10)}) : null]));
+
+  var names = [["overview","Overview"],["gsc","Search Console"],["ga4","Google Analytics"],["semrush","SEMrush"]];
+  var nav = $("div",{cls:"subnav"}), parts = {};
+  names.forEach(function(n, i){
+    var b = $("button",{"aria-pressed": i===0 ? "true" : "false", text:n[1]});
+    b.addEventListener("click", function(){ Array.prototype.forEach.call(nav.children, function(x){ x.setAttribute("aria-pressed","false"); }); b.setAttribute("aria-pressed","true");
+      Object.keys(parts).forEach(function(k){ parts[k].hidden = k !== n[0]; }); window.scrollTo({top: p.offsetTop - 10}); });
+    nav.appendChild(b); parts[n[0]] = $("div",{id:n[0]+"-"+s.id}); if (i) parts[n[0]].hidden = true;
+  });
+  p.appendChild(nav); names.forEach(function(n){ p.appendChild(parts[n[0]]); });
+
+  // ================= OVERVIEW =================
+  var O = parts.overview;
+  var sum = card("summary-"+s.id, s.custom ? "Selected period at a glance" : "This week at a glance", []);
+  if (ins.headline) sum.appendChild($("p",{cls:"headline",text:ins.headline}));
+  if (ins.summary && ins.summary.length) sum.appendChild($("ul",null, ins.summary.map(function(t){ return $("li",{text:t}); })));
+  if (!ins.headline && !(ins.summary||[]).length){
+    // automatic, numbers-only summary (used for weeks without a written summary)
+    var kp = function(k, kind){ if (!k || k.current === null || k.current === undefined) return k && k.na ? "- (single day only)" : "-"; var t = fmt(k.current, kind); if (k.previous !== null && k.previous !== undefined) t += " (prev " + fmt(k.previous, kind) + (k.change_pct !== null && k.change_pct !== undefined ? ", " + (k.change_pct > 0 ? "+" : "") + k.change_pct + "%" : "") + ")"; return t; };
+    var auto = [];
+    if (gsc.kpis) auto.push("Search Console - Clicks " + kp(gsc.kpis.clicks) + " · Impressions " + kp(gsc.kpis.impressions) + " · CTR " + kp(gsc.kpis.ctr_pct, "pct") + " · Avg. position " + kp(gsc.kpis.avg_position, "pos"));
+    if (ga.kpis) auto.push("Google Analytics - " + (ga.kpis.totalUsers && ga.kpis.totalUsers.na ? "" : "Users " + kp(ga.kpis.totalUsers) + " · ") + "Sessions " + kp(ga.kpis.sessions) + " · Organic sessions " + kp((ga.organic_kpis||{}).sessions) + " · Key events " + kp(ga.kpis.key_events));
+    if (auto.length){ sum.appendChild($("div",{cls:"desc",text: s.custom ? "Automatic summary from the data for the selected dates." : "Automatic summary from the data (no written summary for this week)."})); sum.appendChild($("ul",null, auto.map(function(t){ return $("li",{text:t}); }))); }
+    else sum.appendChild($("div",{cls:"empty",text:"No data for this week."}));
+  }
+  O.appendChild(sum);
+  var period = (R.period.days === 1 ? R.period.current[0] : R.period.current[0] + " to " + R.period.current[1]) + (s.custom ? (R.period.days === 1 ? " vs " + R.period.previous[0] + " (same weekday, 7 days earlier)" : " vs previous " + R.period.days + " days") : " vs previous week");
+  function srcCard(id, cls, title, sub){ return $("div",{cls:"card kcard " + cls, id:id},[$("div",{cls:"khead"},[$("span",{cls:"kdot"}), $("h2",{text:title}), sub ? $("span",{cls:"ksub",text:sub}) : null])]); }
+  if (gsc.kpis){
+    var bs = gsc.brand_split || {};
+    var kg = srcCard("kpis-gsc-"+s.id, "gsc", "Google Search Console", period);
+    kg.appendChild($("div",{cls:"kpis"},[kpiCard("Clicks", gsc.kpis.clicks), kpiCard("Impressions", gsc.kpis.impressions),
+      kpiCard("CTR", gsc.kpis.ctr_pct, "pct"), kpiCard("Avg. position", gsc.kpis.avg_position, "pos", true),
+      kpiCard("Non-brand clicks", bs.nonbrand_clicks), kpiCard("Brand clicks", bs.brand_clicks)]));
+    O.appendChild(kg);
+  }
+  if (ga.kpis){
+    var ok = ga.organic_kpis || {};
+    var ka = srcCard("kpis-ga-"+s.id, "ga", "Google Analytics 4", period);
+    ka.appendChild($("div",{cls:"kpis"},[ga.kpis.totalUsers && (ga.kpis.totalUsers.current === null || ga.kpis.totalUsers.current === undefined) ? null : kpiCard("Users", ga.kpis.totalUsers), kpiCard("Sessions", ga.kpis.sessions),
+      kpiCard("Organic sessions", ok.sessions), kpiCard("Engagement rate", ga.kpis.engagement_rate_pct, "pct"),
+      kpiCard("Key events", ga.kpis.key_events), kpiCard("AI-assistant sessions", (ga.ai_referrals||{}).sessions)]));
+    O.appendChild(ka);
+  }
+  function addSemKpis(k){
+  if (B && !B.error){
+    var bc = [], sa = B.site_audit || {}, psa = PB.site_audit || {}, pt = B.position_tracking || {}, ppt = PB.position_tracking || {}, bl = B.backlinks || {}, pbl = PB.backlinks || {}, pr = B.project || {};
+    var vs = function(c, p, own){ var d = prevDiff(c, p); return d !== null ? [d, "vs last week"] : [own, "vs prior"]; };
+    var x;
+    if (sa.site_health !== undefined){ x = vs(sa.site_health, psa.site_health, sa.site_health_change); bc.push(semKpi("Site Health", sa.site_health, x[0], "pct", false, x[1])); }
+    if (sa.errors !== undefined){ x = vs(sa.errors, psa.errors, sa.errors_change); bc.push(semKpi("Audit errors", sa.errors, x[0], null, true, x[1])); }
+    if (sa.warnings !== undefined){ x = vs(sa.warnings, psa.warnings, sa.warnings_change); bc.push(semKpi("Audit warnings", sa.warnings, x[0], null, true, x[1])); }
+    if (sa.ai_search_health !== undefined && sa.ai_search_health !== null) bc.push(semKpi("AI Search Health", sa.ai_search_health, prevDiff(sa.ai_search_health, psa.ai_search_health), "pct", false, "vs last week"));
+    if (pr.Visibility && pr.Visibility.value !== null) bc.push(semKpi("Visibility", pr.Visibility.raw, pr.Visibility.delta));
+    if (pt.top10 !== undefined){ var t10 = (pt.distribution||{})["Top 10"] || {}; x = vs(pt.top10, ppt.top10, null); bc.push(semKpi("Top-10 keywords", pt.top10, x[0], null, false, x[0] ? x[1] : ("new " + (t10.new||"-") + " · lost " + (t10.lost||"-")))); }
+    if (pt.top3 !== undefined){ x = vs(pt.top3, ppt.top3, null); bc.push(semKpi("Top-3 keywords", pt.top3, x[0], null, false, x[0] ? x[1] : "")); }
+    if (bl.authority_score !== undefined){ x = vs(bl.authority_score, pbl.authority_score, null); bc.push(semKpi("Authority Score", bl.authority_score, x[0], null, false, x[0] ? x[1] : "")); }
+    if (bl.referring_domains !== undefined) bc.push(semKpi("Referring domains", bl.referring_domains, bl.referring_domains_change));
+    if (pr["Organic Keywords"] && pr["Organic Keywords"].value !== null) bc.push(semKpi("Organic keywords (est.)", pr["Organic Keywords"].raw, pr["Organic Keywords"].delta));
+    if (pr["Organic Traffic"] && pr["Organic Traffic"].value !== null) bc.push(semKpi("Organic traffic (est.)", pr["Organic Traffic"].raw, pr["Organic Traffic"].delta));
+    if (pr["AI Visibility"] && pr["AI Visibility"].value !== null) bc.push(semKpi("AI Visibility", pr["AI Visibility"].raw, null, null, false, ""));
+    if (bc.length){ k.appendChild($("div",{cls:"ksubline",text:"Read " + (B.captured_at || sr.current.date).slice(0,10) + (sa.crawl_date ? " · last site crawl " + sa.crawl_date : "")})); k.appendChild($("div",{cls:"kpis"},bc)); }
+  }
+  if (sr.status === "ok" && (sr.current.files||[]).length){
+    var cur = {}, prev = {}; (sr.current.files||[]).forEach(function(f){ cur[f.kind] = f.metrics || {}; });
+    ((sr.previous||{}).files||[]).forEach(function(f){ prev[f.kind] = f.metrics || {}; });
+    var mk = sr.current.manual_kpis || {}, pmk = (sr.previous||{}).manual_kpis || {};
+    var mkK = function(name){ return mk[name] === undefined ? null : {current: mk[name], previous: pmk[name] === undefined ? null : pmk[name], change_abs: (typeof mk[name]==="number" && typeof pmk[name]==="number") ? mk[name]-pmk[name] : null, change_pct:null}; };
+    var mm = function(kind, f){ var c = (cur[kind]||{})[f], pv = (prev[kind]||{})[f]; if (c === undefined) return null; return {current:c, previous: pv === undefined ? null : pv, change_abs: (pv===undefined||pv===null)?null:c-pv, change_pct: (pv? Math.round((c-pv)/pv*1000)/10 : null)}; };
+    var cards = [];
+    if (mk["Site Health"] !== undefined) cards.push(kpiCard("Site Health (SEMrush)", mkK("Site Health"), "pct"));
+    if (mk["Authority Score"] !== undefined) cards.push(kpiCard("Authority Score", mkK("Authority Score")));
+    var ae = mk["Errors"] !== undefined ? mkK("Errors") : mm("site_audit","errors"); if (ae) cards.push(kpiCard("Site Audit errors", ae, null, true));
+    var aw = mk["Warnings"] !== undefined ? mkK("Warnings") : mm("site_audit","warnings"); if (aw) cards.push(kpiCard("Site Audit warnings", aw, null, true));
+    ["top3","top10","keywords"].forEach(function(f){ var v = mm("organic_positions", f); if (v) cards.push(kpiCard({top3:"Keywords in top 3",top10:"Keywords in top 10",keywords:"Ranking keywords"}[f], v)); });
+    var rd = mm("referring_domains","referring_domains"); if (rd) cards.push(kpiCard("Referring domains", rd));
+    if (cards.length){ k.appendChild($("div",{cls:"kgroup-title sem",text:"SEMrush (export " + sr.current.date + ")"})); k.appendChild($("div",{cls:"kpis"},cards)); }
+  }
+
+  }
+  var dbd = dayByDayCard(s); if (dbd) O.appendChild(dbd);
+  var ks = srcCard("kpis-sem-"+s.id, "sem", "SEMrush", null);
+  addSemKpis(ks);
+  if (ks.querySelector(".kpis")) O.appendChild(ks);
+  var flags = s.flags || [];
+  var issues = (ins.issues && ins.issues.length) ? ins.issues : flags.filter(function(f){ return f.type === "issue"; });
+  var wins = (ins.wins && ins.wins.length) ? ins.wins.map(function(w){ return typeof w === "string" ? {title:w, severity:"info"} : Object.assign({severity:"info"}, w); }) : flags.filter(function(f){ return f.type === "win"; });
+  var opps = flags.filter(function(f){ return f.type === "opportunity"; });
+  if (!s.custom) O.appendChild($("div",{cls:"grid2"},[
+    card("issues-"+s.id, "Issues to fix", [issueList(issues, true)]),
+    card("wins-"+s.id, "Improvements & wins", [issueList(wins), opps.length ? $("h3",{text:"Opportunities"}) : null, opps.length ? issueList(opps) : null])
+  ]));
+  if (!s.custom && ins.actions && ins.actions.length){
+    O.appendChild(card("actions-"+s.id, "Recommended actions", [table([{key:"priority",label:"Priority"},{key:"action",label:"Action"},{key:"where",label:"Where",url:true},{key:"why",label:"Why (data)"},{key:"owner",label:"Owner"}], ins.actions)]));
+  }
+
+  // ================= SEARCH CONSOLE =================
+  var G = parts.gsc;
+  if (!gsc.kpis){ G.appendChild($("div",{cls:"note",text:"Search Console is not connected for this site."})); }
+  else {
+    G.appendChild($("div",{cls:"note",text:"Property: " + (gsc.property||"") + " · Web search · " + R.period.current[0] + " to " + R.period.current[1] + " vs " + R.period.previous[0] + " to " + R.period.previous[1]}));
+    var bs2 = gsc.brand_split || {};
+    G.appendChild(card("gsc-kpi-"+s.id, "Performance overview", [$("div",{cls:"kpis kpis7"},[kpiCard("Clicks", gsc.kpis.clicks), kpiCard("Impressions", gsc.kpis.impressions),
+      kpiCard("CTR", gsc.kpis.ctr_pct, "pct"), kpiCard("Avg. position", gsc.kpis.avg_position, "pos", true), kpiCard("Non-brand clicks", bs2.nonbrand_clicks),
+      kpiCard("Non-brand impressions", bs2.nonbrand_impressions), kpiCard("Brand clicks", bs2.brand_clicks)])],
+      "Clicks = visits from Google Search. Impressions = times a page was shown in results. CTR = clicks ÷ impressions. Position: lower is better. Brand = queries containing the company name."));
+    G.appendChild($("div",{cls:"grid2"},[
+      card("gsc-daily-clicks-"+s.id, "Clicks per day", [dailyChart(gsc.daily, "clicks", "Daily clicks")], "This week vs the same day last week."),
+      card("gsc-daily-impr-"+s.id, "Impressions per day", [dailyChart(gsc.daily, "impressions", "Daily impressions")], "This week vs the same day last week."),
+      card("gsc-trend-clicks-"+s.id, "Clicks - last 12 weeks", [lineChart(gsc.trend,[{key:"clicks",label:"Clicks",color:"var(--s1)"}],{title:"Weekly clicks"})]),
+      card("gsc-trend-pos-"+s.id, "Average position - last 12 weeks", [lineChart(gsc.trend,[{key:"avg_position",label:"Avg. position",color:"var(--s1)",kind:"pos"}],{invert:true,title:"Weekly average position"})], "Lower is better.")
+    ]));
+    var qcols = [{key:"query",label:"Query"},{key:"clicks",label:"Clicks",n:1},{label:"Clicks change vs previous week",get:function(r){ return chg(r.clicks, r.prev_clicks); }},{key:"impressions",label:"Impr.",n:1},{key:"ctr_pct",label:"CTR",n:1,kind:"pct"},{key:"position",label:"Pos.",n:1,kind:"pos"},{key:"prev_position",label:"Prev pos.",n:1,kind:"pos"}];
+    var pcols = [{label:"Page",url:true,get:function(r){ return shortUrl(r.page); }},{key:"clicks",label:"Clicks",n:1},{label:"Clicks change vs previous week",get:function(r){ return chg(r.clicks, r.prev_clicks); }},{key:"impressions",label:"Impr.",n:1},{key:"ctr_pct",label:"CTR",n:1,kind:"pct"},{key:"position",label:"Pos.",n:1,kind:"pos"}];
+    var mcols = [{key:"query",label:"Query"},{key:"prev_clicks",label:"Prev clicks",n:1},{key:"clicks",label:"Clicks",n:1},{key:"delta",label:"Change in clicks",n:1},{key:"prev_position",label:"Prev pos.",n:1,kind:"pos"},{key:"position",label:"Pos.",n:1,kind:"pos"}];
+    G.appendChild(card("gsc-insights-"+s.id, "Insights - what changed", [
+      $("div",{cls:"stack"},[sub("Queries gaining clicks", null, table(mcols, gsc.query_gainers)), sub("Queries losing clicks", null, table(mcols, gsc.query_losers))]),
+      $("div",{cls:"stack"},[sub("Pages gaining clicks", null, table(pcols, gsc.page_gainers)), sub("Pages that lost ≥30% of clicks", REC_LOSER, table(pcols, gsc.page_losers))]),
+      $("div",{cls:"stack"},[sub("New pages showing in Google", "Pages with impressions this week and none last week.", table(pcols, gsc.new_pages)), sub("Queries that stopped getting clicks", "Had ≥3 clicks last week, 0 this week.", table([{key:"query",label:"Query"},{key:"prev_clicks",label:"Prev clicks",n:1},{key:"prev_position",label:"Prev pos.",n:1,kind:"pos"}], gsc.lost_queries))])
+    ]));
+    G.appendChild(card("gsc-queries-"+s.id, "Queries", [table(qcols, gsc.top_queries)], "Every search query with clicks or impressions this week, sorted by clicks."));
+    G.appendChild(card("gsc-pages-"+s.id, "Pages", [table(pcols, gsc.top_pages)], "Every page shown in Google Search this week, sorted by clicks."));
+    G.appendChild(card("gsc-opps-"+s.id, "Opportunities", [
+      sub("Striking-distance queries (position 4–20)", "Queries already close to page 1 / top 3 with meaningful impressions. Recommended: " + REC_STRIKING, table(qcols, gsc.striking_distance)),
+      sub("Pages with low CTR for their position", "Click-through rate below half of this site's own CTR for pages in the same position range. Recommended: " + REC_LOWCTR,
+        table(pcols.concat([{key:"bucket",label:"Pos. range"},{key:"bucket_site_ctr_pct",label:"Site CTR in range",n:1,kind:"pct"}]), gsc.low_ctr_pages))
+    ]));
+    var ix = gsc.index || {};
+    // (past weeks / custom ranges: indexing, sitemaps and CWV are simply not shown)
+    if (!gsc.history){
+    G.appendChild(card("gsc-index-"+s.id, "Indexing - pages with issues", [
+      $("div",{cls:"kpis"},[kpiCard("URLs checked", {current: ix.checked}), kpiCard("Indexed", {current: ix.indexed}), kpiCard("With issues", {current: (ix.pages_with_issues||[]).length}, null, true)]),
+      sub("Pages with issues and how to fix them", null, table([{label:"Page",url:true,get:function(r){ return shortUrl(r.url); }},{key:"problem",label:"Issue (from Google)"},{key:"last_crawl",label:"Last crawl"},{key:"recommendation",label:"Recommended fix"}], ix.pages_with_issues, "No issues found on the URLs checked.")),
+      sub("Index status of the URLs checked", null, table([{key:"state",label:"Status (Google)"},{key:"urls",label:"URLs",n:1},{label:"Examples",url:true,get:function(r){ return (r.examples||[]).map(shortUrl).join(", "); }}], ix.by_state)),
+      sub("Sitemaps", null, table([{key:"path",label:"Sitemap",url:true},{key:"submitted_urls",label:"URLs",n:1},{key:"errors",label:"Errors",n:1},{key:"warnings",label:"Warnings",n:1},{label:"Last read by Google",get:function(r){ return (r.last_downloaded||"").slice(0,10); }}], gsc.sitemaps))
+    ], "Status from Google's URL Inspection API for this site's top pages plus a sample of URLs from its sitemaps. (Search Console's full Page indexing report is not available through its API.)"));
+    var cw = gsc.cwv || {}, cwKids = [];
+    cwKids.push($("div",{cls:"note",text:"Two different measurements are shown. Real-user data (shown for the whole site and for the homepage on its own) is what Google uses for Core Web Vitals pass/fail and ranking: the 75th percentile of real Chrome visits over the last 28 days, so improvements take up to 28 days to show. The lab test is a single simulated page load run at report time - it reflects the site as it is today and matches the 'Diagnose performance issues' section of pagespeed.web.dev."}));
+    ["mobile","desktop"].forEach(function(st){
+      var b = cw[st]; if (!b) return;
+      var label = st.charAt(0).toUpperCase()+st.slice(1);
+      if (b.lab_metrics && b.lab_metrics.length){
+        cwKids.push($("div",{cls:"cwvhead"},[$("strong",{text:label + " · Lab test today (homepage)"}), b.lab_performance_score !== null && b.lab_performance_score !== undefined ? $("span",{cls:"rating " + (b.lab_performance_score>=90?"good":b.lab_performance_score>=50?"ni":"poor"), text:"Performance score " + b.lab_performance_score + "/100"}) : null]));
+        cwKids.push(table([{key:"metric",label:"Metric"},{key:"value",label:"Lab value",n:1},{label:"Rating",get:function(r){ return rating(r.rating); }}], b.lab_metrics));
+      } else if (b.lab_performance_score !== null && b.lab_performance_score !== undefined) {
+        cwKids.push($("div",{cls:"cwvhead"},[$("strong",{text:label + " · Lab test today (homepage)"}), $("span",{cls:"rating " + (b.lab_performance_score>=90?"good":b.lab_performance_score>=50?"ni":"poor"), text:"Performance score " + b.lab_performance_score + "/100"})]));
+      }
+      var ob = b.origin, pb = b.page;
+      if (ob || pb){
+        var head = [$("strong",{text:label + " · Real users, last 28 days"})];
+        if (ob) head.push($("span",{cls:"rating " + (ob.assessment==="Passed"?"good":ob.assessment==="Failed"?"poor":"none"), text:"Whole site: " + (ob.assessment||"no data")}));
+        if (pb) head.push($("span",{cls:"rating " + (pb.assessment==="Passed"?"good":pb.assessment==="Failed"?"poor":"none"), text:"Homepage: " + (pb.assessment||"no data")}));
+        cwKids.push($("div",{cls:"cwvhead"}, head));
+        var by = {}, order = [];
+        [[ob,"site"],[pb,"home"]].forEach(function(x){ if (!x[0]) return; x[0].metrics.forEach(function(m){ if (!by[m.metric]){ by[m.metric] = {metric:m.metric, thresholds:m.thresholds, unit:m.unit}; order.push(m.metric); } by[m.metric][x[1]] = m; }); });
+        var val = function(m){ if (!m) return $("span",{cls:"flat",text:"-"}); var v = m.p75 === null || m.p75 === undefined ? "-" : (m.unit==="ms" ? fmt(m.p75) + " ms" : String(m.p75)); return $("span",null,[v + " ", rating(m.rating)]); };
+        cwKids.push(table([{key:"metric",label:"Metric"},{label:"Whole site (75th pct.)",get:function(r){ return val(r.site); }},{label:"Homepage (75th pct.)",get:function(r){ return val(r.home); }},{key:"thresholds",label:"Thresholds"},
+          {label:"Recommended fix",get:function(r){ var m = (r.site && r.site.recommendation) || (r.home && r.home.recommendation); return m || "-"; }}], order.map(function(k){ return by[k]; })));
+      }
+    });
+    G.appendChild(card("gsc-cwv-"+s.id, "Core Web Vitals & page speed", cwKids.length > 1 ? cwKids : [$("div",{cls:"empty",text:"No Core Web Vitals data returned (Chrome UX Report has no data for this site, or the PageSpeed request failed)."})],
+      "Source: PageSpeed Insights API - real-user data from the Chrome UX Report (same as Search Console's Core Web Vitals report) and a Lighthouse lab test. LCP, INP and CLS decide pass/fail."));
+    }
+    G.appendChild(card("gsc-results-"+s.id, "Search results breakdown", [
+      $("div",{cls:"stack"},[
+        sub("Countries", null, table([{key:"country",label:"Country"},{key:"clicks",label:"Clicks",n:1},{label:"Clicks change vs previous week",get:function(r){ return chg(r.clicks, r.prev_clicks); }},{key:"impressions",label:"Impr.",n:1},{key:"share_pct",label:"Share of clicks",n:1,kind:"pct"}], gsc.countries)),
+        sub("Devices", null, table([{key:"device",label:"Device"},{key:"clicks",label:"Clicks",n:1},{label:"Clicks change vs previous week",get:function(r){ return chg(r.clicks, r.prev_clicks); }},{key:"impressions",label:"Impr.",n:1},{key:"position",label:"Pos.",n:1,kind:"pos"}], gsc.devices))]),
+      $("div",{cls:"stack"},[
+        sub("Search appearance", "Rich result types the site appeared with.", table([{key:"appearance",label:"Appearance"},{key:"clicks",label:"Clicks",n:1},{label:"Clicks change vs previous week",get:function(r){ return chg(r.clicks, r.prev_clicks); }},{key:"impressions",label:"Impr.",n:1},{key:"position",label:"Pos.",n:1,kind:"pos"}], gsc.search_appearance, "No rich-result appearances this week.")),
+        sub("Other Google surfaces", "Image, video, News and Discover (web search is shown above).", table([{key:"type",label:"Search type"},{key:"clicks",label:"Clicks",n:1},{label:"Clicks change vs previous week",get:function(r){ return chg(r.clicks, r.prev_clicks); }},{key:"impressions",label:"Impr.",n:1},{key:"prev_impressions",label:"Prev impr.",n:1}], gsc.search_types, "No clicks or impressions from these surfaces."))])
+    ]));
+    if (gsc.errors) G.appendChild($("div",{cls:"errors",text:"Some Search Console requests failed: " + gsc.errors.map(function(e){ return e.step; }).join(", ")}));
+  }
+
+  // ================= GOOGLE ANALYTICS =================
+  var A = parts.ga4;
+  if (!ga.kpis){ A.appendChild($("div",{cls:"note",text: ga.note ? "Google Analytics is not shown for this site: " + ga.note : "Google Analytics is not connected for this site."})); }
+  else {
+    var x2 = gx.summary_extra || {current:{}, previous:{}}, xc = x2.current || {}, xp = x2.previous || {};
+    var aet = mk(xc.activeUsers ? xc.userEngagementDuration / xc.activeUsers : null, xp.activeUsers ? xp.userEngagementDuration / xp.activeUsers : null);
+    A.appendChild($("div",{cls:"note",text:"GA4 property " + ga.property_id + " · all traffic · " + R.period.current[0] + " to " + R.period.current[1] + " vs previous week"}));
+    var aetCard = $("div",{cls:"kpi"},[$("div",{cls:"l",text:"Avg. engagement time per active user"}),$("div",{cls:"v",text:secs(aet.current)}),$("div",{cls:"d"},[$("span",{cls:"flat",text:"previous week " + secs(aet.previous)})])]);
+    var aets = {current: (ga.kpis.sessions||{}).current ? xc.userEngagementDuration / ga.kpis.sessions.current : null, previous: (ga.kpis.sessions||{}).previous ? xp.userEngagementDuration / ga.kpis.sessions.previous : null};
+    var aetsCard = $("div",{cls:"kpi"},[$("div",{cls:"l",text:"Avg. engagement time per session"}),$("div",{cls:"v",text:secs(aets.current)}),$("div",{cls:"d"},[$("span",{cls:"flat",text:"previous week " + secs(aets.previous)})])]);
+    function esu(au, k, which){ var e = k && k[which]; return (typeof e === "number" && au) ? Math.round(e / au * 100) / 100 : null; }
+    A.appendChild(card("ga-summary-"+s.id, "Summary", [$("div",{cls:"kpis kpis9"},[
+      kpiCard("Total users", ga.kpis.totalUsers), kpiCard("New users", ga.kpis.newUsers), kpiCard("Active users", mk(xc.activeUsers, xp.activeUsers)),
+      kpiCard("Sessions", ga.kpis.sessions), kpiCard("Engaged sessions", ga.kpis.engagedSessions), kpiCard("Engagement rate", ga.kpis.engagement_rate_pct, "pct"),
+      aetsCard, kpiCard("Views", ga.kpis.screenPageViews),
+      kpiCard("Key events", ga.kpis.key_events)])],
+      "Engaged session = lasted 10+ seconds, had a key event or 2+ page views. Bounce rate = 100% − engagement rate (sessions that were not engaged): " + fmt(pct(xc.bounceRate), "pct") + " this week, " + fmt(pct(xp.bounceRate), "pct") + " previous week. Key events = the conversions marked in GA4."));
+    A.appendChild($("div",{cls:"grid2"},[
+      card("ga-daily-sessions-"+s.id, "Sessions per day", [dailyChart(gx.daily, "sessions", "Daily sessions")], "This week vs the same day last week."),
+      card("ga-daily-users-"+s.id, "Users per day", [dailyChart(gx.daily, "users", "Daily users")], "This week vs the same day last week."),
+      card("ga-trend-"+s.id, "Sessions - last 12 weeks", [lineChart(ga.trend,[{key:"sessions",label:"All sessions",color:"var(--s1)"},{key:"organic_sessions",label:"Organic search sessions",color:"var(--s2)"}],{title:"Weekly sessions"})]),
+      card("ga-daily-ke-"+s.id, "Key events per day", [dailyChart(gx.daily, "key_events", "Daily key events")], "This week vs the same day last week.")
+    ]));
+    var ke = gx.key_event_metric || "keyEvents";
+    var gTot = {activeUsers: xc.activeUsers, sessions: (ga.kpis.sessions||{}).current, prev_sessions: (ga.kpis.sessions||{}).previous,
+      engagedSessions: (ga.kpis.engagedSessions||{}).current, userEngagementDuration: xc.userEngagementDuration,
+      newUsers: (ga.kpis.newUsers||{}).current};
+    gTot[ke] = (ga.kpis.key_events||{}).current; gTot["prev_"+ke] = (ga.kpis.key_events||{}).previous;
+    var S = sessCols(ke);
+    var chRows = gx.channels || (ga.channels||[]).map(function(r){ var o = {sessionDefaultChannelGroup:r.channel, sessions:r.sessions, prev_sessions:r.prev_sessions, engagementRate:r.engagement_rate_pct/100}; o[ke]=r.key_events; return o; });
+    A.appendChild(card("ga-acq-"+s.id, "Traffic acquisition - where visitors came from", [
+      sub("Channels", "Session primary channel group (Default Channel Group) - same columns as GA4's Traffic acquisition report.", table([{key:"sessionDefaultChannelGroup",label:"Channel"}].concat(S), chRows, null, gTot)),
+      sub("Source / medium", "All rows, sorted by sessions.", table([{key:"sessionSourceMedium",label:"Source / medium"}].concat(S), gx.source_medium)),
+      sub("New vs returning", null, table([{key:"newVsReturning",label:"Visitor type"}].concat(S), gx.new_vs_returning)),
+      sub("AI assistants (ChatGPT, Perplexity, Gemini, Copilot, Claude…)", "Sessions whose source matches a known AI assistant.", table([{key:"source",label:"Source"}].concat(S), (ga.ai_referrals||{}).by_source, "No sessions from AI assistants this week."))
+    ]));
+    A.appendChild(card("ga-eng-"+s.id, "Engagement - landing pages, pages & events", [
+      sub("Landing pages (all traffic)", "The first page of each session. All pages, sorted by sessions.", table([{key:"landingPage",label:"Landing page",url:true}].concat(sessCols(ke, {newUsers:true})), gx.landing_pages)),
+      sub("Pages and screens", "Every page viewed, not only the first. All pages, sorted by views.", table([{label:"Page",url:true,get:function(r){ return r.pagePath + (r.pageTitle ? " - " + r.pageTitle : ""); }},{key:"screenPageViews",label:"Views",n:1},{label:"Views change vs previous week",get:function(r){ return chg(r.screenPageViews, r.prev_screenPageViews); }},{key:"activeUsers",label:"Active users",n:1},{label:"Views per active user",n:1,get:function(r){ return ratio(r.screenPageViews, r.activeUsers); }},{label:"Avg. engagement time per active user",n:1,get:function(r){ return secs(r.activeUsers ? r.userEngagementDuration / r.activeUsers : null); }},{key:"eventCount",label:"Event count",n:1},{key:ke,label:"Key events",n:1}], gx.pages)),
+      sub("Events", null, table([{key:"eventName",label:"Event name"},{key:"eventCount",label:"Event count",n:1},{label:"Event count change vs previous week",get:function(r){ return chg(r.eventCount, r.prev_eventCount); }},{key:"totalUsers",label:"Total users",n:1},{label:"Event count per active user",n:1,get:function(r){ return ratio(r.eventCount, r.activeUsers); }}], gx.events)),
+      sub("Organic landing pages with weak engagement", "Organic sessions ≥ 20 and engagement rate below 60% of the site's organic average.", table([{key:"landing_page",label:"Landing page",url:true},{key:"activeUsers",label:"Active users",n:1},{key:"sessions",label:"Sessions",n:1},{key:"engagedSessions",label:"Engaged sessions",n:1},{key:"engagement_rate_pct",label:"Engagement rate",n:1,kind:"pct"},{label:"Bounce rate",n:1,get:function(r){ return fmt(typeof r.engagement_rate_pct === "number" ? Math.round((100 - r.engagement_rate_pct) * 10) / 10 : null, "pct"); }},{key:"site_organic_engagement_pct",label:"Site organic avg",n:1,kind:"pct"},{label:"Avg. engagement time per session",n:1,get:function(r){ return secs(r.sessions && r.userEngagementDuration != null ? r.userEngagementDuration / r.sessions : null); }}], ga.low_engagement_landing_pages, "None this week."))
+    ]));
+    A.appendChild(card("ga-ke-"+s.id, "Key events (conversions)", [
+      sub("By event", null, table([{key:"eventName",label:"Key event"},{key:ke,label:"This week",n:1},{key:"prev_"+ke,label:"Previous week",n:1},{label:"Change",get:function(r){ return chg(r[ke], r["prev_"+ke]); }}], gx.key_events_by_name, "No key events in either week.")),
+      sub("By channel", null, table([{key:"sessionDefaultChannelGroup",label:"Channel"},{key:ke,label:"Key events",n:1},{key:"prev_"+ke,label:"Previous week",n:1},{key:"activeUsers",label:"Active users",n:1},{key:"sessions",label:"Sessions",n:1},{key:"engagedSessions",label:"Engaged sessions",n:1}], gx.key_events_by_channel, "No key events in either week.")),
+      sub("By landing page", null, table([{key:"landingPage",label:"Landing page",url:true},{key:ke,label:"Key events",n:1},{key:"activeUsers",label:"Active users",n:1},{key:"sessions",label:"Sessions",n:1},{key:"engagedSessions",label:"Engaged sessions",n:1}], gx.key_events_by_landing, "No key events this week."))
+    ]));
+    A.appendChild(card("ga-geo-"+s.id, "Geography & technology", [
+      sub("Countries", "All rows, sorted by sessions.", table([{key:"country",label:"Country"}].concat(S), gx.countries)),
+      sub("Cities", "All rows, sorted by sessions.", table([{key:"city",label:"City"},{key:"country",label:"Country"}].concat(sessCols(ke, {noDelta:true})), gx.cities)),
+      sub("Devices", null, table([{key:"deviceCategory",label:"Device"}].concat(S), gx.devices, null, gTot))
+    ]));
+    if (ga.errors) A.appendChild($("div",{cls:"errors",text:"Some GA4 requests failed: " + ga.errors.map(function(e){ return e.step; }).join(", ")}));
+  }
+
+  // ================= SEMRUSH (unchanged content) =================
+  var S = parts.semrush;
+  var sk = srcCard("semrush-kpis-"+s.id, "sem", "SEMrush key metrics", null);
+  addSemKpis(sk); S.appendChild(sk);
+  var ptd = B && !B.error ? (B.position_tracking || {}).detail : null;
+  if (ptd && (ptd.keywords || []).length) S.appendChild(ptRankingsCard(s.id, ptd, B.position_tracking || {}));
+  if (ptd && (ptd.pages || []).length) S.appendChild(ptPagesCard(s.id, ptd));
+  var semCard = $("div",{cls:"card",id:"semrush-"+s.id},[$("h2",{text:"SEMrush detail"})]);
+  if (B && !B.error){
+    var sa2 = B.site_audit || {}, pt2 = B.position_tracking || {}, bl2 = B.backlinks || {};
+    if (B.screen_errors && Object.keys(B.screen_errors).length) semCard.appendChild($("div",{cls:"errors",text:"Screens not read: " + Object.keys(B.screen_errors).map(function(k){ return k + " (" + B.screen_errors[k] + ")"; }).join(", ")}));
+    if (sa2.top_issues) semCard.appendChild(section("Site Audit - top issues (crawl " + (sa2.crawl_date||"-") + ", " + (sa2.pages_crawled||"-") + " pages)", [
+      table([{key:"issue",label:"Issue"},{key:"count",label:"Pages",n:1},{key:"change",label:"Change"},{label:"AI Search",get:function(r){ return r.ai_search ? "yes" : ""; }},{key:"recommendation",label:"Recommendation"}], sa2.top_issues),
+      $("h3",{text:"Pages to improve"}), table([{key:"page",label:"Page",url:true},{key:"issues",label:"Issues"},{key:"count",label:"#",n:0}], sa2.pages_to_improve),
+      $("h3",{text:"Thematic scores"}), table([{key:"k",label:"Area"},{key:"v",label:"Score"}], Object.keys(sa2.thematic||{}).map(function(t){ return {k:t, v:sa2.thematic[t]}; }))
+    ], true));
+    if (pt2.distribution) semCard.appendChild(section("Position Tracking - " + (pt2.tracked_keywords||"-") + " keywords · " + (pt2.location||"") + " · " + (pt2.period||""), [
+      table([{key:"band",label:"Band"},{key:"keywords",label:"Keywords",n:0},{key:"new",label:"New",n:0},{key:"lost",label:"Lost",n:0}], Object.keys(pt2.distribution).map(function(b){ return Object.assign({band:b}, pt2.distribution[b]); })),
+      $("div",{cls:"sub",text:"Improved " + (pt2.improved===undefined?"-":pt2.improved) + " · declined " + (pt2.declined===undefined?"-":pt2.declined) + (pt2.cannibalization ? " · cannibalization: " + pt2.cannibalization.affected_keywords + " keywords, " + pt2.cannibalization.cannibal_pages + " pages" : "")}),
+      $("h3",{text:"Biggest visibility gains" + (pt2.positive_impact ? " (" + pt2.positive_impact.total + ")" : "")}), table([{key:"keyword",label:"Keyword"},{key:"visibility_change",label:"Visibility change"}], (pt2.positive_impact||{}).keywords),
+      $("h3",{text:"Biggest visibility losses" + (pt2.negative_impact ? " (" + pt2.negative_impact.total + ")" : "")}), table([{key:"keyword",label:"Keyword"},{key:"visibility_change",label:"Visibility change"}], (pt2.negative_impact||{}).keywords)
+    ]));
+    if (bl2.authority_score !== undefined) semCard.appendChild(section("Backlinks", [table([{key:"k",label:"Metric"},{key:"v",label:"Value"}], [
+      {k:"Authority Score",v:bl2.authority_score},{k:"Referring domains",v:(bl2.referring_domains===null?"-":fmt(bl2.referring_domains)) + (bl2.referring_domains_change ? " (" + bl2.referring_domains_change + ")" : "")},
+      {k:"Backlinks",v:(bl2.backlinks===null?"-":fmt(bl2.backlinks)) + (bl2.backlinks_change ? " (" + bl2.backlinks_change + ")" : "")},{k:"Toxicity",v:bl2.toxicity||"-"}])]));
+  }
+  if (sr.status === "ok" && (sr.current.files||[]).length){
+    (sr.current.files||[]).forEach(function(f){
+      var m = f.metrics || {}, kids = [$("div",{cls:"sub",text: f.rows + " rows · " + f.kind.replace(/_/g," ")})];
+      if (m.top_gainers) kids.push($("h3",{text:"Biggest gainers"}), table([{key:"keyword",label:"Keyword"},{key:"previous",label:"Prev",n:1,kind:"pos"},{key:"position",label:"Now",n:1,kind:"pos"},{key:"volume",label:"Volume",n:1}], m.top_gainers));
+      if (m.top_losers) kids.push($("h3",{text:"Biggest losers"}), table([{key:"keyword",label:"Keyword"},{key:"previous",label:"Prev",n:1,kind:"pos"},{key:"position",label:"Now",n:1,kind:"pos"},{key:"volume",label:"Volume",n:1}], m.top_losers));
+      if (m.top_keywords) kids.push($("h3",{text:"Top keywords by traffic"}), table([{key:"keyword",label:"Keyword"},{key:"position",label:"Pos.",n:1,kind:"pos"},{key:"volume",label:"Volume",n:1},{key:"traffic",label:"Traffic",n:1},{label:"URL",url:true,get:function(r){ return r.url ? shortUrl(r.url) : "-"; }}], m.top_keywords));
+      if (m.issues) Object.keys(m.issues).forEach(function(sev){ kids.push($("h3",{text:sev.charAt(0).toUpperCase()+sev.slice(1)+"s"}), table([{key:"issue",label:"Issue"},{key:"count",label:"Count",n:1}], m.issues[sev])); });
+      if (m.new_domains) kids.push($("h3",{text:"New referring domains (last 7 days)"}), table([{key:"domain",label:"Domain"},{key:"first_seen",label:"First seen"},{key:"score",label:"Score",n:1}], m.new_domains));
+      if (f.kind === "unknown") kids.push($("div",{cls:"empty",text:"Unrecognised export - columns: " + (f.headers||[]).join(", ")}));
+      semCard.appendChild(section(f.file, kids));
+    });
+  } else if (!(B && !B.error)) {
+    semCard.appendChild($("div",{cls:"empty",text: sr.status === "custom" ? "SEMrush is read once a week, so it is not split by custom dates. See it in the Last 7 days view (or any week)." : sr.status === "not_captured" ? "SEMrush is read during each weekly run, so it is not available for this past week." : sr.status === "no_exports" ? "No SEMrush data this week (browser read did not run and no CSV exports in " + sr.folder + ")." : "SEMrush data unavailable."}));
+  }
+
+  S.appendChild(semCard);
+  // show only what has data: drop empty tables, charts and cards, and the SEMrush tab when it has nothing
+  if (!hasSem && sr.status !== "no_exports" && sr.status !== "error"){
+    Array.prototype.forEach.call(nav.children, function(b){ if (b.textContent === "SEMrush") b.remove(); });
+    if (parts.semrush) parts.semrush.remove();
+  }
+  pruneEmpty(p);
+  return p;
+}
+// ---------- SEMrush Position Tracking: rankings and pages, laid out like SEMrush ----------
+function ymdLabel(d){ var x = new Date(d + "T00:00:00Z"); return x.toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"}); }
+function trunc(v, dp){ if (typeof v !== "number") return "-"; var f = Math.pow(10, dp); return (Math.round(v * f) / f).toFixed(dp); }
+function arrowDiff(d, dp, betterUp){  // SEMrush-style ↑/↓ change; betterUp=false when a lower number is better
+  if (typeof d !== "number") return "-";
+  var r = Math.round(d * Math.pow(10, dp || 0)) / Math.pow(10, dp || 0);
+  if (!r) return $("span",{cls:"flat",text:"0"});
+  var good = betterUp === false ? r < 0 : r > 0;
+  return $("span",{cls: good ? "up" : "down", text: (r > 0 ? "↑" : "↓") + Math.abs(r).toFixed(dp || 0)});
+}
+function signed(d, dp, suffix){ if (typeof d !== "number") return "-"; var r = Math.round(d * Math.pow(10, dp)) / Math.pow(10, dp); if (!r) return $("span",{cls:"flat",text:"0"}); return $("span",{cls: r > 0 ? "up" : "down", text:(r > 0 ? "+" : "") + (dp ? r.toFixed(dp) : fmt(r)) + (suffix || "")}); }
+function posCell(p){ return p ? String(p) : "-"; }
+function posChange(prev, cur){
+  if (!prev && !cur) return "-";
+  if (!prev) return $("span",{cls:"tagnew",text:"New"});
+  if (!cur) return $("span",{cls:"taglost",text:"Lost"});
+  return arrowDiff(prev - cur, 0);
+}
+var INTENT = {i:"I", c:"C", t:"T", n:"N"}, INTENT_NAME = {i:"Informational", c:"Commercial", t:"Transactional", n:"Navigational"};
+function intentCell(list){ var w = $("span",{cls:"intents"}); (list||[]).forEach(function(x){ w.appendChild($("span",{cls:"intent i-"+x, title: INTENT_NAME[x] || x, text: INTENT[x] || x.toUpperCase()})); }); return (list||[]).length ? w : "-"; }
+function kwCell(r){ var w = $("div",null,[$("div",{cls:"kw",text:r.keyword})]); if ((r.tags||[]).length) w.appendChild($("div",{cls:"kwtags"}, r.tags.map(function(t){ return $("span",{cls:"kwtag",text:t}); }))); return w; }
+function urlLink(u){ if (!u) return "-"; var a = $("a",{href:u,target:"_blank",rel:"noopener",text:u}); return a; }
+function ptRankingsCard(sid, d, pt){
+  var c = $("div",{cls:"card",id:"pt-rank-"+sid}), kws = d.keywords || [], dt0 = (d.dates||[])[0], dt1 = (d.dates||[])[1];
+  var d0 = dt0 ? ymdLabel(dt0) : "the start", d1 = dt1 ? ymdLabel(dt1) : "the end";
+  var where = [pt.location, d.tracking_url].filter(Boolean).join(" · ");
+  var search = $("input",{type:"search",cls:"tsearch",placeholder:"Search keyword or URL"});
+  c.appendChild($("div",{cls:"headrow"},[$("div",{cls:"headtxt"},[
+    $("h2",{text:"Position Tracking - rankings"}),
+    $("div",{cls:"desc",text:"Where " + d.tracking_url + " ranks on Google for the " + kws.length + " keywords tracked in SEMrush" + (pt.location ? " (" + pt.location + ")" : "") + ", " + d0 + " compared with " + d1 + "."})
+  ]), search]));
+  var FILTERS = [
+    ["all","All keywords","Every tracked keyword."],
+    ["top3","Top 3","Ranking in positions 1–3 on " + d1 + "."],
+    ["top10","Top 10","Ranking on page 1 (positions 1–10) on " + d1 + "."],
+    ["top20","Top 20","Ranking in positions 1–20 on " + d1 + "."],
+    ["improved","Moved up","Ranked on both dates and moved up between " + d0 + " and " + d1 + "."],
+    ["declined","Moved down","Ranked on both dates and moved down between " + d0 + " and " + d1 + "."],
+    ["new","Newly ranking","Not in the top 100 on " + d0 + ", in the top 100 on " + d1 + "."],
+    ["lost","Dropped out","In the top 100 on " + d0 + ", not in the top 100 on " + d1 + "."],
+    ["notrank","Not ranking","Not in Google's top 100 on " + d1 + "."]];
+  var test = {all:function(){ return true; }, top3:function(r){ return r.pos && r.pos <= 3; }, top10:function(r){ return r.pos && r.pos <= 10; }, top20:function(r){ return r.pos && r.pos <= 20; },
+    improved:function(r){ return r.pos && r.pos_prev && r.pos < r.pos_prev; }, declined:function(r){ return r.pos && r.pos_prev && r.pos > r.pos_prev; },
+    new:function(r){ return r.pos && !r.pos_prev; }, lost:function(r){ return !r.pos && r.pos_prev; }, notrank:function(r){ return !r.pos; }};
+  var state = {f:"all", q:""};
+  var chips = $("div",{cls:"chips"}), box = $("div"), note = $("div",{cls:"ptnote"});
+  var info = {};
+  FILTERS.forEach(function(f){
+    var cnt = kws.filter(test[f[0]]).length; info[f[0]] = f[2];
+    var b = $("button",{type:"button",cls:"chip" + (f[0] === "all" ? " on" : ""),title:f[2]},[$("span",{text:f[1]}),$("span",{cls:"cnt",text:fmt(cnt)})]);
+    b.addEventListener("click", function(){ state.f = f[0]; Array.prototype.forEach.call(chips.children, function(x){ x.classList.remove("on"); }); b.classList.add("on"); draw(); });
+    chips.appendChild(b);
+  });
+  search.addEventListener("input", function(){ state.q = search.value.trim().toLowerCase(); draw(); });
+  var slot = $("div",{cls:"ptslot"});
+  c.appendChild($("div",{cls:"ptbar"},[chips])); c.appendChild($("div",{cls:"ptnoterow"},[note, slot])); c.appendChild(box);
+  var cols = [{label:"Keyword",get:kwCell},{label:"Intent",get:function(r){ return intentCell(r.intents); }},
+    {label:"Pos. " + (dt0 ? ymdLabel(dt0) : "start"),n:1,get:function(r){ return posCell(r.pos_prev); }},
+    {label:"Pos. " + (dt1 ? ymdLabel(dt1) : "end"),n:1,get:function(r){ return posCell(r.pos); }},
+    {label:"Change",n:2,get:function(r){ return posChange(r.pos_prev, r.pos); }},
+    {label:"Visibility",n:1,get:function(r){ return typeof r.visibility === "number" ? trunc(r.visibility, 3) + "%" : "-"; }},
+    {label:"Visibility change",n:2,get:function(r){ return signed(r.visibility_diff, 3, "%"); }},
+    {label:"Est. traffic",n:1,get:function(r){ return trunc(r.traffic, 2); }},
+    {label:"Search volume",key:"volume",n:1},{label:"KD %",key:"kd",n:1},
+    {label:"Ranking URL",url:true,get:function(r){ return urlLink(r.url); }}];
+  function draw(){
+    var rows = kws.filter(test[state.f]).filter(function(r){ return !state.q || r.keyword.toLowerCase().indexOf(state.q) >= 0 || (r.url||"").toLowerCase().indexOf(state.q) >= 0; });
+    note.textContent = "Showing " + fmt(rows.length) + " of " + fmt(kws.length) + " keywords" + (state.q ? " matching “" + search.value.trim() + "”" : "") + (state.f === "all" ? "." : ": " + info[state.f]);
+    box.textContent = ""; slot.textContent = "";
+    if (!rows.length){ box.appendChild($("div",{cls:"empty",text:"No keywords match."})); return; }
+    var t = table(cols, rows, null, null, {noSearch:true}), sr = t.querySelector && t.querySelector(":scope > .tsearchrow");
+    if (sr){ sr.parentNode.removeChild(sr); slot.appendChild(sr); }
+    box.appendChild(t);
+  }
+  draw();
+  return c;
+}
+function ptPagesCard(sid, d){
+  var c = $("div",{cls:"card",id:"pt-pages-"+sid}), pages = d.pages || [], dt1 = (d.dates||[])[1], dl = dt1 ? ymdLabel(dt1) : "";
+  c.appendChild($("h2",{text:"Position Tracking - pages"}));
+  c.appendChild($("div",{cls:"desc",text: pages.length + " URLs ranking for tracked keywords" + (d.pages_new !== undefined && d.pages_new !== null ? " · " + d.pages_new + " new · " + d.pages_lost + " lost" : "") + ". Same table as SEMrush Position Tracking → Pages; changes compare with the first day of the 7-day period. Click a URL row to see its keywords."}));
+  var thead = $("tr",null,["", "URL", "Keywords " + dl, "Change", "Est. traffic " + dl, "Change", "Avg. position " + dl, "Change", "Total volume " + dl, "Change"].map(function(t, i){ return $("th",{cls: i > 1 ? "n" : "", text:t}); }));
+  var tb = $("tbody");
+  var state = {page:0, size:PAGE};
+  var pinfo = $("span",{cls:"pinfo"}), pprev = $("button",{type:"button",cls:"pbtn",text:"‹ Prev"}), pnext = $("button",{type:"button",cls:"pbtn",text:"Next ›"});
+  var tprev = arrowBtn(-1), tnext = arrowBtn(1);
+  function toTop(){ var y = c.getBoundingClientRect().top; if (y < 0) window.scrollTo({top: window.scrollY + y - 90, behavior: "smooth"}); }
+  pprev.addEventListener("click", function(){ state.page--; draw(); toTop(); }); pnext.addEventListener("click", function(){ state.page++; draw(); toTop(); });
+  tprev.addEventListener("click", function(){ state.page--; draw(); }); tnext.addEventListener("click", function(){ state.page++; draw(); });
+  function draw(){
+    tb.textContent = "";
+    var n = Math.max(1, Math.ceil(pages.length / state.size)); if (state.page >= n) state.page = n - 1;
+    var a0 = state.page * state.size, b0 = Math.min(pages.length, a0 + state.size);
+    pinfo.textContent = "Rows " + (a0 + 1) + "–" + b0 + " of " + pages.length; pprev.disabled = tprev.disabled = state.page === 0; pnext.disabled = tnext.disabled = state.page >= n - 1;
+    pages.slice(a0, b0).forEach(function(p){
+      var tog = $("span",{cls:"tog",text:"▸"});
+      var tr = $("tr",{cls:"prow"},[$("td",null,[tog]), $("td",{cls:"url"},[urlLink(p.url)]),
+        $("td",{cls:"n",text:fmt(p.keywords)}), cell(arrowDiff(p.keywords_diff, 0)),
+        $("td",{cls:"n",text:trunc(p.traffic, 2)}), cell(signed(p.traffic_diff, 2)),
+        $("td",{cls:"n",text:trunc(p.avg_position, 2)}), cell(arrowDiff(p.avg_position_diff, 2)),
+        $("td",{cls:"n",text:fmt(p.volume)}), cell(signed(p.volume_diff, 0))]);
+      var detail = $("tr",{cls:"pdetail",hidden:""},[$("td",{colspan:"10"},[ (p.top_keywords||[]).length ? table([{key:"keyword",label:"Keyword"},{label:"Pos. " + (d.dates && d.dates[0] ? ymdLabel(d.dates[0]) : "start"),n:1,get:function(r){ return posCell(r.pos_prev); }},{label:"Pos. " + dl,n:1,get:function(r){ return posCell(r.pos); }},{label:"Change",n:2,get:function(r){ return posChange(r.pos_prev, r.pos); }},{key:"volume",label:"Volume",n:1},{label:"Est. traffic",n:1,get:function(r){ return trunc(r.traffic, 2); }}], p.top_keywords) : $("div",{cls:"empty",text:"No keyword detail."}) ])]);
+      tr.addEventListener("click", function(e){ if (e.target.tagName === "A") return; detail.hidden = !detail.hidden; tog.textContent = detail.hidden ? "▸" : "▾"; });
+      tb.appendChild(tr); tb.appendChild(detail);
+    });
+  }
+  function cell(v){ var td = $("td",{cls:"n"}); if (v instanceof Node) td.appendChild(v); else td.textContent = v; return td; }
+  draw();
+  if (pages.length > state.size) c.appendChild($("div",{cls:"tsearchrow"},[$("span",{cls:"pctl tpager"},[tprev, tnext])]));
+  c.appendChild($("div",{cls:"tblwrap"},[$("table",{cls:"ptpages"},[$("thead",null,[thead]), tb])]));
+  if (pages.length > state.size) c.appendChild($("div",{cls:"pager"},[pinfo, $("span",{cls:"pctl"},[pprev, pnext])]));
+  return c;
+}
+function hasContent(el){
+  return !!el.querySelector("table, svg, .kpi, ul.issues li, .cwvhead, p.headline, ul li, details, .rating");
+}
+function pruneEmpty(root){
+  Array.prototype.forEach.call(root.querySelectorAll(".block"), function(b){ if (!hasContent(b)) b.remove(); });
+  Array.prototype.forEach.call(root.querySelectorAll(".card"), function(c){
+    if (/^(issues|wins|summary)-/.test(c.id || "")) return;
+    if (!hasContent(c)) c.remove();
+  });
+  Array.prototype.forEach.call(root.querySelectorAll(".grid2, .stack"), function(g){ if (!g.children.length) g.remove(); });
+}
+
+// ================= custom date range (day-by-day data) =================
+var DAILY = null, DAILY_ERR = null;
+function loadDaily(){
+  if (DAILY || DAILY_ERR) return Promise.resolve(DAILY);
+  var el = document.getElementById("daily-data"), b64 = el ? el.textContent.trim() : "";
+  if (!b64 || b64.indexOf("__DAILY") === 0){ DAILY_ERR = "No day-by-day data has been saved yet."; return Promise.resolve(null); }
+  if (typeof DecompressionStream === "undefined"){ DAILY_ERR = "This browser cannot open the day-by-day data. Please use a current version of Chrome, Edge, Safari or Firefox."; return Promise.resolve(null); }
+  try {
+    var bin = atob(b64), u8 = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    return new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream("gzip"))).text()
+      .then(function(t){ DAILY = JSON.parse(t); return DAILY; })
+      .catch(function(e){ DAILY_ERR = "Could not read the day-by-day data (" + e + ")."; return null; });
+  } catch(e){ DAILY_ERR = "Could not read the day-by-day data (" + e + ")."; return Promise.resolve(null); }
+}
+function addDays(iso, n){ return new Date(Date.parse(iso + "T00:00:00Z") + n*86400000).toISOString().slice(0,10); }
+function daysBetween(a, b){ return Math.round((Date.parse(b + "T00:00:00Z") - Date.parse(a + "T00:00:00Z")) / 86400000); }
+// day index range [lo, hi] if every day from a to b is stored, else null
+function dayRange(site, a, b){
+  var lo = site.days.indexOf(a), hi = site.days.indexOf(b);
+  if (lo < 0 || hi < 0 || hi - lo !== daysBetween(a, b)) return null;
+  return [lo, hi];
+}
+function aggTable(site, src, name, rng, nd){
+  var t = (site[src] || {})[name]; if (!t || !rng) return [];
+  var cols = t.cols, S = DAILY.strings, m = {}, out = [];
+  var pi = cols.indexOf("position"), ii = cols.indexOf("impressions"), ai = cols.indexOf("averageSessionDuration"), si = cols.indexOf("sessions");
+  t.rows.forEach(function(r){
+    var di = r[0]; if (di < rng[0] || di > rng[1]) return;
+    var key = nd ? r.slice(1, 1 + nd).join("|") : "_";
+    var o = m[key];
+    if (!o){ o = m[key] = {__pxi:0, __asd:0}; for (var j = 0; j < cols.length; j++) o[cols[j]] = j < nd ? S[r[1+j]] : 0; out.push(o); }
+    for (var j = nd; j < cols.length; j++){
+      var v = r[1+j]; if (typeof v !== "number") continue;
+      if (j === pi) o.__pxi += v * (r[1+ii] || 0);
+      else if (j === ai) o.__asd += v * (r[1+si] || 0);
+      else o[cols[j]] += v;
+    }
+  });
+  out.forEach(function(o){
+    if (pi >= 0){ o.position = o.impressions ? o.__pxi / o.impressions : null; o.ctr = o.impressions ? o.clicks / o.impressions : 0; }
+    if (ai >= 0) o.averageSessionDuration = o.sessions ? o.__asd / o.sessions : null;
+    delete o.__pxi; delete o.__asd;
+  });
+  return out;
+}
+function indexBy(rows, keyFn){ var m = {}; (rows||[]).forEach(function(r){ m[keyFn(r)] = r; }); return m; }
+function r1(v){ return typeof v === "number" ? Math.round(v * 10) / 10 : v; }
+function r2(v){ return typeof v === "number" ? Math.round(v * 100) / 100 : v; }
+
+function customGA(site, cur, prev, nDays, base){
+  var ke = site.key_event_metric || "keyEvents", single = nDays === 1;
+  var T = function(name, nd, rng){ return aggTable(site, "ga", name, rng, nd); };
+  var tc = T("totals", 0, cur)[0] || {}, tp = prev ? (T("totals", 0, prev)[0] || {}) : null;
+  var oc = T("organic", 0, cur)[0] || {}, op = prev ? (T("organic", 0, prev)[0] || {}) : null;
+  var P = function(o, k){ return o ? (o[k] || 0) : null; };
+  var NA = {current:null, previous:null, na:"single day only"};
+  function block(c, p){
+    var er = function(o){ return o && o.sessions ? Math.round(o.engagedSessions / o.sessions * 1000) / 10 : (o ? 0 : null); };
+    return {sessions: mk(c.sessions || 0, P(p,"sessions")), newUsers: mk(c.newUsers || 0, P(p,"newUsers")),
+      totalUsers: single ? mk(c.totalUsers || 0, P(p,"totalUsers")) : NA,
+      engagedSessions: mk(c.engagedSessions || 0, P(p,"engagedSessions")), engagement_rate_pct: mk(er(c), er(p)),
+      averageSessionDuration: mk(r1(c.averageSessionDuration), p ? r1(p.averageSessionDuration) : null),
+      screenPageViews: mk(c.screenPageViews || 0, P(p,"screenPageViews")), key_events: mk(c[ke] || 0, P(p, ke))};
+  }
+  var ga = {status:"ok", property_id: (base && base.property_id) || "", kpis: block(tc, tp), organic_kpis: block(oc, op), trend: base ? base.trend : null};
+  function withPrev(rows, prows, keyFn, mets){
+    var pi = indexBy(prows, keyFn);
+    rows.forEach(function(r){ var q = pi[keyFn(r)]; mets.forEach(function(m){ r["prev_" + m] = prev ? (q ? q[m] || 0 : 0) : null; }); });
+    if (!single) rows.forEach(function(r){ r.activeUsers = null; r.totalUsers = null; });
+    return rows;
+  }
+  function top(rows, k){ return rows.sort(function(a, b){ return (b[k]||0) - (a[k]||0); }); }
+  function tab(name, nd, keyFn, n, order, mets){
+    var rows = top(T(name, nd, cur), order || "sessions", n);
+    return withPrev(rows, prev ? T(name, nd, prev) : [], keyFn, mets || ["sessions", ke]);
+  }
+  var x = {key_event_metric: ke};
+  var bounce = function(o){ return o && o.sessions ? 1 - o.engagedSessions / o.sessions : null; };
+  x.summary_extra = {current:{activeUsers: single ? tc.activeUsers : null, eventCount: tc.eventCount || 0, bounceRate: bounce(tc), userEngagementDuration: tc.userEngagementDuration || 0},
+                     previous: tp ? {activeUsers: single ? tp.activeUsers : null, eventCount: tp.eventCount || 0, bounceRate: bounce(tp), userEngagementDuration: tp.userEngagementDuration || 0} : {}};
+  // per-day rows (each day's users are exact for that day)
+  var drows = [];
+  [cur, prev].forEach(function(rng){ if (!rng) return; (site.ga.totals ? site.ga.totals.rows : []).forEach(function(r){
+    if (r[0] < rng[0] || r[0] > rng[1]) return; var c = site.ga.totals.cols, o = {date: site.days[r[0]]};
+    o.sessions = r[1 + c.indexOf("sessions")]; o.users = r[1 + c.indexOf("totalUsers")]; o.key_events = r[1 + c.indexOf(ke)]; o.views = r[1 + c.indexOf("screenPageViews")]; drows.push(o); }); });
+  x.daily = drows.sort(function(a, b){ return a.date < b.date ? -1 : 1; });
+  var k1 = function(f){ return function(r){ return r[f]; }; };
+  x.channels = tab("channels", 1, k1("sessionDefaultChannelGroup"), 50);
+  x.source_medium = tab("source_medium", 1, k1("sessionSourceMedium"), 15);
+  x.new_vs_returning = tab("new_vs_returning", 1, k1("newVsReturning"), 10);
+  x.landing_pages = tab("landing_pages", 1, k1("landingPage"), 20);
+  x.pages = top(T("pages", 2, cur), "screenPageViews", 20);
+  (function(){ var pv = {}; (prev ? T("pages", 2, prev) : []).forEach(function(r){ pv[r.pagePath] = (pv[r.pagePath] || 0) + (r.screenPageViews || 0); });
+    x.pages.forEach(function(r){ r.prev_screenPageViews = prev ? (pv[r.pagePath] || 0) : null; if (!single){ r.activeUsers = null; } }); })();
+  x.countries = tab("countries", 1, k1("country"), 15);
+  x.cities = tab("cities", 2, function(r){ return r.city + "|" + r.country; }, 15);
+  x.devices = tab("devices", 1, k1("deviceCategory"), 10);
+  var evAll = T("events", 1, cur), evPrev = prev ? T("events", 1, prev) : [];
+  x.events = withPrev(top(evAll.slice(), "eventCount", 20), evPrev, k1("eventName"), ["eventCount"]);
+  var kc = evAll.filter(function(r){ return r[ke]; }), kpI = indexBy(evPrev, k1("eventName")), seen = {};
+  x.key_events_by_name = kc.map(function(r){ seen[r.eventName] = 1; var o = {eventName: r.eventName}; o[ke] = r[ke]; o["prev_" + ke] = prev ? ((kpI[r.eventName] || {})[ke] || 0) : null; return o; });
+  evPrev.forEach(function(r){ if (r[ke] && !seen[r.eventName]){ var o = {eventName: r.eventName}; o[ke] = 0; o["prev_" + ke] = r[ke]; x.key_events_by_name.push(o); } });
+  x.key_events_by_name.sort(function(a, b){ return (b[ke]||0) - (a[ke]||0) || (b["prev_"+ke]||0) - (a["prev_"+ke]||0); });
+  x.key_events_by_landing = top(T("landing_pages", 1, cur).filter(function(r){ return r[ke]; }), ke, 15);
+  if (!single) x.key_events_by_landing.forEach(function(r){ r.activeUsers = null; });
+  x.key_events_by_channel = x.channels.filter(function(r){ return r[ke] || r["prev_" + ke]; }).map(function(r){ return Object.assign({}, r); }).sort(function(a, b){ return (b[ke]||0) - (a[ke]||0); });
+  ga.extra = x;
+  // AI assistants
+  var aic = T("ai", 1, cur), aip = prev ? T("ai", 1, prev) : [];
+  var sumS = function(rows){ return rows.reduce(function(t, r){ return t + (r.sessions || 0); }, 0); };
+  var bySrc = withPrev(top(aic, "sessions", 10), aip, k1("sessionSource"), ["sessions"]).map(function(r){
+    return {source: r.sessionSource, sessions: r.sessions, prev_sessions: r.prev_sessions, engaged_sessions: r.engagedSessions, engagedSessions: r.engagedSessions,
+            key_events: r[ke] || 0, activeUsers: r.activeUsers, userEngagementDuration: r.userEngagementDuration}; });
+  ga.ai_referrals = {sessions: mk(sumS(aic), prev ? sumS(aip) : null), by_source: bySrc};
+  // organic landing pages with weak engagement
+  var th = DAILY.thresholds || {}, scale = nDays / 7, orgEr = ga.organic_kpis.engagement_rate_pct.current;
+  var minS = Math.max(1, Math.round((th.min_sessions_landing || 20) * scale)), ratio = th.low_engagement_ratio || 0.6;
+  ga.low_engagement_landing_pages = !orgEr ? [] : T("organic_landing", 1, cur).map(function(r){
+    return {landing_page: r.landingPage, sessions: r.sessions, engagement_rate_pct: r.sessions ? Math.round(r.engagedSessions / r.sessions * 1000) / 10 : 0,
+            site_organic_engagement_pct: orgEr, activeUsers: single ? r.activeUsers : null, engagedSessions: r.engagedSessions, userEngagementDuration: r.userEngagementDuration};
+  }).filter(function(r){ return r.sessions >= minS && r.engagement_rate_pct < ratio * orgEr; }).sort(function(a, b){ return b.sessions - a.sessions; });
+  return ga;
+}
+
+function customGSC(site, cur, prev, nDays, base){
+  var T = function(name, nd, rng){ return aggTable(site, "gsc", name, rng, nd); };
+  var tc = T("totals", 0, cur)[0] || {clicks:0, impressions:0}, tp = prev ? (T("totals", 0, prev)[0] || {clicks:0, impressions:0}) : null;
+  var ctr = function(o){ return o && o.impressions ? Math.round(o.clicks / o.impressions * 10000) / 100 : (o ? 0 : null); };
+  var gsc = {status:"ok", custom:true, history:true, property: (base && base.property) || "", trend: base ? base.trend : null};
+  gsc.kpis = {clicks: mk(tc.clicks || 0, tp ? tp.clicks || 0 : null), impressions: mk(tc.impressions || 0, tp ? tp.impressions || 0 : null),
+              ctr_pct: mk(ctr(tc), ctr(tp)), avg_position: mk(r2(tc.position), tp ? r2(tp.position) : null)};
+  var qc = T("queries", 1, cur), qp = prev ? T("queries", 1, prev) : [];
+  var rx = null; try { var src = (DAILY.brand_regex || "").replace(/^\(\?i\)/, ""); if (src) rx = new RegExp(src, "i"); } catch(e){}
+  var bsum = function(rows, brand, f){ return rows.reduce(function(t, r){ return t + ((rx && rx.test(r.query)) === brand ? r[f] : 0); }, 0); };
+  gsc.brand_split = {brand_clicks: mk(bsum(qc, true, "clicks"), prev ? bsum(qp, true, "clicks") : null),
+                     nonbrand_clicks: mk(bsum(qc, false, "clicks"), prev ? bsum(qp, false, "clicks") : null),
+                     nonbrand_impressions: mk(bsum(qc, false, "impressions"), prev ? bsum(qp, false, "impressions") : null)};
+  var drows = [];
+  [cur, prev].forEach(function(rng){ if (!rng || !site.gsc.totals) return; site.gsc.totals.rows.forEach(function(r){
+    if (r[0] < rng[0] || r[0] > rng[1]) return; var c = site.gsc.totals.cols, cl = r[1 + c.indexOf("clicks")], im = r[1 + c.indexOf("impressions")];
+    drows.push({date: site.days[r[0]], clicks: cl, impressions: im, ctr_pct: im ? Math.round(cl / im * 10000) / 100 : 0, position: r[1 + c.indexOf("position")]}); }); });
+  gsc.daily = drows.sort(function(a, b){ return a.date < b.date ? -1 : 1; });
+  var th = DAILY.thresholds || {}, scale = nDays / 7, sc = function(v, d){ return Math.max(1, Math.round((v === undefined ? d : v) * scale)); };
+  var qpi = indexBy(qp, function(r){ return r.query; }), qci = indexBy(qc, function(r){ return r.query; });
+  function qrow(r, p){ return {query: r.query, clicks: r.clicks, impressions: r.impressions, ctr_pct: Math.round(r.ctr * 10000) / 100, position: r1(r.position),
+    prev_clicks: prev ? (p ? p.clicks : 0) : null, prev_position: p ? r1(p.position) : null}; }
+  gsc.top_queries = qc.slice().sort(function(a, b){ return b.clicks - a.clicks; }).map(function(r){ return qrow(r, qpi[r.query]); });
+  var movers = [];
+  if (prev){
+    var keys = {}; qc.concat(qp).forEach(function(r){ keys[r.query] = 1; });
+    Object.keys(keys).forEach(function(k){ var a = qci[k] || {}, b = qpi[k] || {}, d = (a.clicks || 0) - (b.clicks || 0);
+      if (d) movers.push({query: k, clicks: a.clicks || 0, prev_clicks: b.clicks || 0, delta: d, position: qci[k] ? r1(a.position) : null, prev_position: qpi[k] ? r1(b.position) : null}); });
+  }
+  gsc.query_gainers = movers.filter(function(m){ return m.delta > 0; }).sort(function(a, b){ return b.delta - a.delta; });
+  gsc.query_losers = movers.filter(function(m){ return m.delta < 0; }).sort(function(a, b){ return a.delta - b.delta; });
+  gsc.lost_queries = qp.filter(function(r){ return r.clicks >= 3 && !((qci[r.query] || {}).clicks); }).sort(function(a, b){ return b.clicks - a.clicks; })
+    .map(function(r){ return {query: r.query, prev_clicks: r.clicks, prev_position: r1(r.position)}; });
+  var lo = th.striking_distance_min_pos || 4, hi = th.striking_distance_max_pos || 20, minQ = sc(th.min_impressions_query, 50);
+  gsc.striking_distance = qc.filter(function(r){ return r.position >= lo && r.position <= hi && r.impressions >= minQ; }).sort(function(a, b){ return b.impressions - a.impressions; })
+    .map(function(r){ return qrow(r, qpi[r.query]); });
+  var pc = T("pages", 1, cur), pp = prev ? T("pages", 1, prev) : [];
+  var ppi = indexBy(pp, function(r){ return r.page; }), pci = indexBy(pc, function(r){ return r.page; });
+  function prow(r, p){ return {page: r.page, clicks: r.clicks, impressions: r.impressions, ctr_pct: Math.round((r.ctr || 0) * 10000) / 100, position: r1(r.position),
+    prev_clicks: prev ? (p ? p.clicks : 0) : null, prev_impressions: prev ? (p ? p.impressions : 0) : null, prev_position: p ? r1(p.position) : null}; }
+  gsc.top_pages = pc.slice().sort(function(a, b){ return b.clicks - a.clicks; }).map(function(r){ return prow(r, ppi[r.page]); });
+  var minLoss = sc(10, 10), minGain = sc(5, 5), minP = sc(th.min_impressions_page, 100);
+  gsc.page_losers = !prev ? [] : pp.map(function(b){ var a = pci[b.page] || {page: b.page, clicks: 0, impressions: 0, position: 0, ctr: 0}; var d = a.clicks - b.clicks;
+    return (d < 0 && b.clicks >= minLoss && -d / b.clicks >= 0.3) ? Object.assign(prow(a, b), {delta: d}) : null; }).filter(Boolean).sort(function(a, b){ return a.delta - b.delta; });
+  gsc.page_gainers = !prev ? [] : pc.map(function(a){ var b = ppi[a.page]; var d = a.clicks - (b ? b.clicks : 0);
+    return d >= minGain ? Object.assign(prow(a, b), {delta: d}) : null; }).filter(Boolean).sort(function(a, b){ return b.delta - a.delta; });
+  gsc.new_pages = !prev ? [] : pc.filter(function(r){ return !ppi[r.page] && r.impressions >= minP; }).sort(function(a, b){ return b.impressions - a.impressions; }).map(function(r){ return prow(r, null); });
+  var buckets = {"1-3": [0, 3.5], "4-6": [3.5, 6.5], "7-10": [6.5, 10.5]}, bstat = {};
+  Object.keys(buckets).forEach(function(b){ var l = buckets[b][0], h = buckets[b][1], imp = 0, cl = 0;
+    pc.forEach(function(r){ if (r.position > l && r.position <= h){ imp += r.impressions; cl += r.clicks; } }); bstat[b] = imp ? cl / imp : null; });
+  var low = [];
+  pc.forEach(function(r){ if (r.impressions < minP) return; Object.keys(buckets).forEach(function(b){ var l = buckets[b][0], h = buckets[b][1];
+    if (r.position > l && r.position <= h && bstat[b] && r.ctr < (th.low_ctr_ratio || 0.5) * bstat[b]) low.push(Object.assign(prow(r, ppi[r.page]), {bucket: b, bucket_site_ctr_pct: Math.round(bstat[b] * 10000) / 100})); }); });
+  gsc.low_ctr_pages = low.sort(function(a, b){ return b.impressions - a.impressions; });
+  var dpi = indexBy(prev ? T("devices", 1, prev) : [], function(r){ return r.device; });
+  gsc.devices = T("devices", 1, cur).sort(function(a, b){ return b.clicks - a.clicks; }).map(function(r){ return {device: r.device, clicks: r.clicks, impressions: r.impressions, prev_clicks: prev ? ((dpi[r.device] || {}).clicks || 0) : null, position: r1(r.position)}; });
+  var cc = T("countries", 1, cur), cpi = indexBy(prev ? T("countries", 1, prev) : [], function(r){ return r.country; }), tcl = cc.reduce(function(t, r){ return t + r.clicks; }, 0);
+  gsc.countries = cc.sort(function(a, b){ return b.clicks - a.clicks; }).map(function(r){ return {country: r.country.toUpperCase(), clicks: r.clicks, impressions: r.impressions,
+    prev_clicks: prev ? ((cpi[r.country] || {}).clicks || 0) : null, share_pct: tcl ? Math.round(r.clicks / tcl * 1000) / 10 : null}; });
+  if (site.gsc.appearance){
+    var api = indexBy(prev ? T("appearance", 1, prev) : [], function(r){ return r.searchAppearance; });
+    gsc.search_appearance = T("appearance", 1, cur).map(function(r){ return {appearance: r.searchAppearance, clicks: r.clicks, impressions: r.impressions, ctr_pct: Math.round(r.ctr * 10000) / 100, position: r1(r.position), prev_clicks: prev ? ((api[r.searchAppearance] || {}).clicks || 0) : null}; });
+  }
+  var sti = indexBy(prev ? T("search_types", 1, prev) : [], function(r){ return r.type; });
+  gsc.search_types = T("search_types", 1, cur).map(function(r){ var p = sti[r.type] || {}; return {type: r.type, clicks: r.clicks, impressions: r.impressions, prev_clicks: prev ? p.clicks || 0 : null, prev_impressions: prev ? p.impressions || 0 : null}; });
+  return gsc;
+}
+
+function buildCustom(a, b){
+  var n = daysBetween(a, b) + 1, pa = addDays(a, -n), pb = addDays(a, -1), base = D.weeks[0], sites = [], notes = [];
+  if (n === 1){ pa = pb = addDays(a, -7); }  // one day is compared with the same weekday a week earlier
+  base.sites.forEach(function(bs){
+    var site = DAILY.sites[bs.id]; if (!site) return;
+    var cur = dayRange(site, a, b), prev = dayRange(site, pa, pb);
+    if (!cur) return;
+    var gsLast = null; if (site.gsc.totals) site.gsc.totals.rows.forEach(function(r){ var d = site.days[r[0]]; if (!gsLast || d > gsLast) gsLast = d; });
+    if (gsLast && b > gsLast) notes.push(bs.label + ": Search Console has data up to " + fmtDate(gsLast) + " so far (Google publishes it with a delay of about 2 days).");
+    if (!prev) notes.push(bs.label + ": the " + (n === 1 ? "same day last week is" : "previous " + n + " days are") + " not fully stored, so there is no comparison for this range.");
+    var cg = customGSC(site, cur, prev, n, bs.gsc);
+    // indexing, sitemaps and Core Web Vitals are checks, not date totals: show the latest weekly check
+    if (bs.gsc && bs.gsc.status !== "not_configured"){ cg.history = false; cg.index = bs.gsc.index; cg.sitemaps = bs.gsc.sitemaps; cg.cwv = bs.gsc.cwv; }
+    sites.push({id: bs.id, label: bs.label, custom: true, flags: [], insights: {}, semrush: bs.semrush || {status: "custom"},
+      gsc: cg, ga4: bs.ga4 && bs.ga4.status === "not_configured" ? bs.ga4 : customGA(site, cur, prev, n, bs.ga4)});
+  });
+  if (!sites.length) return null;
+  var pulled = ""; Object.keys(DAILY.sites).forEach(function(k){ (DAILY.sites[k].pulled_on || []).forEach(function(d){ if (d > pulled) pulled = d; }); });
+  return {custom: true, history: true, title: D.title, period: {current: [a, b], previous: [pa, pb], days: n}, sites: sites, generated_at: pulled, notes: notes,
+          gaps: notes};
+}
+// in the custom view, word labels as "period" instead of "week"
+function periodWording(root){
+  var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null), nodes = [], t;
+  while ((t = w.nextNode())) nodes.push(t);
+  nodes.forEach(function(nd){
+    var v = nd.nodeValue, o = v;
+    v = v.replace(/\bthis week\b/g, "this period").replace(/\bThis week\b/g, "This period").replace(/\bprevious week\b/g, "previous period").replace(/\bPrevious week\b/g, "Previous period")
+         .replace(/\blast week\b/g, "the previous period").replace(/\beither week\b/g, "either period").replace(/\bweek over week\b/g, "period over period").replace(/\bvs prev week\b/g, "vs previous period").replace(/\bweekly\b(?= impressions)/g, "");
+    if (v !== o) nd.nodeValue = v;
+  });
+}
+function fmtDate(d){ var x = new Date(d + "T00:00:00Z"); return x.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}); }
+function rangeTxt(p){ return fmtDate(p[0]) + " – " + fmtDate(p[1]); }
+var pick = document.getElementById("weekpick"), hasDaily = false, LATEST = null;
+function fmtDay(d){ var x = new Date(d + "T00:00:00Z"); return x.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}); }
+function latestDay(){ var mx = null; if (DAILY) Object.keys(DAILY.sites).forEach(function(k){ var ds = DAILY.sites[k].days; if (ds.length && (!mx || ds[ds.length-1] > mx)) mx = ds[ds.length-1]; }); return mx; }
+function addOpt(parent, v, t){ var o = document.createElement("option"); o.value = v; o.textContent = t; parent.appendChild(o); }
+function fillPicker(){
+  pick.textContent = "";
+  LATEST = latestDay(); hasDaily = !!LATEST;
+  if (LATEST){
+    var gl = document.createElement("optgroup"); gl.label = "Latest data (updated every day)";
+    addOpt(gl, "d1", "Latest day · " + fmtDay(LATEST));
+    addOpt(gl, "d7", "Last 7 days · " + rangeTxt([addDays(LATEST, -6), LATEST]));
+    addOpt(gl, "d28", "Last 28 days · " + rangeTxt([addDays(LATEST, -27), LATEST]));
+    pick.appendChild(gl);
+  }
+  var gw = document.createElement("optgroup"); gw.label = "Weekly reports (Mon-Sun, with insights)";
+  D.weeks.forEach(function(w, i){ addOpt(gw, String(i), "Week · " + rangeTxt(w.period.current)); });
+  pick.appendChild(gw);
+  if (hasDaily){ var go = document.createElement("optgroup"); go.label = "Other"; addOpt(go, "custom", "Pick a day or dates…"); pick.appendChild(go); }
+  if (D.weeks.length < 2 && !hasDaily) pick.disabled = true;
+}
+function showLatest(n){ showRange(addDays(LATEST, -(n - 1)), LATEST, n === 1 ? "Latest day" : "Last " + n + " days", true); }
+var tabs = document.getElementById("tabs"), panels = document.getElementById("panels"), foot = document.getElementById("foot");
+var rbox = document.getElementById("rangebox"), dfrom = document.getElementById("dfrom"), dto = document.getElementById("dto"), rmsg = document.getElementById("rangemsg");
+function render(){
+  tabs.textContent = ""; panels.textContent = ""; foot.textContent = "";
+  var chip = document.getElementById("sitechip"); chip.textContent = "";
+  if (R.custom){
+    panels.appendChild($("div",{cls:"histnote"},[
+      $("div",{text:(R.viewLabel || "Custom range") + ": Search Console and Google Analytics figures are added up from the day-by-day data (refreshed every day) for these dates, compared with " + (R.period.days === 1 ? "the same day one week earlier" : "the " + R.period.days + " days just before") + ". " +
+        (R.period.days === 1 ? "User counts are exact for this single day." : "User counts (Total users, Active users and the 'per active user' figures) are shown only when a single day is picked, because the same person can visit on several days.") +
+        " Indexing, Core Web Vitals and SEMrush show the latest weekly check (" + rangeTxt(D.weeks[0].period.current) + "); the written insights are in the weekly reports."})].concat((R.gaps||[]).map(function(t){ return $("div",{text:t, style:"margin-top:6px"}); }))));
+  } else if (R.history) panels.appendChild($("div",{cls:"histnote",text:"Past week from history: Search Console and Google Analytics figures are for this week's dates. Indexing checks, Core Web Vitals and SEMrush are captured only during each weekly run, so they are not available for this week."}));
+  R.sites.forEach(function(s, i){
+    var b = $("button",{cls:"tab",role:"tab",id:"tab-"+s.id,"aria-selected": i===0 ? "true" : "false","aria-controls":"panel-"+s.id,text:s.label});
+    var panel = buildSite(s); if (i) panel.hidden = true;
+    if (R.custom) periodWording(panel);
+    b.addEventListener("click", function(){
+      Array.prototype.forEach.call(tabs.children, function(t){ t.setAttribute("aria-selected","false"); });
+      Array.prototype.forEach.call(panels.querySelectorAll(".panel"), function(pn){ pn.hidden = true; });
+      b.setAttribute("aria-selected","true"); panel.hidden = false;
+    });
+    tabs.appendChild(b); panels.appendChild(panel);
+  });
+  tabs.hidden = R.sites.length === 1;
+  if (R.sites.length === 1) chip.appendChild($("div",{cls:"sitechip"},[$("i",{text:"◉"}), "Website: " + R.sites[0].label]));
+  foot.appendChild($("div",{text:"Sources: Google Search Console API, Google Analytics Data API (GA4), PageSpeed Insights API (Chrome UX Report), SEMrush. Notes:"}));
+  foot.appendChild($("ul",{cls:"notes"}, (R.custom ? D.weeks[0].notes || [] : R.notes || []).map(function(n){ return $("li",{text:n}); })));
+}
+function show(idx){
+  R = D.weeks[idx]; R.title = D.title;
+  document.getElementById("title").textContent = D.title || "SEO Weekly Dashboard";
+  document.getElementById("period").textContent = (idx === 0 ? "Latest weekly report: " : "Week: ") + rangeTxt(R.period.current) + "  ·  compared with the previous 7 days: " + rangeTxt(R.period.previous);
+  document.getElementById("generated").textContent = "Data pulled " + (R.generated_at || "").replace("T"," ").slice(0,16) + " UTC";
+  render();
+}
+function showRange(a, b, label, keepPick){
+  rmsg.textContent = "";
+  if (!a || !b){ rmsg.textContent = "Pick a start date and an end date."; return; }
+  if (a > b){ var t = a; a = b; b = t; dfrom.value = a; dto.value = b; }
+  // a range that is exactly a saved week opens that week's full report
+  for (var i = 0; i < D.weeks.length; i++){ var pc = D.weeks[i].period.current; if (pc[0] === a && pc[1] === b){ if (!keepPick) pick.value = String(i); rbox.hidden = true; show(i); if (label) document.getElementById("period").textContent = label + " (full weekly report): " + rangeTxt(pc) + "  ·  compared with the previous 7 days: " + rangeTxt(D.weeks[i].period.previous); return; } }
+  var C = buildCustom(a, b);
+  if (!C){ rmsg.textContent = "There is no stored data for every day from " + fmtDate(a) + " to " + fmtDate(b) + ". Choose dates between " + fmtDate(dfrom.min) + " and " + fmtDate(dfrom.max) + "."; return; }
+  R = C; C.viewLabel = label || (C.period.days === 1 ? "Selected day" : "Custom range");
+  document.getElementById("period").textContent = C.period.days === 1
+    ? C.viewLabel + ": " + fmtDay(a) + "  ·  compared with the same day last week: " + fmtDay(C.period.previous[0])
+    : C.viewLabel + ": " + rangeTxt(C.period.current) + " (" + C.period.days + " days)  ·  compared with the previous " + C.period.days + " days: " + rangeTxt(C.period.previous);
+  document.getElementById("generated").textContent = "Data updated " + fmtDate(C.generated_at) + " · weekly report: " + rangeTxt(D.weeks[0].period.current);
+  render();
+}
+pick.addEventListener("change", function(){
+  rmsg.textContent = "";
+  if (/^d\d+$/.test(pick.value)){ rbox.hidden = true; showLatest(parseInt(pick.value.slice(1), 10)); window.scrollTo({top:0}); return; }
+  if (pick.value !== "custom"){ rbox.hidden = true; show(parseInt(pick.value, 10)); window.scrollTo({top:0}); return; }
+  rbox.hidden = false;
+  loadDaily().then(function(d){
+    if (!d){ rmsg.textContent = DAILY_ERR; return; }
+    var mn = null, mx = null;
+    Object.keys(d.sites).forEach(function(k){ var ds = d.sites[k].days; if (!ds.length) return; if (!mn || ds[0] < mn) mn = ds[0]; if (!mx || ds[ds.length-1] > mx) mx = ds[ds.length-1]; });
+    dfrom.min = dto.min = mn; dfrom.max = dto.max = mx;
+    if (!dfrom.value) dfrom.value = addDays(mx, -6) < mn ? mn : addDays(mx, -6);
+    if (!dto.value) dto.value = mx;
+    rmsg.textContent = ""; var hint = $("span",{text:"Data available " + fmtDate(mn) + " – " + fmtDate(mx), style:"color:#c9d6b5"}); rmsg.appendChild(hint);
+  });
+});
+document.getElementById("dapply").addEventListener("click", function(){
+  loadDaily().then(function(d){ if (!d){ rmsg.textContent = DAILY_ERR; return; } showRange(dfrom.value, dto.value); window.scrollTo({top:0}); });
+});
+function gunzipB64(b64){
+  var bin = atob(b64), u8 = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+  return new Response(new Blob([u8]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+}
+// Show plain dashes instead of em dashes everywhere, including text that comes from the data.
+function noEmDash(root){
+  var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), n;
+  while ((n = w.nextNode())) if (n.nodeValue.indexOf("\u2014") >= 0) n.nodeValue = n.nodeValue.replace(/\u2014/g, "-");
+  if (root.querySelectorAll) Array.prototype.forEach.call(root.querySelectorAll("[title],[placeholder]"), function(e){
+    ["title","placeholder"].forEach(function(a){ var v = e.getAttribute(a); if (v && v.indexOf("\u2014") >= 0) e.setAttribute(a, v.replace(/\u2014/g, "-")); });
+  });
+}
+new MutationObserver(function(ms){ ms.forEach(function(m){
+  if (m.type === "characterData"){ if (m.target.nodeValue.indexOf("\u2014") >= 0) m.target.nodeValue = m.target.nodeValue.replace(/\u2014/g, "-"); }
+  else Array.prototype.forEach.call(m.addedNodes, function(x){ if (x.nodeType === 3){ if (x.nodeValue.indexOf("\u2014") >= 0) x.nodeValue = x.nodeValue.replace(/\u2014/g, "-"); } else if (x.nodeType === 1) noEmDash(x); });
+}); }).observe(document.body, {childList:true, subtree:true, characterData:true});
+function boot(d){
+  D = d.weeks ? d : {title: d.title, weeks: [d]};
+  R = D.weeks[0];
+  document.getElementById("title").textContent = D.title || "SEO Dashboard";
+  // open on the latest data (last 7 days up to yesterday); fall back to the latest weekly report
+  loadDaily().then(function(){
+    fillPicker();
+    if (LATEST){ pick.value = "d7"; showLatest(7); } else { pick.value = "0"; show(0); }
+  });
+}
+(function(){
+  var el = document.getElementById("report-data"), txt = el.textContent.trim();
+  if (el.getAttribute("data-enc") === "gzip-b64" && txt.charAt(0) !== "{"){
+    if (typeof DecompressionStream === "undefined"){ document.getElementById("panels").textContent = "This browser cannot open the dashboard data. Please use a current version of Chrome, Edge, Safari or Firefox."; return; }
+    gunzipB64(txt).then(function(t){ boot(JSON.parse(t)); }).catch(function(e){ document.getElementById("panels").textContent = "Could not read the dashboard data (" + e + ")."; });
+  } else boot(JSON.parse(txt));
+})();
+})();
+</script>
+</body>
+</html>
