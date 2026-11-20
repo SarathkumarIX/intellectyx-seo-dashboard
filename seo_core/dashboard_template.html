@@ -152,7 +152,9 @@ h1{font-size:26px;margin:0 0 6px;font-weight:700;letter-spacing:-.015em;color:#f
 .khead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .khead h2{font-size:16px;margin:0;font-weight:700}
 .kdot{width:10px;height:10px;border-radius:3px;background:var(--accent)}
-.kcard.gsc .kdot{background:var(--gsc)}.kcard.ga .kdot{background:var(--ga)}.kcard.sem .kdot{background:var(--sem)}
+.kcard.bing .kdot{background:#0e9f9a}
+.kpis.kpis3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:560px){.kpis.kpis3{grid-template-columns:1fr}}.kcard.gsc .kdot{background:var(--gsc)}.kcard.ga .kdot{background:var(--ga)}.kcard.sem .kdot{background:var(--sem)}
 .ksub{font-size:12.5px;color:var(--muted);margin-left:auto}
 .ksubline{font-size:12.5px;color:var(--muted);margin:-8px 0 14px}
 .kpi{position:relative;display:flex;flex-direction:column;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;min-width:0;transition:border-color .15s, box-shadow .15s}
@@ -681,6 +683,20 @@ function highIntentCard(s){
 }
 
 // ---------- Bing Webmaster Tools tab ----------
+function bingTotals(sid){
+  var site = DAILY && DAILY.sites && DAILY.sites[sid], b = site && site.bing;
+  if (!b || !(b.daily || []).length) return null;
+  var a = R.period.current[0], e = R.period.current[1], pa = R.period.previous[0], pe = R.period.previous[1];
+  // compare like with like: only the days Bing has published, against the same days one period earlier
+  var by = {}; b.daily.forEach(function(r){ by[r.date] = r; });
+  var shift = daysBetween(pa, a), cu = {clicks:0, impressions:0, n:0}, pv = {clicks:0, impressions:0, n:0};
+  for (var d = a; d <= e; d = addDays(d, 1)){ var r = by[d]; if (!r) continue; cu.clicks += r.clicks; cu.impressions += r.impressions; cu.n++;
+    var q = by[addDays(d, -shift)]; if (q){ pv.clicks += q.clicks; pv.impressions += q.impressions; pv.n++; } }
+  if (!cu.n) return {none:true, last:b.daily[b.daily.length - 1].date};
+  var ctr = function(o){ return o.impressions ? Math.round(o.clicks / o.impressions * 10000) / 100 : 0; };
+  return {cu:cu, pv:pv, days:daysBetween(a, e) + 1, last:b.daily[b.daily.length - 1].date,
+    clicks: mk(cu.clicks, pv.n ? pv.clicks : null), impressions: mk(cu.impressions, pv.n ? pv.impressions : null), ctr_pct: mk(ctr(cu), pv.n ? ctr(pv) : null)};
+}
 function bingPart(s, part){
   var site = DAILY && DAILY.sites && DAILY.sites[s.id], b = site && site.bing;
   if (!b) return false;
@@ -691,11 +707,9 @@ function bingPart(s, part){
   var ctr = function(o){ return o.impressions ? Math.round(o.clicks / o.impressions * 10000) / 100 : 0; };
   var lastDay = (b.daily || []).length ? b.daily[b.daily.length - 1].date : null;
   part.appendChild($("div",{cls:"note",text:"Bing Webmaster Tools · " + (b.site_url || "") + " · data read " + String(b.pulled_at || "").slice(0, 10) + (lastDay ? " · daily numbers up to " + fmtDate(lastDay) : "")}));
-  var k = card("bing-kpi-"+s.id, "Performance overview", [$("div",{cls:"kpis"},[
-    kpiCard("Clicks", have ? mk(cu.clicks, haveP ? pv.clicks : null) : {current:null}), kpiCard("Impressions", have ? mk(cu.impressions, haveP ? pv.impressions : null) : {current:null}),
-    kpiCard("CTR", have ? mk(ctr(cu), haveP ? ctr(pv) : null) : {current:null}, "pct")])],
-    have ? "Bing search clicks and impressions for " + rangeTxt([a, e]) + (haveP ? ", compared with " + rangeTxt([pa, pe]) + "." : ".") + (cu.n < daysBetween(a, e) + 1 ? " Bing has published " + cu.n + " of these days so far." : "")
-         : "Bing has not published daily numbers for these dates yet.");
+  var bt = bingTotals(s.id), have = bt && !bt.none;
+  var k = card("bing-kpi-"+s.id, "Performance overview", have ? [$("div",{cls:"kpis kpis3"},[kpiCard("Clicks", bt.clicks), kpiCard("Impressions", bt.impressions), kpiCard("CTR", bt.ctr_pct, "pct")])] : [$("div",{cls:"empty",text:"Bing has not published these dates yet; its latest day is " + fmtDate(lastDay) + "."})],
+    have ? "Bing search clicks and impressions for " + rangeTxt([a, e]) + ", compared with " + rangeTxt([pa, pe]) + "." + (bt.cu.n < bt.days ? " Bing has published " + bt.cu.n + " of these " + bt.days + " days so far, so the comparison uses the same " + bt.cu.n + " days one period earlier." : "") : null);
   part.appendChild(k);
   // daily chart: the selected dates, or the last 28 days Bing has published
   var pts = (b.daily || []).filter(function(r){ return inR(r.date, a, e); });
@@ -744,12 +758,14 @@ function dayByDayCard(s){
     return m;
   }
   var gt = byDay("ga", "totals"), go = byDay("ga", "organic"), st = byDay("gsc", "totals"), rows = [];
+  var bd = {}; ((site.bing || {}).daily || []).forEach(function(r){ bd[r.date] = r; }); var hasB = !!Object.keys(bd).length;
   for (var i = hi; i >= lo; i--){
     var d = site.days[i], g = gt[i], o = go[i], q = st[i];
     rows.push({date: d, clicks: q ? q.clicks : null, impressions: q ? q.impressions : null,
       ctr: q && q.impressions ? q.clicks / q.impressions * 100 : null, position: q ? q.position : null,
       users: g ? g.totalUsers : null, sessions: g ? g.sessions : null, organic: o ? o.sessions : (g ? 0 : null),
-      er: g && g.sessions ? g.engagedSessions / g.sessions * 100 : null, ke: g ? g[ke] : null});
+      er: g && g.sessions ? g.engagedSessions / g.sessions * 100 : null, ke: g ? g[ke] : null,
+      bclicks: bd[d] ? bd[d].clicks : null, bimpr: bd[d] ? bd[d].impressions : null});
   }
   if (!rows.length) return null;
   var dayCell = function(r){ var x = new Date(r.date + "T00:00:00Z"), t = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][x.getUTCDay()] + ", " + ymdLabel(r.date);
@@ -760,9 +776,10 @@ function dayByDayCard(s){
     {label:"CTR",n:1,get:function(r){ return dec(r.ctr, 2, "%"); }},{label:"Avg. position",n:1,get:function(r){ return dec(r.position, 1); }},
     {label:"Users",n:1,get:function(r){ return fmt(r.users); }},{label:"Sessions",n:1,get:function(r){ return fmt(r.sessions); }},
     {label:"Organic sessions",n:1,get:function(r){ return fmt(r.organic); }},{label:"Engagement rate",n:1,get:function(r){ return dec(r.er, 1, "%"); }},
-    {label:"Key events",n:1,get:function(r){ return fmt(r.ke); }}];
+    {label:"Key events",n:1,get:function(r){ return fmt(r.ke); }}].concat(hasB ? [
+    {label:"Bing clicks",n:1,get:function(r){ return fmt(r.bclicks); }},{label:"Bing impressions",n:1,get:function(r){ return fmt(r.bimpr); }}] : []);
   var gsLast = null; Object.keys(st).forEach(function(k){ var d = site.days[k]; if (!gsLast || d > gsLast) gsLast = d; });
-  var note = "Search Console (Clicks to Avg. position) and Google Analytics (Users to Key events) for each day" + (one ? " in the two weeks up to the selected day" : "") + ", newest first. The latest 2-3 days can still change slightly as Google finishes processing them." +
+  var note = "Search Console (Clicks to Avg. position), Google Analytics (Users to Key events)" + (hasB ? " and Bing" : "") + " for each day" + (one ? " in the two weeks up to the selected day" : "") + ", newest first. The latest 2-3 days can still change slightly as Google finishes processing them." +
     (gsLast && gsLast < b ? " Search Console has published data up to " + fmtDate(gsLast) + " so far." : "");
   return card("daybyday-"+s.id, "Day by day", [table(cols, rows)], note);
 }
@@ -796,7 +813,8 @@ function buildSite(s){
   var srState = sr.status === "ok" ? (sr.stale ? "stale" : "ok") : sr.status;
   var B = sr.status === "ok" ? sr.current.browser : null, PB = sr.status === "ok" && sr.previous ? (sr.previous.browser || {}) : {};
   var hasSem = sr.status === "ok" && ((B && !B.error) || (sr.current && (sr.current.files||[]).length));
-  p.appendChild($("div",{cls:"status"},[statusPill("Search Console", gsc.status), statusPill("GA4", ga.status), hasSem || sr.status === "no_exports" || sr.status === "error" ? statusPill("SEMrush", srState, "loaded") : null,
+  var hasBing = !!(DAILY && DAILY.sites && DAILY.sites[s.id] && DAILY.sites[s.id].bing);
+  p.appendChild($("div",{cls:"status"},[statusPill("Search Console", gsc.status), hasBing ? statusPill("Bing", "ok") : null, statusPill("GA4", ga.status), hasSem || sr.status === "no_exports" || sr.status === "error" ? statusPill("SEMrush", srState, "loaded") : null,
     B && B.captured_at ? $("span",{cls:"pill",text:"SEMrush read: " + B.captured_at.slice(0,10)}) : null]));
 
   var names = [["overview","Overview"],["gsc","Search Console"],["bing","Bing"],["ga4","Google Analytics"],["semrush","SEMrush"]];
@@ -820,6 +838,8 @@ function buildSite(s){
     var auto = [];
     if (gsc.kpis) auto.push("Search Console - Clicks " + kp(gsc.kpis.clicks) + " · Impressions " + kp(gsc.kpis.impressions) + " · CTR " + kp(gsc.kpis.ctr_pct, "pct") + " · Avg. position " + kp(gsc.kpis.avg_position, "pos"));
     if (ga.kpis) auto.push("Google Analytics - " + (ga.kpis.totalUsers && ga.kpis.totalUsers.na ? "" : uLabel("Users", ga.kpis.totalUsers) + " " + kp(ga.kpis.totalUsers) + " · ") + "Sessions " + kp(ga.kpis.sessions) + " · Organic sessions " + kp((ga.organic_kpis||{}).sessions) + " · Key events " + kp(ga.kpis.key_events));
+    var bts = bingTotals(s.id);
+    if (bts && !bts.none) auto.push("Bing - Clicks " + kp(bts.clicks) + " · Impressions " + kp(bts.impressions) + " · CTR " + kp(bts.ctr_pct, "pct"));
     if (auto.length){ sum.appendChild($("div",{cls:"desc",text: s.custom ? "Automatic summary from the data for the selected dates." : "Automatic summary from the data (no written summary for this week)."})); sum.appendChild($("ul",null, auto.map(function(t){ return $("li",{text:t}); }))); }
     else sum.appendChild($("div",{cls:"empty",text:"No data for this week."}));
   }
@@ -833,6 +853,17 @@ function buildSite(s){
       kpiCard("CTR", gsc.kpis.ctr_pct, "pct"), kpiCard("Avg. position", gsc.kpis.avg_position, "pos", true),
       kpiCard("Non-brand clicks", bs.nonbrand_clicks), kpiCard("Brand clicks", bs.brand_clicks)]));
     O.appendChild(kg);
+  }
+  var bt = bingTotals(s.id);
+  if (bt && bt.none){
+    var kb0 = srcCard("kpis-bing-"+s.id, "bing", "Bing", period);
+    kb0.appendChild($("div",{cls:"ksubline",style:"margin:0",text:"Bing has not published these dates yet; its latest day is " + fmtDate(bt.last) + "."}));
+    O.appendChild(kb0);
+  } else if (bt){
+    var kb = srcCard("kpis-bing-"+s.id, "bing", "Bing", period);
+    kb.appendChild($("div",{cls:"kpis kpis3"},[kpiCard("Clicks", bt.clicks), kpiCard("Impressions", bt.impressions), kpiCard("CTR", bt.ctr_pct, "pct")]));
+    if (bt.cu.n < bt.days) kb.appendChild($("div",{cls:"ksubline",style:"margin:12px 0 0",text:"Bing has published " + bt.cu.n + " of these " + bt.days + " days so far (up to " + fmtDate(bt.last) + "), so the comparison uses the same " + bt.cu.n + " days one period earlier."}));
+    O.appendChild(kb);
   }
   if (ga.kpis){
     var ok = ga.organic_kpis || {};
@@ -1203,7 +1234,7 @@ function hasContent(el){
 function pruneEmpty(root){
   Array.prototype.forEach.call(root.querySelectorAll(".block"), function(b){ if (!hasContent(b)) b.remove(); });
   Array.prototype.forEach.call(root.querySelectorAll(".card"), function(c){
-    if (/^(issues|wins|summary)-/.test(c.id || "")) return;
+    if (/^(issues|wins|summary|kpis-bing|bing-kpi)-/.test(c.id || "")) return;
     if (!hasContent(c)) c.remove();
   });
   Array.prototype.forEach.call(root.querySelectorAll(".grid2, .stack"), function(g){ if (!g.children.length) g.remove(); });
