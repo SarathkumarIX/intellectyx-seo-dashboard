@@ -89,6 +89,22 @@ h1{font-size:26px;margin:0 0 6px;font-weight:700;letter-spacing:-.015em;color:#f
 .calfoot{margin-top:8px;font-size:11.5px;color:#9fb08a;text-align:center}
 .rangemsg:empty{display:none}
 @media (max-width:700px){.hright{align-items:flex-start}.pnav{justify-content:flex-start}.rangemsg{text-align:left}}
+.qpcell{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.qpcell a{color:var(--brand-dk, var(--brand));text-decoration:none;word-break:break-all}
+.qpcell a:hover{text-decoration:underline}
+.qpmore{appearance:none;font:inherit;font-size:11.5px;font-weight:700;color:var(--ink);background:var(--brand-t);border:1px solid var(--brand-t2);border-radius:999px;padding:1px 8px;cursor:pointer;white-space:nowrap}
+.qpmore:hover{background:var(--brand);color:var(--brand-ink)}
+.qpdetail>td{background:var(--card2);padding:10px 12px 12px!important}
+.qpdetail .tblwrap{margin:0}
+.hibadge{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.hibadge.up{background:rgba(34,160,90,.16);color:var(--good)}
+.hibadge.down{background:rgba(220,60,50,.14);color:var(--crit)}
+.hibadge.steady{background:var(--brand-t);color:var(--ink2)}
+.hibadge.none{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.hisum{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:13px;color:var(--ink2);margin:4px 0 12px}
+.spark{display:inline-block;vertical-align:middle}
+.hipage{color:var(--brand-dk, var(--brand));text-decoration:none;word-break:break-word}
+.hipage:hover{text-decoration:underline}
 .infobar{display:flex;align-items:flex-start;gap:10px;background:var(--brand-t);border:1px solid var(--brand-t2);border-radius:12px;padding:10px 12px 10px 14px;font-size:13px;color:var(--ink2);margin-bottom:18px}
 .infobar[hidden]{display:none}
 .ibicon{flex:none;color:var(--brand);display:inline-flex;margin-top:1px}
@@ -542,6 +558,177 @@ function weekPairs(daily, cur0, key){
   return out;
 }
 // Day-by-day totals for the dates in view (a single day shows the 14 days up to it), newest first.
+// ================= query → ranking URL, high-intent pages, Bing =================
+function stripHash(u){ var i = (u || "").indexOf("#"); return i >= 0 ? u.slice(0, i) : (u || ""); }
+function pathOf(u){ try { var x = new URL(u); return x.pathname + x.search; } catch(e){ return u; } }
+// day indexes of the selected dates that are stored (lenient: skips missing days)
+function periodIdx(site, a, b){ var out = []; site.days.forEach(function(d, i){ if (d >= a && d <= b) out.push(i); }); return out; }
+var QP_CACHE = {};
+function qpIndex(sid){
+  var key = sid + "|" + R.period.current[0] + "|" + R.period.current[1];
+  if (QP_CACHE.key === key) return QP_CACHE.val;
+  var site = DAILY && DAILY.sites && DAILY.sites[sid], t = site && site.gsc && site.gsc.query_page, val = null;
+  if (t){
+    var idx = periodIdx(site, R.period.current[0], R.period.current[1]), set = {}, covered = 0, S = DAILY.strings, c = t.cols;
+    idx.forEach(function(i){ set[i] = true; });
+    var qi = c.indexOf("query"), pi = c.indexOf("page"), ci = c.indexOf("clicks"), ii = c.indexOf("impressions"), po = c.indexOf("position");
+    var m = {}, seen = {};
+    t.rows.forEach(function(r){
+      if (!set[r[0]]) return; seen[r[0]] = true;
+      var q = S[r[1+qi]], p = stripHash(S[r[1+pi]]), k = q + "\u0001" + p, o = m[k];
+      if (!o){ o = m[k] = {query:q, page:p, clicks:0, impressions:0, _pi:0}; }
+      o.clicks += r[1+ci] || 0; o.impressions += r[1+ii] || 0; o._pi += (r[1+po] || 0) * (r[1+ii] || 0);
+    });
+    covered = Object.keys(seen).length;
+    if (covered){
+      val = {byQuery:{}, partial: covered < idx.length || idx.length < (daysBetween(R.period.current[0], R.period.current[1]) + 1)};
+      Object.keys(m).forEach(function(k){ var o = m[k]; o.position = o.impressions ? o._pi / o.impressions : null; o.ctr = o.impressions ? o.clicks / o.impressions * 100 : 0; delete o._pi;
+        (val.byQuery[o.query] = val.byQuery[o.query] || []).push(o); });
+      Object.keys(val.byQuery).forEach(function(q){ val.byQuery[q].sort(function(a, b){ return (b.clicks - a.clicks) || (b.impressions - a.impressions); }); });
+    }
+  }
+  QP_CACHE = {key:key, val:val};
+  return val;
+}
+// a button that opens / closes an extra row under its table row
+function detailToggle(label, build){
+  var b = $("button",{type:"button",cls:"qpmore","aria-expanded":"false",text:label});
+  b.addEventListener("click", function(){
+    var tr = b.closest("tr"); if (!tr) return;
+    var nx = tr.nextElementSibling;
+    if (nx && nx.classList.contains("qpdetail")){ nx.remove(); b.setAttribute("aria-expanded","false"); b.textContent = label; return; }
+    Array.prototype.forEach.call(tr.parentNode.querySelectorAll(":scope > .qpdetail"), function(x){ var pb = x.previousElementSibling && x.previousElementSibling.querySelector(".qpmore[aria-expanded=true]"); if (pb) pb.click(); });
+    var row = $("tr",{cls:"qpdetail"},[$("td",{colspan:String(tr.children.length)},[build()])]);
+    tr.parentNode.insertBefore(row, tr.nextSibling); b.setAttribute("aria-expanded","true"); b.textContent = "Hide";
+  });
+  return b;
+}
+function qpCell(sid, query){
+  var ix = qpIndex(sid), list = ix && ix.byQuery[query];
+  if (!list || !list.length) return "-";
+  var top = list[0], w = $("div",{cls:"qpcell"});
+  w.appendChild($("a",{href:top.page,target:"_blank",rel:"noopener",title:top.page,text:pathOf(top.page)}));
+  if (list.length > 1) w.appendChild(detailToggle("+" + (list.length - 1) + " more", function(){
+    return tableCore([{label:"URL",url:true,get:function(r){ return $("a",{href:r.page,target:"_blank",rel:"noopener",text:pathOf(r.page)}); }},
+      {key:"clicks",label:"Clicks",n:1},{key:"impressions",label:"Impr.",n:1},
+      {label:"CTR",n:1,get:function(r){ return r.ctr.toFixed(2) + "%"; }},{label:"Pos.",n:1,get:function(r){ return typeof r.position === "number" ? r.position.toFixed(1) : "-"; }}], list, null, list);
+  }));
+  return w;
+}
+function qpCol(sid){ return {label:"Ranking URL",get:function(r){ return qpCell(sid, r.query); }}; }
+
+// ---------- high-intent pages: daily search status ----------
+var HIGH_INTENT = [["Service", /^\/services\/[^\/]+/], ["Hire", /^\/hire-[^\/]+/], ["Industry", /^\/industries\/[^\/]+/],
+                   ["Case study", /^\/casestudies\/[^\/]+/], ["Contact", /^\/(contact|contact-us|get-a-quote|request-a-quote|schedule-a-call)\/?$/], ["Pricing", /^\/pricing/]];
+function intentType(u){ var p = pathOf(u); for (var i = 0; i < HIGH_INTENT.length; i++) if (HIGH_INTENT[i][1].test(p)) return HIGH_INTENT[i][0]; return null; }
+function sparkline(vals){
+  var W = 96, H = 26, mx = Math.max.apply(null, vals.concat([1])), n = vals.length;
+  var pts = vals.map(function(v, i){ return (n === 1 ? W / 2 : i * W / (n - 1)).toFixed(1) + "," + (H - 2 - (v / mx) * (H - 4)).toFixed(1); }).join(" ");
+  var sp = $("span",{cls:"spark",title:"Clicks per day: " + vals.join(", ")});
+  sp.innerHTML = '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><polyline points="' + pts + '" fill="none" stroke="var(--brand)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg>';
+  return sp;
+}
+function highIntentCard(s){
+  var site = DAILY && DAILY.sites && DAILY.sites[s.id], t = site && site.gsc && site.gsc.pages;
+  if (!t) return null;
+  var S = DAILY.strings, c = t.cols, pi = c.indexOf("page"), ci = c.indexOf("clicks"), ii = c.indexOf("impressions"), po = c.indexOf("position");
+  var end = R.period.current[1]; if (site.days.indexOf(end) < 0) end = site.days[site.days.length - 1];
+  var ei = site.days.indexOf(end), from = Math.max(0, ei - 27);
+  // per page, per day (fragments merged into the page)
+  var pages = {};
+  t.rows.forEach(function(r){
+    var di = r[0]; if (di < from || di > ei) return;
+    var u = stripHash(S[r[1+pi]]), ty = intentType(u); if (!ty) return;
+    var o = pages[u] || (pages[u] = {page:u, type:ty, d:{}});
+    var x = o.d[di] || (o.d[di] = {c:0, i:0, pi:0});
+    x.c += r[1+ci] || 0; x.i += r[1+ii] || 0; x.pi += (r[1+po] || 0) * (r[1+ii] || 0);
+  });
+  var lw = ei - 7;  // same weekday last week
+  var sum = function(o, a, b, k){ var t2 = 0; for (var i = a; i <= b; i++) if (o.d[i]) t2 += o.d[i][k]; return t2; };
+  var posOf = function(o, a, b){ var im = 0, w = 0; for (var i = a; i <= b; i++) if (o.d[i]){ im += o.d[i].i; w += o.d[i].pi; } return im ? w / im : null; };
+  var rows = Object.keys(pages).map(function(u){
+    var o = pages[u], day = o.d[ei] || {c:0, i:0, pi:0}, prv = o.d[lw] || {c:0, i:0, pi:0};
+    var c7 = sum(o, ei - 6, ei, "c"), c7p = sum(o, ei - 13, ei - 7, "c"), i7 = sum(o, ei - 6, ei, "i"), i7p = sum(o, ei - 13, ei - 7, "i");
+    var p7 = posOf(o, ei - 6, ei), p7p = posOf(o, ei - 13, ei - 7);
+    var status = !i7 ? "none" : (c7 > c7p || (c7 === c7p && i7 > i7p * 1.2) || (p7 && p7p && p7 < p7p - 1)) ? "up"
+               : (c7 < c7p || i7 < i7p * 0.8 || (p7 && p7p && p7 > p7p + 1)) ? "down" : "steady";
+    var spark = []; for (var i = Math.max(from, ei - 13); i <= ei; i++) spark.push(o.d[i] ? o.d[i].c : 0);
+    return {page:u, type:o.type, clicks:day.c, impressions:day.i, ctr: day.i ? day.c / day.i * 100 : null, position: day.i ? day.pi / day.i : null,
+            prev_clicks: prv.c, prev_position: prv.i ? prv.pi / prv.i : null, c7:c7, c7p:c7p, i7:i7, status:status, spark:spark, o:o};
+  }).filter(function(r){ return r.i7 || sum(r.o, from, ei, "i"); });
+  if (!rows.length) return null;
+  rows.sort(function(a, b){ return (b.i7 - a.i7) || (b.c7 - a.c7); });
+  var counts = {up:0, down:0, steady:0, none:0}; rows.forEach(function(r){ counts[r.status]++; });
+  var badge = function(st){ var L = {up:"▲ Up", down:"▼ Down", steady:"= Steady", none:"No impressions"}[st]; return $("span",{cls:"hibadge " + st,text:L}); };
+  var dec = function(v, dp, suf){ return typeof v === "number" ? v.toFixed(dp) + (suf || "") : "-"; };
+  var dayRows = function(o){ var out = []; for (var i = ei; i >= Math.max(from, ei - 13); i--){ var x = o.d[i] || {c:0, i:0, pi:0}; out.push({date:site.days[i], c:x.c, i:x.i, ctr: x.i ? x.c / x.i * 100 : null, pos: x.i ? x.pi / x.i : null}); } return out; };
+  var cols = [
+    {label:"Page",get:function(r){ return $("a",{cls:"hipage",href:r.page,target:"_blank",rel:"noopener",title:r.page,text:pathOf(r.page)}); }},
+    {key:"type",label:"Type"},
+    {label:"Status (7 days)",get:function(r){ return badge(r.status); }},
+    {label:"Clicks " + ymdLabel(end),n:1,get:function(r){ return fmt(r.clicks); }},
+    {label:"vs " + ymdLabel(addDays(end, -7)),get:function(r){ return chg(r.clicks, r.prev_clicks); }},
+    {label:"Impressions " + ymdLabel(end),n:1,get:function(r){ return fmt(r.impressions); }},
+    {label:"CTR",n:1,get:function(r){ return dec(r.ctr, 2, "%"); }},
+    {label:"Avg. position",n:1,get:function(r){ return dec(r.position, 1); }},
+    {label:"Clicks last 7 days",n:1,get:function(r){ return fmt(r.c7); }},
+    {label:"Clicks, last 14 days",get:function(r){ return sparkline(r.spark); }},
+    {label:"",get:function(r){ return detailToggle("Daily ▾", function(){ return tableCore([{label:"Date",get:function(x){ return fmtDay(x.date); }},{key:"c",label:"Clicks",n:1},{key:"i",label:"Impressions",n:1},
+        {label:"CTR",n:1,get:function(x){ return dec(x.ctr, 2, "%"); }},{label:"Avg. position",n:1,get:function(x){ return dec(x.pos, 1); }}], dayRows(r.o), null, dayRows(r.o)); }); }}];
+  var summary = $("div",{cls:"hisum"},[badge("up"), $("span",{text:counts.up + " up"}), badge("down"), $("span",{text:counts.down + " down"}), badge("steady"), $("span",{text:counts.steady + " steady"})]);
+  return card("intent-"+s.id, "High-intent pages · daily search status", [summary, table(cols, rows)],
+    "Service, hire, industry, case-study and contact pages (picked by their URL), Google Search figures for " + fmtDay(end) + " compared with " + fmtDay(addDays(end, -7)) + " (same weekday). Status compares the last 7 days with the 7 days before (clicks, impressions and position). Click Daily for a page's last 14 days.");
+}
+
+// ---------- Bing Webmaster Tools tab ----------
+function bingPart(s, part){
+  var site = DAILY && DAILY.sites && DAILY.sites[s.id], b = site && site.bing;
+  if (!b) return false;
+  var a = R.period.current[0], e = R.period.current[1], pa = R.period.previous[0], pe = R.period.previous[1];
+  var inR = function(d, x, y){ return d && d >= x && d <= y; };
+  var tot = function(x, y){ var o = {clicks:0, impressions:0, n:0}; (b.daily || []).forEach(function(r){ if (inR(r.date, x, y)){ o.clicks += r.clicks; o.impressions += r.impressions; o.n++; } }); return o; };
+  var cu = tot(a, e), pv = tot(pa, pe), have = cu.n > 0, haveP = pv.n > 0;
+  var ctr = function(o){ return o.impressions ? Math.round(o.clicks / o.impressions * 10000) / 100 : 0; };
+  var lastDay = (b.daily || []).length ? b.daily[b.daily.length - 1].date : null;
+  part.appendChild($("div",{cls:"note",text:"Bing Webmaster Tools · " + (b.site_url || "") + " · data read " + String(b.pulled_at || "").slice(0, 10) + (lastDay ? " · daily numbers up to " + fmtDate(lastDay) : "")}));
+  var k = card("bing-kpi-"+s.id, "Performance overview", [$("div",{cls:"kpis"},[
+    kpiCard("Clicks", have ? mk(cu.clicks, haveP ? pv.clicks : null) : {current:null}), kpiCard("Impressions", have ? mk(cu.impressions, haveP ? pv.impressions : null) : {current:null}),
+    kpiCard("CTR", have ? mk(ctr(cu), haveP ? ctr(pv) : null) : {current:null}, "pct")])],
+    have ? "Bing search clicks and impressions for " + rangeTxt([a, e]) + (haveP ? ", compared with " + rangeTxt([pa, pe]) + "." : ".") + (cu.n < daysBetween(a, e) + 1 ? " Bing has published " + cu.n + " of these days so far." : "")
+         : "Bing has not published daily numbers for these dates yet.");
+  part.appendChild(k);
+  // daily chart: the selected dates, or the last 28 days Bing has published
+  var pts = (b.daily || []).filter(function(r){ return inR(r.date, a, e); });
+  if (pts.length < 2) pts = (b.daily || []).slice(-28);
+  if (pts.length > 1){ var bo = {xKey:"date", xLabel:function(p){ return p.date.slice(5); }};
+    part.appendChild($("div",{cls:"grid2"},[
+      card("bing-daily-clicks-"+s.id, "Clicks per day", [lineChart(pts, [{key:"clicks",label:"Clicks",color:"var(--s1)"}], Object.assign({title:"Bing daily clicks"}, bo))]),
+      card("bing-daily-impr-"+s.id, "Impressions per day", [lineChart(pts, [{key:"impressions",label:"Impressions",color:"var(--s1)"}], Object.assign({title:"Bing daily impressions"}, bo))])])); }
+  // queries / pages are weekly in Bing: use the weeks that overlap the selected dates
+  function weekly(list, field){
+    var wk = {}, m = {};
+    (list || []).forEach(function(r){ if (!r.week) return; var we = addDays(r.week, 6); if (r.week > e || we < a) return; wk[r.week] = true;
+      var o = m[r[field]] || (m[r[field]] = {name:r[field], clicks:0, impressions:0, _p:0});
+      o.clicks += r.clicks; o.impressions += r.impressions; o._p += (r.avg_impression_position || 0) * r.impressions; });
+    var rows = Object.keys(m).map(function(n){ var o = m[n]; o.ctr_pct = o.impressions ? Math.round(o.clicks / o.impressions * 10000) / 100 : 0; o.position = o.impressions ? Math.round(o._p / o.impressions * 10) / 10 : null; return o; })
+      .sort(function(x, y){ return (y.clicks - x.clicks) || (y.impressions - x.impressions); });
+    return {rows:rows, weeks:Object.keys(wk).sort()};
+  }
+  var q = weekly(b.queries, "query"), pg = weekly(b.pages, "page");
+  var wtxt = function(w){ return w.length ? "Bing reports these per week; weeks starting " + w.map(ymdLabel).join(", ") + "." : ""; };
+  part.appendChild(card("bing-queries-"+s.id, "Queries", [table([{key:"name",label:"Query"},{key:"clicks",label:"Clicks",n:1},{key:"impressions",label:"Impr.",n:1},{key:"ctr_pct",label:"CTR",n:1,kind:"pct"},{key:"position",label:"Avg. position",n:1,kind:"pos"}], q.rows, "No Bing query data for these dates.")], wtxt(q.weeks)));
+  part.appendChild(card("bing-pages-"+s.id, "Pages", [table([{label:"Page",url:true,get:function(r){ return $("a",{href:r.name,target:"_blank",rel:"noopener",text:pathOf(r.name)}); }},{key:"clicks",label:"Clicks",n:1},{key:"impressions",label:"Impr.",n:1},{key:"ctr_pct",label:"CTR",n:1,kind:"pct"},{key:"position",label:"Avg. position",n:1,kind:"pos"}], pg.rows, "No Bing page data for these dates.")], wtxt(pg.weeks)));
+  // crawl health (latest numbers Bing has)
+  var cr = (b.crawl || []).filter(function(r){ return r.date <= e; }); var lc = cr.length ? cr[cr.length - 1] : null;
+  var crawlKids = [];
+  if (lc){ var asOf = "on " + fmtDate(lc.date), st = function(l, v){ return semKpi(l, v, null, null, false, asOf); };
+    crawlKids.push($("div",{cls:"kpis"},[st("Pages crawled", lc.crawled_pages), st("Crawl errors", lc.crawl_errors), st("Pages in index", lc.in_index),
+      st("4xx responses", lc.code_4xx), st("5xx responses", lc.code_5xx), st("Blocked by robots.txt", lc.blocked_by_robots)])); }
+  if ((b.crawl_issues || []).length) crawlKids.push(sub("Crawl issues", null, table([{label:"URL",url:true,get:function(r){ return $("a",{href:r.url,target:"_blank",rel:"noopener",text:pathOf(r.url)}); }},{key:"http_code",label:"HTTP code",n:1},{key:"issues",label:"Issue flags"},{key:"in_links",label:"Inbound links",n:1}], b.crawl_issues)));
+  if ((b.sitemaps || []).length) crawlKids.push(sub("Sitemaps", null, table([{key:"url",label:"Sitemap",url:true},{key:"status",label:"Status"},{key:"url_count",label:"URLs",n:1},{key:"last_crawled",label:"Last crawled"},{key:"submitted",label:"Submitted"}], b.sitemaps)));
+  if (crawlKids.length) part.appendChild(card("bing-crawl-"+s.id, "Crawl & index health", crawlKids, "Latest crawl numbers Bing has published" + (lc ? " (" + fmtDate(lc.date) + ")" : "") + "."));
+  return true;
+}
 function uLabel(base, k){ return k && k.avg ? base + " (avg. per day)" : base; }
 function dayByDayCard(s){
   if (!DAILY || !DAILY.sites || !DAILY.sites[s.id]) return null;
@@ -612,7 +799,7 @@ function buildSite(s){
   p.appendChild($("div",{cls:"status"},[statusPill("Search Console", gsc.status), statusPill("GA4", ga.status), hasSem || sr.status === "no_exports" || sr.status === "error" ? statusPill("SEMrush", srState, "loaded") : null,
     B && B.captured_at ? $("span",{cls:"pill",text:"SEMrush read: " + B.captured_at.slice(0,10)}) : null]));
 
-  var names = [["overview","Overview"],["gsc","Search Console"],["ga4","Google Analytics"],["semrush","SEMrush"]];
+  var names = [["overview","Overview"],["gsc","Search Console"],["bing","Bing"],["ga4","Google Analytics"],["semrush","SEMrush"]];
   var nav = $("div",{cls:"subnav"}), parts = {};
   names.forEach(function(n, i){
     var b = $("button",{"aria-pressed": i===0 ? "true" : "false", text:n[1]});
@@ -692,6 +879,7 @@ function buildSite(s){
 
   }
   var dbd = dayByDayCard(s); if (dbd) O.appendChild(dbd);
+  var hic = highIntentCard(s); if (hic) O.appendChild(hic);
   var ks = srcCard("kpis-sem-"+s.id, "sem", "SEMrush", null);
   addSemKpis(ks);
   if (ks.querySelector(".kpis")) O.appendChild(ks);
@@ -723,9 +911,10 @@ function buildSite(s){
       card("gsc-trend-clicks-"+s.id, "Clicks - last 12 weeks", [lineChart(gsc.trend,[{key:"clicks",label:"Clicks",color:"var(--s1)"}],{title:"Weekly clicks"})]),
       card("gsc-trend-pos-"+s.id, "Average position - last 12 weeks", [lineChart(gsc.trend,[{key:"avg_position",label:"Avg. position",color:"var(--s1)",kind:"pos"}],{invert:true,title:"Weekly average position"})], "Lower is better.")
     ]));
-    var qcols = [{key:"query",label:"Query"},{key:"clicks",label:"Clicks",n:1},{label:"Clicks change vs previous week",get:function(r){ return chg(r.clicks, r.prev_clicks); }},{key:"impressions",label:"Impr.",n:1},{key:"ctr_pct",label:"CTR",n:1,kind:"pct"},{key:"position",label:"Pos.",n:1,kind:"pos"},{key:"prev_position",label:"Prev pos.",n:1,kind:"pos"}];
+    var qpc = qpIndex(s.id) ? [qpCol(s.id)] : [];  // shown once query→URL data exists for these dates
+    var qcols = [{key:"query",label:"Query"},{key:"clicks",label:"Clicks",n:1},{label:"Clicks change vs previous week",get:function(r){ return chg(r.clicks, r.prev_clicks); }},{key:"impressions",label:"Impr.",n:1},{key:"ctr_pct",label:"CTR",n:1,kind:"pct"},{key:"position",label:"Pos.",n:1,kind:"pos"},{key:"prev_position",label:"Prev pos.",n:1,kind:"pos"}].concat(qpc);
     var pcols = [{label:"Page",url:true,get:function(r){ return shortUrl(r.page); }},{key:"clicks",label:"Clicks",n:1},{label:"Clicks change vs previous week",get:function(r){ return chg(r.clicks, r.prev_clicks); }},{key:"impressions",label:"Impr.",n:1},{key:"ctr_pct",label:"CTR",n:1,kind:"pct"},{key:"position",label:"Pos.",n:1,kind:"pos"}];
-    var mcols = [{key:"query",label:"Query"},{key:"prev_clicks",label:"Prev clicks",n:1},{key:"clicks",label:"Clicks",n:1},{key:"delta",label:"Change in clicks",n:1},{key:"prev_position",label:"Prev pos.",n:1,kind:"pos"},{key:"position",label:"Pos.",n:1,kind:"pos"}];
+    var mcols = [{key:"query",label:"Query"},{key:"prev_clicks",label:"Prev clicks",n:1},{key:"clicks",label:"Clicks",n:1},{key:"delta",label:"Change in clicks",n:1},{key:"prev_position",label:"Prev pos.",n:1,kind:"pos"},{key:"position",label:"Pos.",n:1,kind:"pos"}].concat(qpc);
     G.appendChild(card("gsc-insights-"+s.id, "Insights - what changed", [
       $("div",{cls:"stack"},[sub("Queries gaining clicks", null, table(mcols, gsc.query_gainers)), sub("Queries losing clicks", null, table(mcols, gsc.query_losers))]),
       $("div",{cls:"stack"},[sub("Pages gaining clicks", null, table(pcols, gsc.page_gainers)), sub("Pages that lost ≥30% of clicks", REC_LOSER, table(pcols, gsc.page_losers))]),
@@ -887,6 +1076,10 @@ function buildSite(s){
   if (!hasSem && sr.status !== "no_exports" && sr.status !== "error"){
     Array.prototype.forEach.call(nav.children, function(b){ if (b.textContent === "SEMrush") b.remove(); });
     if (parts.semrush) parts.semrush.remove();
+  }
+  if (!bingPart(s, parts.bing)){
+    Array.prototype.forEach.call(nav.children, function(b){ if (b.textContent === "Bing") b.remove(); });
+    parts.bing.remove();
   }
   pruneEmpty(p);
   return p;

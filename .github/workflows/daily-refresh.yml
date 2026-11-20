@@ -2,7 +2,9 @@ name: Daily SEO dashboard refresh
 
 on:
   schedule:
-    - cron: "5 5 * * *"   # 10:35 IST every day (GitHub may start it a little late)
+    # GitHub often starts scheduled runs late or skips them when busy, so try three times a day
+    # (06:47, 09:47 and 15:47 IST). Each run only re-pulls the last few days, so extra runs are cheap.
+    - cron: "17 1,4,10 * * *"
   workflow_dispatch: {}
 
 permissions:
@@ -40,6 +42,7 @@ jobs:
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           DASHBOARD_KEY: ${{ secrets.DASHBOARD_KEY }}
+          BING_API_KEY: ${{ secrets.BING_API_KEY }}
         run: |
           umask 077
           printf '%s' "$GOOGLE_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/sa.json"

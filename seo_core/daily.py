@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
+from . import bing
 from . import google_api as g
 from .config import data_dir, load_config
 
@@ -110,7 +111,7 @@ def pull_ga(cfg: dict, site: dict, start: str, end: str, errors: list) -> tuple[
     return days, ke
 
 
-def pull_gsc(cfg: dict, site: dict, start: str, end: str, errors: list) -> dict[str, dict]:
+def pull_gsc(cfg: dict, site: dict, start: str, end: str, errors: list, qp_from: str | None = None) -> dict[str, dict]:
     prop = site.get("gsc_property")
     if not prop:
         return {}
@@ -129,6 +130,18 @@ def pull_gsc(cfg: dict, site: dict, start: str, end: str, errors: list) -> dict[
             r["position"] = round(r.get("position") or 0, 2)
         for d, rs in _split_by_date(rows, "date", False).items():
             days.setdefault(d, {})[name] = _pack(rs, dims[1:] + cols)
+    # Which URL ranked for which query (kept for the most recent query_page_days only: it is the largest table)
+    if qp_from and end >= qp_from:
+        s0 = max(start, qp_from)
+        try:
+            rows = g.gsc_query(cfg, prop, s0, end, dimensions=["date", "query", "page"], row_limit=5_000_000)
+            for r in rows:
+                r.pop("ctr", None)
+                r["position"] = round(r.get("position") or 0, 1)
+            for d, rs in _split_by_date(rows, "date", False).items():
+                days.setdefault(d, {})["query_page"] = _pack(rs, ["query", "page"] + cols)
+        except Exception as e:
+            errors.append({"source": "GSC", "table": "query_page", "range": [s0, end], "error": f"{type(e).__name__}: {e}"})
     # Search appearance cannot be grouped with the date, so it is pulled one day at a time.
     d = dt.date.fromisoformat(start)
     while d <= dt.date.fromisoformat(end):
@@ -190,6 +203,7 @@ def refresh(site_ids: list[str] | None = None, days: int | None = None, force: b
     window = int(days or cfg.get("daily_window_days", 112))
     yesterday = dt.datetime.now(tz).date() - dt.timedelta(days=1)
     first = yesterday - dt.timedelta(days=window - 1)
+    qp_first = yesterday - dt.timedelta(days=int(cfg.get("query_page_days", 56)) - 1)
     sites = [s for s in cfg["sites"] if (s["id"] in site_ids if site_ids else s.get("enabled", True))]
     summary = {"window": [_iso(first), _iso(yesterday)], "sites": {}}
     for site in sites:
@@ -201,8 +215,12 @@ def refresh(site_ids: list[str] | None = None, days: int | None = None, force: b
             stale = True
             if f.exists() and not force:
                 try:
-                    pulled = dt.date.fromisoformat(json.loads(f.read_text()).get("pulled_on", "1970-01-01"))
+                    rec0 = json.loads(f.read_text())
+                    pulled = dt.date.fromisoformat(rec0.get("pulled_on", "1970-01-01"))
                     stale = (pulled - d).days < REFRESH_RECENT_DAYS
+                    # days in the query→URL window that were saved before that table existed
+                    if not stale and d >= qp_first and site.get("gsc_property") and "query_page" not in (rec0.get("gsc") or {}):
+                        stale = True
                 except Exception:
                     stale = True
             if stale:
@@ -225,7 +243,7 @@ def refresh(site_ids: list[str] | None = None, days: int | None = None, force: b
             s, e = _iso(ch[0]), _iso(ch[-1])
             n_err = len(errors)
             ga, ke = pull_ga(cfg, site, s, e, errors)
-            gs = pull_gsc(cfg, site, s, e, errors)
+            gs = pull_gsc(cfg, site, s, e, errors, qp_from=_iso(qp_first))
             if len(errors) > n_err and any(x["table"] == "totals" for x in errors[n_err:]):
                 continue  # don't save a day whose totals failed; it will be retried next time
             today = dt.datetime.now(tz).date()
@@ -235,6 +253,7 @@ def refresh(site_ids: list[str] | None = None, days: int | None = None, force: b
                        "ga": ga.get(k, {}), "gsc": gs.get(k, {})}
                 (sdir / f"{k}.json").write_text(json.dumps(rec, separators=(",", ":"), default=str))
                 written += 1
+        bing.refresh(cfg, site, errors)  # Bing Webmaster Tools snapshot (only when a Bing API key is set)
         exact = pull_exact_users(cfg, site, yesterday, errors)
         if exact:
             exact_users_file(cfg, site["id"]).write_text(json.dumps({"pulled_on": _iso(dt.datetime.now(tz).date()), "ranges": exact}))
@@ -286,6 +305,9 @@ def payload(cfg: dict, site_ids: list[str]) -> str | None:
                         rows = t["rows"]
                     for row in rows:
                         dst["rows"].append([di] + [sid(v) if isinstance(v, str) else v for v in row])
+        bsnap = bing.load(cfg, site_id)
+        if bsnap:
+            site["bing"] = bsnap
         ef = exact_users_file(cfg, site_id)
         if ef.exists():
             try:
