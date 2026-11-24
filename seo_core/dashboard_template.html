@@ -344,6 +344,11 @@ small.muted{color:var(--muted);font-size:12px}
 .pwdots i.on{background:rgba(18,183,106,.7)}
 .pwdots b{font-size:12px;font-weight:600;color:var(--ink2);min-width:26px;text-align:left;line-height:14px}
 .pwllm td:not(:first-child){min-width:84px}
+
+.pwloc{display:flex;flex-wrap:wrap;gap:6px}
+.pwlc{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 8px;font-size:12.5px;white-space:nowrap}
+.pwlc .fl{font-size:14px;line-height:1}
+.pwlc b{font-weight:700;color:var(--ink);margin-left:2px}
 </style>
 </head>
 <body>
@@ -827,6 +832,12 @@ function pwDots(cells){
   (cells || []).forEach(function(c){ if (c === 1) n++; bars.appendChild($("i",{cls:c === 1 ? "on" : ""})); });
   box.appendChild(bars); box.appendChild($("b",{text:n + "/7"})); return box;
 }
+var PW_DN = null;
+function pwCountry(c){
+  if (!/^[A-Za-z]{2}$/.test(c || "")) return c || "Unknown";
+  try { PW_DN = PW_DN || new Intl.DisplayNames(["en"], {type:"region"}); var n = PW_DN.of(c.toUpperCase()); return n && n !== c.toUpperCase() ? n : c; } catch(e){ return c; }
+}
+function pwFlag(c){ if (!/^[A-Za-z]{2}$/.test(c || "")) return "🌐"; return String.fromCodePoint.apply(null, c.toUpperCase().split("").map(function(x){ return 127397 + x.charCodeAt(0); })); }
 function pwLabel(P, mid, fallback){ var m = (P.models || {})[mid]; return m ? m[0] : (fallback || mid); }
 function pwWindow(sid){
   var P = pwSnap(sid); if (!P) return null;
@@ -1030,7 +1041,7 @@ function aiPart(s, part){
     Object.keys(B.ref_pages || {}).forEach(function(ref){
       var rr = rrows.filter(function(x){ return x.ref === ref; })[0] || {};
       kids.push(sub(ref + " · " + fmt(rr.visits) + " visit" + (rr.visits === 1 ? "" : "s") + " (prev. " + nn + ": " + fmt(rr.prev) + ")", null,
-        table([{label:"Page on our site",get:function(r){ return r[0]; }},{label:"Visitors",n:1,get:function(r){ return r[1]; }},{label:"Visitor location",get:function(r){ return (r[2] || []).map(function(l){ return l[0] + " " + l[1]; }).join(" · ") || "-"; }}], B.ref_pages[ref], "No pages recorded.")));
+        table([{label:"Page on our site",get:function(r){ return r[0]; }},{label:"Visitors",n:1,get:function(r){ return r[1]; }},{label:"Visitor location",get:function(r){ if (!(r[2] || []).length) return "-"; return $("span",{cls:"pwloc"}, r[2].map(function(l){ return $("span",{cls:"pwlc"},[$("span",{cls:"fl",text:pwFlag(l[0])}), pwCountry(l[0]), $("b",{text:fmt(l[1])})]); })); }}], B.ref_pages[ref], "No pages recorded.")));
     });
     part.appendChild(card("ai-refs-"+s.id, "AI referral clicks", kids, "Visits to our site from AI platforms · " + rangeTxt([w.a, w.e]) + " vs prev. " + nn + " (Promptwatch Visitor Analytics). AI platforms don't pass the visitor's question, so the prompt behind a visit is not available. Source: /analytics/visitors/referrer-stats · /top-pages and /top-locations per AI platform."));
   }

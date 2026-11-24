@@ -314,7 +314,7 @@ def payload(cfg: dict, site_ids: list[str]) -> str | None:
             site["bing"] = bsnap
         psnap = promptwatch.load(cfg, site_id)
         if psnap and psnap.get("version") == 2:
-            site["promptwatch"] = {k: psnap.get(k) for k in ("end", "pulled_at", "auth", "models", "vis_daily", "texts", "bundles", "own_domains", "run", "windows")}
+            site["promptwatch"] = {k: psnap.get(k) for k in ("end", "pulled_at", "auth", "models", "vis_daily", "texts", "bundles", "own_domains", "run", "windows", "first_data", "ai_visits_daily")}
         ef = exact_users_file(cfg, site_id)
         if ef.exists():
             try:

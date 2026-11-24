@@ -27,9 +27,10 @@ from pathlib import Path
 from .config import data_dir
 
 API = "https://server.promptwatch.com/api/v2"
-KEEP_DAYS = 35     # day bundles kept (Day view + 7-day tracker)
+KEEP_DAYS = 60     # day bundles kept (Day view, 7-day tracker, custom ranges)
+FULL_DAYS = 35     # days that also get the full detail (citations, LLM view, referrals)
 KEEP_WEEKS = 12    # Mon-Sun week bundles kept
-TRACK_DAYS = 14    # days that always get at least the brand ranks (tracker + "vs prev. day")
+TRACK_DAYS = 60    # days that always get at least the brand ranks (tracker, custom ranges)
 REFERRERS = ["chatgpt.com", "gemini.google.com", "perplexity.ai", "copilot.microsoft.com", "copilot.com", "m365.cloud.microsoft",
              "copilot.cloud.microsoft", "claude.ai", "claude.com", "grok.com", "chat.mistral.ai", "mistral.ai",
              "chat.deepseek.com", "deepseek.com", "kimi.com"]
@@ -342,6 +343,15 @@ def pull(cfg: dict, site: dict, prev: dict | None = None, max_calls: int | None 
                             cl.get("/visibility-time-series", startDate=start92, endDate=_iso(end), range="day") or []]
     except PromptwatchError as e:
         out["errors"].append({"call": "visibility", "error": str(e)})
+    try:  # AI referral visits per platform per day (sums for custom date ranges)
+        t = cl.get("/analytics/visitors/trend", startDate=_iso(end - dt.timedelta(days=59)), endDate=_iso(end), timezone="UTC") or {}
+        out["ai_visits_daily"] = {"dates": t.get("dates") or [], "series": [[x.get("name"), x.get("data") or []] for x in t.get("series") or []]}
+    except PromptwatchError as e:
+        out["errors"].append({"call": "ai_visits_daily", "error": str(e)})
+        if prev and "ai_visits_daily" in prev:
+            out["ai_visits_daily"] = prev["ai_visits_daily"]
+    # first day Promptwatch has data for this project (no requests for windows before it)
+    out["first_data"] = next((r[0] for r in out.get("vis_daily") or [] if r[1] is not None), (prev or {}).get("first_data"))
 
     W = plan_windows(end)
     out["windows"] = W
@@ -355,9 +365,12 @@ def pull(cfg: dict, site: dict, prev: dict | None = None, max_calls: int | None 
              (W["p7"], "light", None), (W["r7"], "full", W["p7"]),
              (W["p28"], "light", None), (W["r28"], "full", W["p28"]),
              (weeks[1], "light", None), (weeks[0], "full", weeks[1])]
-    tasks += [(d, "light", None) for d in days[2:TRACK_DAYS + 1]]
+    tasks += [(d, "light", None) for d in days[2:TRACK_DAYS]]
     tasks += [(w, "full", weeks[i + 2] if i + 2 < len(weeks) else None) for i, w in enumerate(weeks[1:KEEP_WEEKS])]
-    tasks += [(d, "full", prevday(d)) for d in days[1:KEEP_DAYS - 1]]
+    tasks += [(d, "full", prevday(d)) for d in days[1:FULL_DAYS]]
+    fd = out.get("first_data")
+    if fd:  # skip windows that end before Promptwatch has any data
+        tasks = [t for t in tasks if t[0].split("_")[1] >= fd]
     done, skipped = [], []
     n_prompts = max([len(v.get("rank") or {}) for v in out["bundles"].values()] + [100])
     for k, tier, prev_k in tasks:
