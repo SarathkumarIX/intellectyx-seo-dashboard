@@ -1153,7 +1153,7 @@ function pwSynth(P, a, e){
   return B;
 }
 function uLabel(base, k){ return k && k.avg ? base + " (avg. per day)" : base; }
-function dayByDayCard(s){
+function dayByDayCard(s, which){
   if (!DAILY || !DAILY.sites || !DAILY.sites[s.id]) return null;
   var site = DAILY.sites[s.id], a = R.period.current[0], b = R.period.current[1], one = a === b;
   if (one) a = addDays(b, -13);
@@ -1180,17 +1180,21 @@ function dayByDayCard(s){
   var dayCell = function(r){ var x = new Date(r.date + "T00:00:00Z"), t = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][x.getUTCDay()] + ", " + ymdLabel(r.date);
     return one && r.date === b ? $("strong",{text:t + " (selected)"}) : t; };
   var dec = function(v, dp, suf){ return typeof v === "number" ? v.toFixed(dp) + (suf || "") : "-"; };
-  var cols = [{label:"Date",get:dayCell},
-    {label:"Clicks",n:1,get:function(r){ return fmt(r.clicks); }},{label:"Impressions",n:1,get:function(r){ return fmt(r.impressions); }},
-    {label:"CTR",n:1,get:function(r){ return dec(r.ctr, 2, "%"); }},{label:"Avg. position",n:1,get:function(r){ return dec(r.position, 1); }},
-    {label:"Users",n:1,get:function(r){ return fmt(r.users); }},{label:"Sessions",n:1,get:function(r){ return fmt(r.sessions); }},
+  var cG = [{label:"Clicks",n:1,get:function(r){ return fmt(r.clicks); }},{label:"Impressions",n:1,get:function(r){ return fmt(r.impressions); }},
+    {label:"CTR",n:1,get:function(r){ return dec(r.ctr, 2, "%"); }},{label:"Avg. position",n:1,get:function(r){ return dec(r.position, 1); }}];
+  var cA = [{label:"Users",n:1,get:function(r){ return fmt(r.users); }},{label:"Sessions",n:1,get:function(r){ return fmt(r.sessions); }},
     {label:"Organic sessions",n:1,get:function(r){ return fmt(r.organic); }},{label:"Engagement rate",n:1,get:function(r){ return dec(r.er, 1, "%"); }},
-    {label:"Key events",n:1,get:function(r){ return fmt(r.ke); }}].concat(hasB ? [
-    {label:"Bing clicks",n:1,get:function(r){ return fmt(r.bclicks); }},{label:"Bing impressions",n:1,get:function(r){ return fmt(r.bimpr); }}] : []);
+    {label:"Key events",n:1,get:function(r){ return fmt(r.ke); }}];
+  var cB = [{label:"Clicks",n:1,get:function(r){ return fmt(r.bclicks); }},{label:"Impressions",n:1,get:function(r){ return fmt(r.bimpr); }},
+    {label:"CTR",n:1,get:function(r){ return r.bimpr ? dec(r.bclicks / r.bimpr * 100, 2, "%") : "-"; }}];
+  if (which === "bing" && !hasB) return null;
+  var cols = [{label:"Date",get:dayCell}].concat(which === "ga" ? cA : which === "bing" ? cB : cG);
   var gsLast = null; Object.keys(st).forEach(function(k){ var d = site.days[k]; if (!gsLast || d > gsLast) gsLast = d; });
-  var note = "Search Console (Clicks to Avg. position), Google Analytics (Users to Key events)" + (hasB ? " and Bing" : "") + " for each day" + (one ? " in the two weeks up to the selected day" : "") + ", newest first. The latest 2-3 days can still change slightly as Google finishes processing them." +
-    (gsLast && gsLast < b ? " Search Console has published data up to " + fmtDate(gsLast) + " so far." : "");
-  return card("daybyday-"+s.id, "Day by day", [table(cols, rows)], note);
+  var span = " for each day" + (one ? " in the two weeks up to the selected day" : "") + ", newest first.";
+  var note = which === "ga" ? "Google Analytics (all traffic)" + span + " The latest 2-3 days can still change slightly as Google finishes processing them."
+    : which === "bing" ? "Bing search clicks and impressions" + span + " Days Bing has not published yet show -."
+    : "Google Search Console (web search)" + span + " The latest 2-3 days can still change slightly as Google finishes processing them." + (gsLast && gsLast < b ? " Search Console has published data up to " + fmtDate(gsLast) + " so far." : "");
+  return card("daybyday-" + (which || "gsc") + "-" + s.id, "Day by day", [table(cols, rows)], note);
 }
 function dailyChart(daily, key, label, kind){
   if (R.period.days === 1) return $("div",{cls:"empty",text:"Single day selected."});  // a one-point chart adds nothing
@@ -1343,8 +1347,6 @@ function buildSite(s){
   }
 
   }
-  var dbd = dayByDayCard(s); if (dbd) O.appendChild(dbd);
-  var hic = highIntentCard(s); if (hic) O.appendChild(hic);
   var ks = srcCard("kpis-sem-"+s.id, "sem", "SEMrush", null);
   addSemKpis(ks);
   if (ks.querySelector(".kpis")) O.appendChild(ks);
@@ -1550,6 +1552,12 @@ function buildSite(s){
     Array.prototype.forEach.call(nav.children, function(b){ if (b.textContent === "AI Search") b.remove(); });
     parts.ai.remove();
   }
+  // day-by-day tables and high-intent pages live in their own source tabs, right after the overview cards
+  function placeAfterFirst(host, el){ if (!host || !el || !host.parentNode) return; var first = host.querySelector(":scope > .card"); if (first && first.nextSibling) host.insertBefore(el, first.nextSibling); else host.appendChild(el); }
+  placeAfterFirst(parts.gsc, dayByDayCard(s, "gsc"));
+  var hiC = highIntentCard(s); if (hiC && parts.gsc){ var dg = parts.gsc.querySelector("#daybyday-gsc-" + s.id); if (dg && dg.nextSibling) parts.gsc.insertBefore(hiC, dg.nextSibling); else placeAfterFirst(parts.gsc, hiC); }
+  placeAfterFirst(parts.ga4, dayByDayCard(s, "ga"));
+  if (parts.bing && parts.bing.parentNode) placeAfterFirst(parts.bing, dayByDayCard(s, "bing"));
   pruneEmpty(p);
   // keep the tab the user was on when the date filter changes (the page is rebuilt for each period)
   if (SUBTAB && SUBTAB !== "overview"){
