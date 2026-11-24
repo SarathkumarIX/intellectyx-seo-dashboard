@@ -17,7 +17,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 75
     steps:
       - uses: actions/checkout@v4
 
@@ -43,6 +43,7 @@ jobs:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           DASHBOARD_KEY: ${{ secrets.DASHBOARD_KEY }}
           BING_API_KEY: ${{ secrets.BING_API_KEY }}
+          PROMPTWATCH_API_KEY: ${{ secrets.PROMPTWATCH_API_KEY }}
         run: |
           umask 077
           printf '%s' "$GOOGLE_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/sa.json"

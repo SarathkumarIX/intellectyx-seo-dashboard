@@ -12,12 +12,14 @@ import base64
 import datetime as dt
 import gzip
 import json
+import os
 import time
 from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
 from . import bing
+from . import promptwatch
 from . import google_api as g
 from .config import data_dir, load_config
 
@@ -254,6 +256,8 @@ def refresh(site_ids: list[str] | None = None, days: int | None = None, force: b
                 (sdir / f"{k}.json").write_text(json.dumps(rec, separators=(",", ":"), default=str))
                 written += 1
         bing.refresh(cfg, site, errors)  # Bing Webmaster Tools snapshot (only when a Bing API key is set)
+        if os.environ.get("PROMPTWATCH_API_KEY") or cfg.get("promptwatch_refresh_here"):
+            promptwatch.refresh(cfg, site, errors)  # Promptwatch AI-search snapshot (cloud runs; the Mac only on request)
         exact = pull_exact_users(cfg, site, yesterday, errors)
         if exact:
             exact_users_file(cfg, site["id"]).write_text(json.dumps({"pulled_on": _iso(dt.datetime.now(tz).date()), "ranges": exact}))
@@ -308,6 +312,9 @@ def payload(cfg: dict, site_ids: list[str]) -> str | None:
         bsnap = bing.load(cfg, site_id)
         if bsnap:
             site["bing"] = bsnap
+        psnap = promptwatch.load(cfg, site_id)
+        if psnap and psnap.get("version") == 2:
+            site["promptwatch"] = {k: psnap.get(k) for k in ("end", "pulled_at", "auth", "models", "vis_daily", "texts", "bundles", "own_domains", "run")}
         ef = exact_users_file(cfg, site_id)
         if ef.exists():
             try:

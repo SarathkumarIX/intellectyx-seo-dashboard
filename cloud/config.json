@@ -17,6 +17,7 @@
     "trend_weeks": 12
   },
   "daily_window_days": 112,
+  "promptwatch_max_calls": 1700,
   "sites": [
     {
       "id": "intellectyx-com",
@@ -24,6 +25,11 @@
       "url": "https://www.intellectyx.com/",
       "gsc_property": "https://www.intellectyx.com/",
       "ga4_property_id": "355441476",
+      "promptwatch_project_id": null,
+      "promptwatch_own_domains": [
+        "intellectyx.com",
+        "intellectyx.ai"
+      ],
       "enabled": true
     },
     {
@@ -32,6 +38,8 @@
       "url": "https://www.intellectyx.ai/",
       "gsc_property": "https://www.intellectyx.ai/",
       "ga4_property_id": "",
+      "promptwatch_project_id": null,
+      "promptwatch_own_domains": null,
       "enabled": false
     }
   ],
