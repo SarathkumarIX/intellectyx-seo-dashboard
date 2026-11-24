@@ -349,13 +349,19 @@ small.muted{color:var(--muted);font-size:12px}
 .pwlc{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:999px;padding:3px 10px 3px 8px;font-size:12.5px;white-space:nowrap}
 .pwlc .fl{font-size:14px;line-height:1}
 .pwlc b{font-weight:700;color:var(--ink);margin-left:2px}
+
+.pwstrip{display:inline-flex;flex-wrap:wrap;gap:2px;max-width:420px}
+.pwstrip i.pwr{width:11px;height:16px;min-width:0;padding:0;border-radius:3px}
+.pwstrip i.pwr.nd{border:1px dashed var(--line)}
+.pwstrip i.pwr.nb{background:rgba(255,255,255,.05);border-color:transparent}
+.pwstrip i.pwr.r1{background:rgba(18,183,106,.55)}.pwstrip i.pwr.r2{background:rgba(144,195,34,.32)}.pwstrip i.pwr.r4{background:rgba(253,176,34,.3)}.pwstrip i.pwr.gap{background:rgba(240,68,56,.32)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div id="hleft">
-      <div class="eyebrow">Intellectyx · SEO performance</div>
+      <div class="eyebrow">Intellectyx · SEO · AEO · GEO performance</div>
       <h1 id="title"></h1>
       <div class="sub" id="period"></div>
       <div id="sitechip"></div>
@@ -812,6 +818,7 @@ function bingPart(s, part){
 }
 // ================= AI Search (Promptwatch) =================
 // Mirrors the "IX AI Visibility" e-mail. Every value is Promptwatch's; windows are UTC days, as in Promptwatch.
+function pwN(v){ return typeof v !== "number" ? "-" : (v % 1 ? pwF1(v) : fmt(v)); }
 function pwF1(v){ return (Math.round(v * 10 + 1e-9) / 10).toFixed(1); }
 function pwSnap(sid){ var site = DAILY && DAILY.sites && DAILY.sites[sid]; return site && site.promptwatch && site.promptwatch.bundles ? site.promptwatch : null; }
 function pwSelf(brands){ if (!brands) return null; if (!brands.length) return [-1, null]; for (var i = 0; i < brands.length; i++) if (brands[i][2] === "SELF") return [brands[i][3], brands[i][4]]; return [0, null]; }
@@ -870,7 +877,7 @@ function pwTotals(sid){
 function pwKpi(label, value, k, note, pts, lowerBetter){
   var d = k && typeof k.current === "number" && typeof k.previous === "number" ? Math.round((k.current - k.previous) * 10) / 10 : null;
   var vs = "vs prev. " + note;
-  var ch = d === null ? $("span",{cls:"flat",text:"no prior data"}) : !d ? $("span",{cls:"flat",text:"no change " + vs}) : $("span",{cls:(d > 0) !== !!lowerBetter ? "up" : "down", text:(d > 0 ? "▲ " : "▼ ") + (pts ? pwF1(Math.abs(d)) + " pts " : fmt(Math.abs(d)) + " ") + vs});
+  var ch = d === null ? $("span",{cls:"flat",text:"no prior data"}) : !d ? $("span",{cls:"flat",text:"no change " + vs}) : $("span",{cls:(d > 0) !== !!lowerBetter ? "up" : "down", text:(d > 0 ? "▲ " : "▼ ") + (pts ? pwF1(Math.abs(d)) + " pts " : pwN(Math.abs(d)) + " ") + vs});
   return $("div",{cls:"kpi"},[$("div",{cls:"l",text:label}),$("div",{cls:"v",text:value}),$("div",{cls:"d"},[ch])]);
 }
 function pwPageCell(row, sub){  // [url, title, count, avgPos]
@@ -891,6 +898,11 @@ function aiPart(s, part){
   var T = pwTotals(s.id), w = T.w, nn = pwNoun(w.n), texts = P.texts || {};
   var txt = function(pid){ return (texts[pid] || [pid])[0]; };
   part.appendChild($("div",{cls:"note",text:"Promptwatch · " + ((P.auth || {}).project || {}).name + " · data read " + String(P.pulled_at || "").slice(0, 16).replace("T", " ") + " UTC · dates are UTC days, matching Promptwatch"}));
+  if (P.first_data && w.e < P.first_data){
+    part.appendChild(card("ai-missing-"+s.id, "AI search visibility", [$("div",{cls:"empty",text:"Promptwatch has no data for " + rangeTxt([w.a, w.e]) + ". Tracking for this project starts " + fmtDate(P.first_data) + "."})]));
+    return true;
+  }
+  if (T.missing && w.n > 1 && !(P.windows && ((P.windows.weeks || []).indexOf(w.key) >= 0 || w.key === P.windows.r7 || w.key === P.windows.r28))) return pwCustom(s, part, w);
   if (T.missing){
     var planned = (P.windows || {}), isPlanned = (planned.days || []).concat(planned.weeks || [], [planned.r7, planned.r28]).indexOf(w.key) >= 0;
     part.appendChild(card("ai-missing-"+s.id, "AI search visibility", [$("div",{cls:"empty",text: isPlanned
@@ -1069,6 +1081,67 @@ function aiPart(s, part){
   if (B.tier !== "full") part.appendChild($("div",{cls:"note",text:"Citations, the LLM-wise view and AI referral details for " + rangeTxt([w.a, w.e]) + " are still being fetched from Promptwatch; they appear after the next refresh."}));
   return true;
 }
+// Custom date ranges: Promptwatch only ranks prompts per window, so this view adds up Promptwatch's daily figures.
+function pwCustom(s, part, w){
+  var P = w.P, texts = P.texts || {}, txt = function(pid){ return (texts[pid] || [pid])[0]; };
+  var days = []; for (var d = w.a; d <= w.e; d = addDays(d, 1)) days.push(d);
+  var pdays = []; for (var d2 = w.pa; d2 <= w.pe; d2 = addDays(d2, 1)) pdays.push(d2);
+  var dayB = function(d){ var b = P.bundles[d + "_" + d]; return b && b.rank && Object.keys(b.rank).length ? b : null; };
+  var have = days.filter(dayB), phave = pdays.filter(dayB);
+  part.appendChild($("div",{cls:"note",text:"Custom range: Promptwatch ranks prompts for a whole window, so for these dates the tab adds up Promptwatch's daily figures (" + have.length + " of " + days.length + " days available" + (P.first_data && w.a < P.first_data ? "; Promptwatch tracking for this project starts " + fmtDate(P.first_data) : "") + "). Single days, weeks and the last 7 / 28 days show the full e-mail view."}));
+  var cnt = function(list){ var o = {r1:0, top3:0, gap:0, n:0, resp:0, ment:0, days:list.length}; list.forEach(function(d){ var b = dayB(d), S = pwStats(b); o.r1 += S.r1; o.top3 += S.top3; o.gap += S.gap; o.n += S.n; o.resp += (b.sum || [])[0] || 0; o.ment += (b.sum || [])[1] || 0; }); return o; };
+  var C = cnt(have), PC = phave.length ? cnt(phave) : null;
+  var avg = function(o, k){ return o && o.days ? Math.round(o[k] / o.days * 10) / 10 : null; };
+  var vis = pwVis(P, w.a, w.e), pvis = pwVis(P, w.pa, w.pe), r1 = function(v){ return v === null ? null : Math.round(v * 10) / 10; };
+  var rate = C.resp ? Math.round(C.ment / C.resp * 1000) / 10 : null, prate = PC && PC.resp ? Math.round(PC.ment / PC.resp * 1000) / 10 : null;
+  if (!have.length && vis === null){
+    part.appendChild(card("ai-missing-"+s.id, "AI search visibility", [$("div",{cls:"empty",text:"Promptwatch has no data for " + rangeTxt([w.a, w.e]) + (P.first_data ? ". Tracking for this project starts " + fmtDate(P.first_data) + "." : ".")})]));
+    return true;
+  }
+  var nn = "period";
+  part.appendChild(card("ai-kpis-"+s.id, "Key numbers", [$("div",{cls:"kpis pwk4"},[
+      pwKpi("Prompts ranked #1 (avg. per day)", pwN(avg(C, "r1")), mk(avg(C, "r1"), avg(PC, "r1")), nn),
+      pwKpi("Prompts in top 3 (avg. per day)", pwN(avg(C, "top3")), mk(avg(C, "top3"), avg(PC, "top3")), nn),
+      pwKpi("Gap prompts (avg. per day)", pwN(avg(C, "gap")), mk(avg(C, "gap"), avg(PC, "gap")), nn, false, true),
+      pwKpi("Prompts tracked (avg. per day)", pwN(avg(C, "n")), mk(avg(C, "n"), avg(PC, "n")), nn),
+      pwKpi("Visibility", fmt(r1(vis), "pct"), mk(r1(vis), r1(pvis)), nn, true), pwKpi("Brand mention rate", fmt(rate, "pct"), mk(rate, prate), nn, true),
+      pwKpi("Brand mentions", fmt(C.ment), mk(C.ment, PC ? PC.ment : null), nn), pwKpi("AI responses", fmt(C.resp), mk(C.resp, PC ? PC.resp : null), nn)])],
+    rangeTxt([w.a, w.e]) + " vs " + rangeTxt([w.pa, w.pe]) + ". Prompt counts = average of Promptwatch's daily brand-rank counts; visibility = average of its daily visibility values; mentions and responses = sum of its daily response summaries; mention rate = mentions / responses."));
+  var vd = (P.vis_daily || []).filter(function(r){ return r[0] >= w.a && r[0] <= w.e; }).map(function(r){ return {date:r[0], v:r[1]}; });
+  if (vd.length > 1) part.appendChild(card("ai-visday-"+s.id, "Visibility by day", [lineChart(vd, [{key:"v",label:"Visibility %",color:"var(--ai)",kind:"pct"}], {xKey:"date", xLabel:function(p){ return p.date.slice(5); }, tipTitle:function(p){ return fmtDay(p.date); }, title:"Promptwatch daily visibility"})], "Intellectyx's daily Promptwatch visibility score. Source: /visibility-time-series."));
+  // prompt-by-prompt: how often each prompt was #1 / top 3 / a gap on the days in the range
+  if (have.length){
+    var rows = {};
+    have.forEach(function(d){ var b = dayB(d); Object.keys(b.rank).forEach(function(pid){ var o = rows[pid] || (rows[pid] = {pid:pid, prompt:txt(pid), seen:0, d1:0, d3:0, dg:0, best:null, last:null, cells:{}});
+      var r = pwSelf(b.rank[pid])[0]; o.seen++; o.cells[d] = r; if (r === 1) o.d1++; if (r >= 1 && r <= 3) o.d3++; if (r === 0) o.dg++; if (r >= 1 && (o.best === null || r < o.best)) o.best = r; o.last = r; }); });
+    var list = Object.keys(rows).map(function(k){ return rows[k]; }).sort(function(x, y){ return (y.d1 - x.d1) || (y.d3 - x.d3) || (x.dg - y.dg) || (x.prompt < y.prompt ? -1 : 1); });
+    var strip = function(r){ var b = $("span",{cls:"pwstrip"}); days.forEach(function(d){ var c = r.cells[d], cls = c === undefined ? "nd" : c === -1 ? "nb" : c === 0 ? "gap" : c === 1 ? "r1" : c <= 3 ? "r2" : "r4";
+      b.appendChild($("i",{cls:"pwr " + cls, title:fmtDay(d) + ": " + (c === undefined ? "no data" : pwRankTxt(c))})); }); return b; };
+    part.appendChild(card("ai-range-prompts-"+s.id, "Prompts across these dates", [$("div",{cls:"pwtrack"},[table([{key:"prompt",label:"Prompt"},
+      {label:"Daily rank",get:strip},{label:"Days #1",get:function(r){ return r.d1 + "/" + r.seen; }},{label:"Days top 3",get:function(r){ return r.d3 + "/" + r.seen; }},
+      {label:"Days gap",get:function(r){ return r.dg ? $("span",{cls:"pwchg lost",text:String(r.dg)}) : $("span",{cls:"pwchg flat",text:"0"}); }},
+      {label:"Best rank",get:function(r){ return pwRankCell(r.best); }},{label:"Latest",get:function(r){ return pwRankCell(r.last); }}], list)])],
+      "Promptwatch's daily brand rank of every tracked prompt on each day in " + rangeTxt([w.a, w.e]) + " (one square per day; hover for the date). Days = days ranked #1 / in the top 3 / a gap, out of the days the prompt had data. Source: /prompts/brand-rank (one request per day)."));
+    // brands: prompt-days at #1 / in the top 3
+    var br = {}; have.forEach(function(d){ var b = dayB(d); Object.keys(b.rank).forEach(function(pid){ (b.rank[pid] || []).forEach(function(x){ var o = br[x[0]] || (br[x[0]] = {name:x[0], domain:x[1], rel:x[2], r1:0, top3:0, on:0}); o.on++; if (x[3] === 1) o.r1++; if (x[3] <= 3) o.top3++; }); }); });
+    var bl = Object.keys(br).map(function(k){ return br[k]; }).sort(function(x, y){ return (y.r1 - x.r1) || (y.top3 - x.top3); });
+    part.appendChild(card("ai-brands-"+s.id, "Brand comparison", [table([{label:"Brand",get:function(r){ return $("div",{cls:"pwpage"},[$("div",{cls:"t",text:r.name + (r.rel === "SELF" ? " (you)" : "")}), r.domain ? $("small",{text:r.domain}) : null]); }},
+      {key:"r1",label:"#1 prompt-days",n:1},{key:"top3",label:"Top-3 prompt-days",n:1},{key:"on",label:"Ranked prompt-days",n:1}], bl)],
+      "Each prompt on each day counts once (" + have.length + " days × the prompts tracked that day). Source: /prompts/brand-rank (one request per day)."));
+  }
+  // AI referral visits: sum of Promptwatch's daily visits per platform
+  var av = P.ai_visits_daily;
+  if (av && (av.dates || []).length){
+    var idx = {}; av.dates.forEach(function(d, i){ idx[String(d).slice(0, 10)] = i; });
+    var sum = function(data, list){ var t = 0, n = 0; list.forEach(function(d){ var i = idx[d]; if (i !== undefined){ t += data[i] || 0; n++; } }); return n ? t : null; };
+    var rr = av.series.map(function(x){ return {ref:x[0], visits:sum(x[1], days), prev:sum(x[1], pdays)}; }).filter(function(r){ return r.visits || r.prev; }).sort(function(x, y){ return (y.visits || 0) - (x.visits || 0); });
+    var covered = days.filter(function(d){ return idx[d] !== undefined; }).length;
+    part.appendChild(card("ai-refs-"+s.id, "AI referral clicks", [table([{key:"ref",label:"AI platform"},{key:"visits",label:"Visits",n:1},{key:"prev",label:"Prev. period",n:1},
+      {label:"Change",n:1,get:function(r){ if (!r.prev) return "-"; var c = Math.round((r.visits - r.prev) / r.prev * 1000) / 10; return $("span",{cls:c > 0 ? "up" : c < 0 ? "down" : "flat", text:(c > 0 ? "▲ " : c < 0 ? "▼ " : "") + pwF1(Math.abs(c)) + "%"}); }}], rr, "No AI referral visits recorded for these dates.")],
+      "Visits to our site from AI platforms, summed from Promptwatch Visitor Analytics' daily numbers" + (covered < days.length ? " (" + covered + " of " + days.length + " days available; Promptwatch keeps 60 days)" : "") + ". Source: /analytics/visitors/trend."));
+  }
+  return true;
+}
 function uLabel(base, k){ return k && k.avg ? base + " (avg. per day)" : base; }
 function dayByDayCard(s){
   if (!DAILY || !DAILY.sites || !DAILY.sites[s.id]) return null;
@@ -1204,8 +1277,19 @@ function buildSite(s){
   }
   var at = pwTotals(s.id);
   if (at){
-    var ak = srcCard("kpis-ai-"+s.id, "ai", "AI Search (Promptwatch)", at.missing ? "" : rangeTxt([at.w.a, at.w.e]) + " vs prev. " + pwNoun(at.w.n));
-    if (at.missing) ak.appendChild($("div",{cls:"ksubline",style:"margin:0",text:"Promptwatch figures are prepared for single days, Mon-Sun weeks and the last 7 / 28 days" + ((at.w.P.windows || {}).days && (at.w.P.windows.days.concat(at.w.P.windows.weeks || [], [at.w.P.windows.r7, at.w.P.windows.r28]).indexOf(at.w.key) >= 0) ? "; these dates are still being fetched." : "; choose one of those views.")}));
+    var ak = srcCard("kpis-ai-"+s.id, "ai", "AI Search (Promptwatch)", rangeTxt([at.w.a, at.w.e]) + " vs prev. " + (at.missing ? "period" : pwNoun(at.w.n)));
+    var cw = at.w, cdays = [], cpd = [], cdb = function(d){ var b = cw.P.bundles[d + "_" + d]; return b && b.rank && Object.keys(b.rank).length ? b : null; };
+    if (at.missing){ for (var cd = cw.a; cd <= cw.e; cd = addDays(cd, 1)) if (cdb(cd)) cdays.push(cd); for (var cp = cw.pa; cp <= cw.pe; cp = addDays(cp, 1)) if (cdb(cp)) cpd.push(cp); }
+    if (at.missing && cw.P.first_data && cw.e < cw.P.first_data) ak.appendChild($("div",{cls:"ksubline",style:"margin:0",text:"Promptwatch has no data for these dates; tracking starts " + fmtDate(cw.P.first_data) + "."}));
+    else if (at.missing && cdays.length && cw.n > 1){
+      var cagg = function(list){ if (!list.length) return null; var o = {r1:0, top3:0, gap:0, resp:0, ment:0}; list.forEach(function(d){ var b = cdb(d), S2 = pwStats(b); o.r1 += S2.r1; o.top3 += S2.top3; o.gap += S2.gap; o.resp += (b.sum || [])[0] || 0; o.ment += (b.sum || [])[1] || 0; }); o.r1 = Math.round(o.r1 / list.length * 10) / 10; o.top3 = Math.round(o.top3 / list.length * 10) / 10; o.gap = Math.round(o.gap / list.length * 10) / 10; o.rate = o.resp ? Math.round(o.ment / o.resp * 1000) / 10 : null; return o; };
+      var CA = cagg(cdays), PA = cagg(cpd), cv = pwVis(cw.P, cw.a, cw.e), pv2 = pwVis(cw.P, cw.pa, cw.pe), rr1 = function(v){ return v === null ? null : Math.round(v * 10) / 10; };
+      ak.appendChild($("div",{cls:"kpis"},[pwKpi("Prompts #1 (avg. per day)", pwN(CA.r1), mk(CA.r1, PA ? PA.r1 : null), "period"), pwKpi("Prompts in top 3 (avg. per day)", pwN(CA.top3), mk(CA.top3, PA ? PA.top3 : null), "period"),
+        pwKpi("Gap prompts (avg. per day)", pwN(CA.gap), mk(CA.gap, PA ? PA.gap : null), "period", false, true), pwKpi("Visibility", fmt(rr1(cv), "pct"), mk(rr1(cv), rr1(pv2)), "period", true),
+        pwKpi("Brand mention rate", fmt(CA.rate, "pct"), mk(CA.rate, PA ? PA.rate : null), "period", true), pwKpi("Brand mentions", fmt(CA.ment), mk(CA.ment, PA ? PA.ment : null), "period")]));
+      ak.appendChild($("div",{cls:"ksubline",style:"margin:12px 0 0",text:"Added up from Promptwatch's daily figures (" + cdays.length + " of " + cw.n + " days available)."}));
+    }
+    else if (at.missing) ak.appendChild($("div",{cls:"ksubline",style:"margin:0",text:"Promptwatch figures for these dates are still being fetched; they appear after the next refresh."}));
     else { var an = pwNoun(at.w.n);
       ak.appendChild($("div",{cls:"kpis"},[pwKpi("Prompts ranked #1", at.S.r1 + " / " + at.S.n, at.r1, an), pwKpi("Prompts in top 3", String(at.S.top3), at.top3, an),
         $("div",{cls:"kpi"},[$("div",{cls:"l",text:"Prompts won / lost"}),$("div",{cls:"v",text:at.PS ? at.won + " / " + at.lost : "-"}),$("div",{cls:"d"},[$("span",{cls:"flat",text:"vs prev. " + an})])]),
