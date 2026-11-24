@@ -917,7 +917,7 @@ function aiPart(s, part){
   }
   var B = w.B, PB = w.PB, S = T.S, PS = T.PS, N = S.n, cmpTxt = "prev. " + nn;
   if (B.synthetic) part.appendChild($("div",{cls:"note",text:"Promptwatch calculates whole-window figures for single days, Mon-Sun weeks and the last 7 / 28 days. For these dates the figures are built from its daily data (" + B.have + " of " + B.days + " days" + (P.first_data && w.a < P.first_data ? "; tracking starts " + fmtDate(P.first_data) : "") + "): each brand's score for a prompt is the average of its daily scores, which gives the same ranks Promptwatch shows for its own windows; counts and citations are added up."}));
-  var vsTxt = PB ? "compared with prev. " + nn + " (" + rangeTxt([w.pa, w.pe]) + ")" : "no data for the prev. " + nn + " yet";
+  var vsTxt = PB ? "compared with prev. " + nn + " (" + rangeTxt([w.pa, w.pe]) + ")" : (P.first_data && w.pe < P.first_data ? "no comparison: Promptwatch has no data for the prev. " + nn + " (" + rangeTxt([w.pa, w.pe]) + "); tracking starts " + fmtDate(P.first_data) : "no data for the prev. " + nn + " (" + rangeTxt([w.pa, w.pe]) + ") yet");
   // ---- brand counts (#1 / top 3 / ranked on), used by the bullets and the brand comparison
   var brands = {};
   Object.keys(B.rank || {}).forEach(function(pid){ (B.rank[pid] || []).forEach(function(b){ var o = brands[b[0]] || (brands[b[0]] = {name:b[0], domain:b[1], rel:b[2], r1:0, top3:0, on:0}); o.on++; if (b[3] === 1) o.r1++; if (b[3] <= 3) o.top3++; }); });
@@ -986,7 +986,7 @@ function aiPart(s, part){
   // ---- prompt tracker (daily ranks)
   var tEnd = w.e, tDays = [], useStrip = w.n > 14;
   if (w.n === 1 || w.n === 7) { for (var i = 6; i >= 0; i--) tDays.push(addDays(tEnd, -i)); }
-  else { for (var i2 = w.n - 1; i2 >= 0; i2--) tDays.push(addDays(tEnd, -i2)); }
+  else { for (var i2 = w.n - 1; i2 >= 0; i2--){ var td = addDays(tEnd, -i2); if (!P.first_data || td >= P.first_data) tDays.push(td); } useStrip = tDays.length > 14; }
   var dayB = tDays.map(function(d){ return P.bundles[d + "_" + d]; });
   var trows = Object.keys(texts).filter(function(pid){ return S.self[pid] || dayB.some(function(db){ return db && db.rank && db.rank[pid]; }); }).map(function(pid){
     var o = {prompt:txt(pid), pid:pid, cells:dayB.map(function(db){ if (!db) return undefined; var r = db.rank[pid]; return r ? pwSelf(r)[0] : null; })};
@@ -1002,12 +1002,12 @@ function aiPart(s, part){
       b.appendChild($("i",{cls:"pwr " + cls, title:fmtDay(tDays[i]) + ": " + (c === undefined ? "not fetched yet" : pwRankTxt(c))})); }); return b; }}] : tDays.map(function(d, i){ var x = new Date(d + "T00:00:00Z");
     return {label:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][x.getUTCDay()] + " " + d.slice(8), get:function(r){ return r.cells[i] === undefined ? $("span",{cls:"pwr nd",title:"not fetched yet",text:"?"}) : pwRankCell(r.cells[i]); }}; }));
   if (w.n > 1) tcols.push({label:w.n === 7 && !B.synthetic ? "Week" : "Period", get:function(r){ return $("span",{cls:"pwwk"},[pwRankCell(r.win)]); }});
-  tcols.push({label:"vs prev. " + nn, get:function(r){ return pwChg(r.chg); }});
-  tcols.push({label:"Days #1", get:function(r){ if (tDays.length !== 7) return r.days1 + "/" + tDays.length; return pwDots(r.cells); }});
+  if (PB) tcols.push({label:"vs prev. " + nn, get:function(r){ return pwChg(r.chg); }});
+  tcols.push({label:"Days #1", get:function(r){ if (tDays.length !== 7) return r.days1 + "/" + r.cells.filter(function(c){ return c !== null && c !== undefined; }).length; return pwDots(r.cells); }});
   part.appendChild(card("ai-tracker-"+s.id, tDays.length === 7 ? "7-day prompt tracker" : "Daily prompt tracker", [$("div",{cls:"pwtrack"},[table(tcols, trows, "No prompts.")]), $("div",{cls:"pwleg"},[
       $("span",null,[$("i",{cls:"pwr r1"}),"#1"]), $("span",null,[$("i",{cls:"pwr r2"}),"Rank 2-3"]), $("span",null,[$("i",{cls:"pwr r4"}),"Rank 4+"]),
       $("span",null,[$("i",{cls:"pwr gap"}),"Gap: competitor ranked, we are not"]), $("span",{text:"– no tracked brand mentioned · · no data that day"})])],
-    "Promptwatch daily rank of every tracked prompt, " + rangeTxt([tDays[0], tDays[tDays.length - 1]]) + (w.n > 1 ? " · " + (w.n === 7 && !B.synthetic ? "Week" : "Period") + " = rank for the whole " + (w.n === 7 && !B.synthetic ? "week" : "period") : "") + (useStrip ? " · one square per day (hover for the date)" : "") + ". Source: /prompts/brand-rank (one request per day)."));
+    "Promptwatch daily rank of every tracked prompt, " + rangeTxt([tDays[0], tDays[tDays.length - 1]]) + (w.n > 1 ? " · " + (w.n === 7 && !B.synthetic ? "Week" : "Period") + " = rank for the whole " + (w.n === 7 && !B.synthetic ? "week" : "period") : "") + (useStrip ? " · one square per day (hover for the date)" : "") + (tDays.length !== 7 ? " · Days #1 = days ranked #1 out of the days the prompt had data" : "") + (!PB ? " · no comparison: Promptwatch has no data for the previous " + nn + " (" + rangeTxt([w.pa, w.pe]) + (P.first_data ? "; tracking starts " + fmtDate(P.first_data) : "") + ")" : "") + ". Source: /prompts/brand-rank (one request per day)."));
   // ---- LLM-wise prompt view
   if (full && B.rank_llm){
     var mods = (vh.models || []).map(function(m){ return m[0]; }).filter(function(m){ return B.rank_llm[m]; });
