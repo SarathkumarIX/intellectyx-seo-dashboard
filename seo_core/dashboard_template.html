@@ -1088,7 +1088,7 @@ function pwCustom(s, part, w){
   var pdays = []; for (var d2 = w.pa; d2 <= w.pe; d2 = addDays(d2, 1)) pdays.push(d2);
   var dayB = function(d){ var b = P.bundles[d + "_" + d]; return b && b.rank && Object.keys(b.rank).length ? b : null; };
   var have = days.filter(dayB), phave = pdays.filter(dayB);
-  part.appendChild($("div",{cls:"note",text:"Custom range: Promptwatch ranks prompts for a whole window, so for these dates the tab adds up Promptwatch's daily figures (" + have.length + " of " + days.length + " days available" + (P.first_data && w.a < P.first_data ? "; Promptwatch tracking for this project starts " + fmtDate(P.first_data) : "") + "). Single days, weeks and the last 7 / 28 days show the full e-mail view."}));
+  part.appendChild($("div",{cls:"note",text:"Custom range: Promptwatch ranks prompts for a whole window, so for these dates the tab adds up Promptwatch's daily figures (" + have.length + " of " + days.length + " days available" + (P.first_data && w.a < P.first_data ? "; Promptwatch tracking for this project starts " + fmtDate(P.first_data) : "") + "). Single days, weeks and the last 7 / 28 days show Promptwatch's own figures for the whole window."}));
   var cnt = function(list){ var o = {r1:0, top3:0, gap:0, n:0, resp:0, ment:0, days:list.length}; list.forEach(function(d){ var b = dayB(d), S = pwStats(b); o.r1 += S.r1; o.top3 += S.top3; o.gap += S.gap; o.n += S.n; o.resp += (b.sum || [])[0] || 0; o.ment += (b.sum || [])[1] || 0; }); return o; };
   var C = cnt(have), PC = phave.length ? cnt(phave) : null;
   var avg = function(o, k){ return o && o.days ? Math.round(o[k] / o.days * 10) / 10 : null; };
@@ -1129,10 +1129,73 @@ function pwCustom(s, part, w){
       {key:"r1",label:"#1 prompt-days",n:1},{key:"top3",label:"Top-3 prompt-days",n:1},{key:"on",label:"Ranked prompt-days",n:1}], bl)],
       "Each prompt on each day counts once (" + have.length + " days × the prompts tracked that day). Source: /prompts/brand-rank (one request per day)."));
   }
+  var fullDays = have.filter(function(d){ return dayB(d).tier === "full"; });
+  if (have.length > 1){
+    // won / lost between the first and the last day of the range
+    var first = have[0], last = have[have.length - 1], fb = dayB(first), lb = dayB(last), won = [], lost = [];
+    Object.keys(lb.rank).forEach(function(pid){ var now = pwSelf(lb.rank[pid])[0], was = fb.rank[pid] ? pwSelf(fb.rank[pid])[0] : null;
+      if (now === 1 && was !== 1){ var t0 = pwTop(fb.rank[pid] || []); won.push({prompt:txt(pid), was:was, vis:pwSelf(lb.rank[pid])[1], over:t0 ? t0[0] : "–"}); }
+      if (was === 1 && now !== 1){ var t1 = pwTop(lb.rank[pid]); lost.push({prompt:txt(pid), now:now, vis:pwSelf(lb.rank[pid])[1], top:t1}); } });
+    var hdr = fmtDay(first) + " → " + fmtDay(last);
+    part.appendChild($("div",{cls:"grid2"},[
+      card("ai-won-"+s.id, "Prompts won (" + won.length + ")", [table([{key:"prompt",label:"Prompt"},{label:"Brand rank",get:function(r){ return $("span",{cls:"pwmove"},[pwRankCell(r.was), " → ", pwRankCell(1)]); }},{key:"vis",label:"Vis.",n:1,kind:"pct"},{key:"over",label:"Was #1"}], won, "No prompts won across these dates.")],
+        "#1 on the last day of the range, not #1 on its first day (" + hdr + "). Source: /prompts/brand-rank per day."),
+      card("ai-lost-"+s.id, "Prompts lost (" + lost.length + ")", [table([{key:"prompt",label:"Prompt"},{label:"Brand rank",get:function(r){ return $("span",{cls:"pwmove"},[pwRankCell(1), " → ", pwRankCell(r.now)]); }},{label:"Now #1",get:function(r){ return r.top ? r.top[0] + " (" + fmt(r.top[4], "pct") + ")" : "–"; }}], lost, "No prompts lost across these dates.")],
+        "#1 on the first day of the range, not #1 on its last day (" + hdr + ").")]));
+    // close to #1 / gaps by how often it happened
+    var plist = Object.keys(rows).map(function(k){ return rows[k]; });
+    var close = plist.filter(function(r){ return r.d3 - r.d1 >= r.seen / 2 && r.d1 < r.seen / 2; }).sort(function(x, y){ return (y.d3 - y.d1) - (x.d3 - x.d1); });
+    var gaps = plist.filter(function(r){ return r.dg >= r.seen / 2; }).sort(function(x, y){ return y.dg - x.dg; });
+    var topOn = function(pid){ var c = {}; have.forEach(function(d){ var t = pwTop(dayB(d).rank[pid] || []); if (t) c[t[0]] = (c[t[0]] || 0) + 1; }); var b = Object.keys(c).sort(function(x, y){ return c[y] - c[x]; })[0]; return b ? b + " (" + c[b] + " day" + (c[b] === 1 ? "" : "s") + ")" : "–"; };
+    part.appendChild(card("ai-close-"+s.id, "Close to #1 (" + close.length + ")", [table([{key:"prompt",label:"Prompt"},{label:"Days #2-3",get:function(r){ return (r.d3 - r.d1) + "/" + r.seen; }},{label:"Days #1",get:function(r){ return r.d1 + "/" + r.seen; }},{label:"Most often #1",get:function(r){ return topOn(r.pid); }},{label:"Latest",get:function(r){ return pwRankCell(r.last); }}], close, "No prompts were mostly #2-3.")],
+      "Prompts ranked #2-3 on at least half of their days and #1 on fewer than half: the quickest wins. Source: /prompts/brand-rank per day."));
+    part.appendChild(card("ai-gaps-"+s.id, "Gaps (" + gaps.length + ")", [table([{key:"prompt",label:"Prompt"},{label:"Days gap",get:function(r){ return r.dg + "/" + r.seen; }},{label:"Most often #1",get:function(r){ return topOn(r.pid); }},{label:"Latest",get:function(r){ return pwRankCell(r.last); }}], gaps, "No prompts were mostly gaps.")],
+      "A tracked competitor is ranked and Intellectyx is not, on at least half of the prompt's days. Source: /prompts/brand-rank per day."));
+  }
+  // visibility by LLM: average of Promptwatch's daily values per brand and LLM
+  var llmAvg = function(list){ var acc = {}, models = {}, names = {}; list.forEach(function(d){ var vh = (dayB(d) || {}).vis_llm; if (!vh) return;
+      vh.models.forEach(function(m){ models[m[0]] = m[1]; });
+      vh.cells.forEach(function(c){ var b = vh.brands[c[0]]; if (!b || typeof c[2] !== "number") return; var k = b[0]; names[k] = b; var o = (acc[k] || (acc[k] = {}))[c[1]] || (acc[k][c[1]] = [0, 0]); o[0] += c[2]; o[1]++; }); });
+    return {acc:acc, models:models, names:names}; };
+  var LA = llmAvg(have), LP = llmAvg(phave);
+  var lmods = Object.keys(LA.models);
+  if (lmods.length){
+    var av2 = function(L, b, m){ var o = (L.acc[b] || {})[m]; return o ? o[0] / o[1] : null; };
+    var selfName = Object.keys(LA.names).filter(function(k){ return LA.names[k][2] === "SELF"; })[0];
+    var brs = Object.keys(LA.names).sort(function(x, y){ return (LA.names[y][2] === "SELF") - (LA.names[x][2] === "SELF") || ((av2(LA, y, lmods[0]) || 0) - (av2(LA, x, lmods[0]) || 0)); });
+    var posAvg = {}; fullDays.forEach(function(d){ var pl = dayB(d).pos_llm || {}; Object.keys(pl).forEach(function(m){ var o = posAvg[m] || (posAvg[m] = [0, 0]); o[0] += pl[m]; o[1]++; }); });
+    var vrows = brs.map(function(b){ return {name:b + (LA.names[b][2] === "SELF" ? " (you)" : ""), b:b}; });
+    if (selfName && phave.length) vrows.push({name:"Intellectyx vs prev. period (pts)", kind:"chg"});
+    if (fullDays.length) vrows.push({name:"Intellectyx position in answer", kind:"pos"});
+    part.appendChild(card("ai-llm-"+s.id, "Visibility by LLM", [table([{key:"name",label:"Brand · visibility %"}].concat(lmods.map(function(m){ return {label:pwLabel(P, m, LA.models[m]), n:1, get:function(r){
+      if (r.kind === "chg"){ var c = av2(LA, selfName, m), p = av2(LP, selfName, m); if (c === null || p === null) return "-"; var d = Math.round((c - p) * 10) / 10; return $("span",{cls:d > 0 ? "up" : d < 0 ? "down" : "flat", text:(d > 0 ? "▲" : d < 0 ? "▼" : "") + pwF1(Math.abs(d))}); }
+      if (r.kind === "pos"){ var o = posAvg[m]; return o ? "#" + pwF1(o[0] / o[1]) : "-"; }
+      var v = av2(LA, r.b, m); return v === null ? "-" : pwF1(v); }}; })), vrows)],
+      "Average of Promptwatch's daily visibility score per brand on each LLM (" + have.length + " days)" + (fullDays.length ? "; position in answer = average of " + fullDays.length + " daily values" : "") + ". Source: /performance-heatmap per day."));
+  }
+  // our pages cited by AI: daily citation counts added up
+  if (fullDays.length){
+    var urls = {};
+    fullDays.forEach(function(d){ var b = dayB(d);
+      ((b.cites || {}).rows || []).forEach(function(r){ var o = urls[r[0]] || (urls[r[0]] = {url:r[0], page:r[1] || r[0], times:0, posw:0, min:null, max:null, models:{}, ps:{}});
+        o.times += r[2] || 0; if (typeof r[4] === "number") o.posw += r[4] * (r[2] || 0); if (r[5] != null) o.min = o.min === null ? r[5] : Math.min(o.min, r[5]); if (r[6] != null) o.max = o.max === null ? r[6] : Math.max(o.max, r[6]); (r[7] || []).forEach(function(m){ o.models[m] = 1; }); });
+      Object.keys(b.cites_prompt || {}).forEach(function(pid){ (b.cites_prompt[pid] || []).forEach(function(c){ var o = urls[c[0]]; if (!o) return; o.ps[pid] = (o.ps[pid] || 0) + (c[2] || 0); }); }); });
+    var lastRank = function(pid){ return rows[pid] ? rows[pid].last : null; };
+    var crow = Object.keys(urls).map(function(k){ var o = urls[k]; o.avg = o.times ? o.posw / o.times : null; o.plist = Object.keys(o.ps).map(function(pid){ return {pid:pid, n:o.ps[pid], rank:lastRank(pid)}; }).sort(function(x, y){ return y.n - x.n; }); return o; })
+      .sort(function(x, y){ return y.times - x.times; });
+    part.appendChild(card("ai-cited-"+s.id, "Our pages cited by AI", [table([{label:"Page",get:function(r){ var sh = r.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""); return $("div",{cls:"pwpage"},[$("div",{cls:"t",text:r.page}), $("a",{href:r.url,target:"_blank",rel:"noopener",text:sh})]); }},
+      {key:"times",label:"Times cited",n:1},
+      {label:"Avg source position",n:1,get:function(r){ return $("span",{cls:"pwrc"},[$("span",{text:r.avg !== null ? "#" + pwF1(r.avg) : "-"}), $("small",{text:"best #" + (r.min || "-") + " · worst #" + (r.max || "-")})]); }},
+      {label:"Cited by",get:function(r){ var ms = Object.keys(r.models); return ms.slice(0, 3).map(function(m){ return pwLabel(P, m); }).join(", ") + (ms.length ? " · " + ms.length + " LLM" + (ms.length === 1 ? "" : "s") : ""); }},
+      {label:"Tracked prompts that cite this page (latest Intellectyx brand rank)",get:function(r){ if (!r.plist.length) return "-"; var box = $("div",{cls:"pwcp"},[$("b",{text:r.plist.length + " prompt" + (r.plist.length === 1 ? "" : "s")})]);
+        var list = function(xs){ return xs.map(function(x){ return $("div",null,[pwRankCell(x.rank), " " + txt(x.pid) + " (" + x.n + "×)"]); }); };
+        list(r.plist.slice(0, 3)).forEach(function(dv){ box.appendChild(dv); }); if (r.plist.length > 3) box.appendChild(detailToggle("+" + (r.plist.length - 3) + " more", function(){ return $("div",{cls:"pwcp"}, list(r.plist)); })); return box; }}], crow, "No Intellectyx pages were cited on these days.")],
+      "Intellectyx pages cited in AI answers, adding up Promptwatch's daily citation counts for the " + fullDays.length + " of " + days.length + " days that have citation details" + (fullDays.length < have.length ? " (the other days are still being fetched)" : "") + ". Avg source position = average over all citations. Source: /citations/grouped per day."));
+  }
   // AI referral visits: sum of Promptwatch's daily visits per platform
   var av = P.ai_visits_daily;
   if (av && (av.dates || []).length){
-    var idx = {}; av.dates.forEach(function(d, i){ idx[String(d).slice(0, 10)] = i; });
+    var idx = {}; av.dates.forEach(function(d, i){ var k = /^\d{4}-\d\d-\d\d/.test(String(d)) ? String(d).slice(0, 10) : addDays(P.end, -(av.dates.length - 1 - i)); idx[k] = i; });
     var sum = function(data, list){ var t = 0, n = 0; list.forEach(function(d){ var i = idx[d]; if (i !== undefined){ t += data[i] || 0; n++; } }); return n ? t : null; };
     var rr = av.series.map(function(x){ return {ref:x[0], visits:sum(x[1], days), prev:sum(x[1], pdays)}; }).filter(function(r){ return r.visits || r.prev; }).sort(function(x, y){ return (y.visits || 0) - (x.visits || 0); });
     var covered = days.filter(function(d){ return idx[d] !== undefined; }).length;
@@ -1140,6 +1203,11 @@ function pwCustom(s, part, w){
       {label:"Change",n:1,get:function(r){ if (!r.prev) return "-"; var c = Math.round((r.visits - r.prev) / r.prev * 1000) / 10; return $("span",{cls:c > 0 ? "up" : c < 0 ? "down" : "flat", text:(c > 0 ? "▲ " : c < 0 ? "▼ " : "") + pwF1(Math.abs(c)) + "%"}); }}], rr, "No AI referral visits recorded for these dates.")],
       "Visits to our site from AI platforms, summed from Promptwatch Visitor Analytics' daily numbers" + (covered < days.length ? " (" + covered + " of " + days.length + " days available; Promptwatch keeps 60 days)" : "") + ". Source: /analytics/visitors/trend."));
   }
+  // same order as the e-mail: won / lost before the prompt table, brand comparison last
+  var q = function(id){ return part.querySelector("#" + id + "-" + s.id); };
+  var pr = q("ai-range-prompts"), wl = q("ai-won"); if (pr && wl && wl.parentNode.classList.contains("grid2")) part.insertBefore(wl.parentNode, pr);
+  if (pr && q("ai-visday")) part.insertBefore(q("ai-visday"), wl && wl.parentNode.classList.contains("grid2") ? wl.parentNode : pr);
+  var bc = q("ai-brands"); if (bc) part.appendChild(bc);
   return true;
 }
 function uLabel(base, k){ return k && k.avg ? base + " (avg. per day)" : base; }
