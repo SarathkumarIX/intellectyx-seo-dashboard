@@ -773,6 +773,7 @@ function bingPart(s, part){
 }
 // ================= AI Search (Promptwatch) =================
 // Mirrors the "IX AI Visibility" e-mail. Every value is Promptwatch's; windows are UTC days, as in Promptwatch.
+function pwF1(v){ return (Math.round(v * 10 + 1e-9) / 10).toFixed(1); }
 function pwSnap(sid){ var site = DAILY && DAILY.sites && DAILY.sites[sid]; return site && site.promptwatch && site.promptwatch.bundles ? site.promptwatch : null; }
 function pwSelf(brands){ if (!brands) return null; if (!brands.length) return [-1, null]; for (var i = 0; i < brands.length; i++) if (brands[i][2] === "SELF") return [brands[i][3], brands[i][4]]; return [0, null]; }
 function pwTop(brands){ for (var i = 0; i < (brands || []).length; i++) if (brands[i][3] === 1) return brands[i]; return null; }
@@ -814,14 +815,14 @@ function pwTotals(sid){
 function pwKpi(label, value, k, note, pts, lowerBetter){
   var d = k && typeof k.current === "number" && typeof k.previous === "number" ? Math.round((k.current - k.previous) * 10) / 10 : null;
   var vs = "vs prev. " + note;
-  var ch = d === null ? $("span",{cls:"flat",text:"no prior data"}) : !d ? $("span",{cls:"flat",text:"no change " + vs}) : $("span",{cls:(d > 0) !== !!lowerBetter ? "up" : "down", text:(d > 0 ? "▲ " : "▼ ") + (pts ? Math.abs(d).toFixed(1) + " pts " : fmt(Math.abs(d)) + " ") + vs});
+  var ch = d === null ? $("span",{cls:"flat",text:"no prior data"}) : !d ? $("span",{cls:"flat",text:"no change " + vs}) : $("span",{cls:(d > 0) !== !!lowerBetter ? "up" : "down", text:(d > 0 ? "▲ " : "▼ ") + (pts ? pwF1(Math.abs(d)) + " pts " : fmt(Math.abs(d)) + " ") + vs});
   return $("div",{cls:"kpi"},[$("div",{cls:"l",text:label}),$("div",{cls:"v",text:value}),$("div",{cls:"d"},[ch])]);
 }
 function pwPageCell(row, sub){  // [url, title, count, avgPos]
   if (!row) return "-";
   var u = row[0] || "", short = u.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
   return $("div",{cls:"pwpage"},[$("div",{cls:"t",text:row[1] || short}), $("a",{href:u,target:"_blank",rel:"noopener",text:short}),
-    $("small",{text:"cited " + fmt(row[2]) + "× · source position #" + (typeof row[3] === "number" ? row[3].toFixed(1) : "-")}), sub ? $("small",{text:sub}) : null]);
+    $("small",{text:"cited " + fmt(row[2]) + "× · source position #" + (typeof row[3] === "number" ? pwF1(row[3]) : "-")}), sub ? $("small",{text:sub}) : null]);
 }
 function pwStatusBar(S){
   var parts = [["Winning", S.r1, "r1"], ["Top 3", S.top2_3, "r2"], ["Visible", S.vis, "r4"], ["Gap", S.gap, "gap"], ["No tracked brands", S.none, "nb"]];
@@ -937,7 +938,7 @@ function aiPart(s, part){
     var mods = (vh.models || []).map(function(m){ return m[0]; }).filter(function(m){ return B.rank_llm[m]; });
     var lrows = trows.filter(function(r){ return S.self[r.pid]; });
     var lcols = [{key:"prompt",label:"Prompt"}].concat(mods.map(function(m){ return {label:pwLabel(P, m), get:function(r){ var rr = B.rank_llm[m][r.pid], pos = ((B.pos_prompt || {})[r.pid] || {})[m];
-      return pwRankCell(rr ? rr[0] : null, typeof pos === "number" && rr && rr[0] > 0 ? "pos " + pos.toFixed(1) : ""); }}; }));
+      return pwRankCell(rr ? rr[0] : null, typeof pos === "number" && rr && rr[0] > 0 ? "pos " + pwF1(pos) : ""); }}; }));
     var tot = mods.map(function(m){ return pwLabel(P, m) + " " + Object.keys(B.rank_llm[m]).filter(function(pid){ return B.rank_llm[m][pid][0] === 1; }).length; }).join(" · ");
     part.appendChild(card("ai-llm-prompts-"+s.id, "LLM-wise prompt view", [table(lcols, lrows), $("div",{cls:"pwleg"},[$("span",null,[$("b",{text:"Prompts ranked #1: "}), tot])])],
       "Brand rank of Intellectyx for each prompt using only that LLM's answers (#1 = most visible brand on that LLM). pos = position in answer on that LLM (order in which Intellectyx is named, #1 = named first). Gap = a tracked competitor is ranked, Intellectyx is not · – = no tracked brand mentioned · · = no answers. Source: /prompts/brand-rank per LLM · /performance-heatmap per prompt (metric = position)."));
@@ -965,7 +966,7 @@ function aiPart(s, part){
       return {page:r[1] || r[0], url:r[0], times:r[2], share:r[3], avg:r[4], min:r[5], max:r[6], models:r[7] || [], nm:r[8], ps:ps}; });
     var ccols = [{label:"Page",get:function(r){ var short = r.url.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, ""); return $("div",{cls:"pwpage"},[$("div",{cls:"t",text:r.page}), $("a",{href:r.url,target:"_blank",rel:"noopener",text:short})]); }},
       {key:"times",label:"Times cited",n:1},{key:"share",label:"Citation share",n:1,kind:"pct"},
-      {label:"Avg source position",n:1,get:function(r){ return $("span",{cls:"pwrc"},[$("span",{text:typeof r.avg === "number" ? "#" + r.avg.toFixed(1) : "-"}), $("small",{text:"best #" + (r.min || "-") + " · worst #" + (r.max || "-")})]); }},
+      {label:"Avg source position",n:1,get:function(r){ return $("span",{cls:"pwrc"},[$("span",{text:typeof r.avg === "number" ? "#" + pwF1(r.avg) : "-"}), $("small",{text:"best #" + (r.min || "-") + " · worst #" + (r.max || "-")})]); }},
       {label:"Cited by",get:function(r){ return (r.models || []).slice(0, 3).map(function(m){ return pwLabel(P, m); }).join(", ") + (r.nm ? " · " + r.nm + " LLM" + (r.nm === 1 ? "" : "s") : ""); }},
       {label:"Tracked prompts that cite this page (Intellectyx brand rank)",get:function(r){ if (!r.ps.length) return "-";
         var n1 = r.ps.filter(function(x){ return x.rank === 1; }).length;
@@ -981,7 +982,7 @@ function aiPart(s, part){
   if (full && B.refs){
     var rrows = B.refs.map(function(r){ return {ref:r[0], visits:r[1], prev:r[2], hits:r[3], chgp:r[2] ? Math.round((r[1] - r[2]) / r[2] * 1000) / 10 : (r[1] ? 100 : 0)}; }).sort(function(x, y){ return (y.visits - x.visits) || (x.ref < y.ref ? -1 : 1); });
     var kids = [table([{key:"ref",label:"AI platform"},{key:"visits",label:"Visits",n:1},{key:"prev",label:"Prev. " + nn,n:1},
-      {label:"Change",n:1,get:function(r){ return $("span",{cls:r.chgp > 0 ? "up" : r.chgp < 0 ? "down" : "flat", text:(r.chgp > 0 ? "▲ " : r.chgp < 0 ? "▼ " : "● ") + Math.abs(r.chgp).toFixed(1) + "%"}); }},{key:"hits",label:"Hits",n:1}], rrows)];
+      {label:"Change",n:1,get:function(r){ return $("span",{cls:r.chgp > 0 ? "up" : r.chgp < 0 ? "down" : "flat", text:(r.chgp > 0 ? "▲ " : r.chgp < 0 ? "▼ " : "● ") + pwF1(Math.abs(r.chgp)) + "%"}); }},{key:"hits",label:"Hits",n:1}], rrows)];
     Object.keys(B.ref_pages || {}).forEach(function(ref){
       var rr = rrows.filter(function(x){ return x.ref === ref; })[0] || {};
       kids.push(sub(ref + " · " + fmt(rr.visits) + " visit" + (rr.visits === 1 ? "" : "s") + " (prev. " + nn + ": " + fmt(rr.prev) + ")", null,
@@ -998,9 +999,9 @@ function aiPart(s, part){
     var brows = Object.keys(vh.brands).map(function(id){ var b = vh.brands[id]; return {id:id, name:b[0] + (b[2] === "SELF" ? " (you)" : ""), self:b[2] === "SELF"}; })
       .sort(function(x, y){ return (y.self - x.self) || (((cell[y.id] || {})[m0] || 0) - ((cell[x.id] || {})[m0] || 0)); });
     var vcols = [{key:"name",label:"Brand · visibility %"}].concat(vh.models.map(function(m){ return {label:pwLabel(P, m[0], m[1]), n:1, get:function(r){
-      if (r.kind === "chg"){ var c = selfVis[m[0]], p = pself[m[0]]; if (typeof c !== "number" || typeof p !== "number") return "-"; var d = Math.round((c - p) * 10) / 10; return $("span",{cls:d > 0 ? "up" : d < 0 ? "down" : "flat", text:(d > 0 ? "▲" : d < 0 ? "▼" : "") + Math.abs(d).toFixed(1)}); }
-      if (r.kind === "pos"){ var v = (B.pos_llm || {})[m[0]]; return typeof v === "number" ? "#" + v.toFixed(1) : "-"; }
-      var x = (cell[r.id] || {})[m[0]]; return typeof x === "number" ? x.toFixed(1) : "-"; }}; }));
+      if (r.kind === "chg"){ var c = selfVis[m[0]], p = pself[m[0]]; if (typeof c !== "number" || typeof p !== "number") return "-"; var d = Math.round((c - p) * 10) / 10; return $("span",{cls:d > 0 ? "up" : d < 0 ? "down" : "flat", text:(d > 0 ? "▲" : d < 0 ? "▼" : "") + pwF1(Math.abs(d))}); }
+      if (r.kind === "pos"){ var v = (B.pos_llm || {})[m[0]]; return typeof v === "number" ? "#" + pwF1(v) : "-"; }
+      var x = (cell[r.id] || {})[m[0]]; return typeof x === "number" ? pwF1(x) : "-"; }}; }));
     var extra = [];
     if (pvh) extra.push({name:"Intellectyx vs prev. " + nn + " (pts)", kind:"chg"});
     if (B.pos_llm) extra.push({name:"Intellectyx position in answer", kind:"pos"});
