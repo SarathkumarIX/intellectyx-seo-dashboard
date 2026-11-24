@@ -373,13 +373,39 @@ small.muted{color:var(--muted);font-size:12px}
 .pwr.r4,.pwtrack .pwr.r4{background:var(--pw4bg);color:var(--pw4);box-shadow:inset 0 0 0 1px var(--pw4ring)}
 .pwr.gap,.pwtrack .pwr.gap{background:var(--pwgbg);color:var(--pwgap);box-shadow:inset 0 0 0 1px var(--pwgring);font-size:11px;letter-spacing:.04em;text-transform:uppercase}
 .pwr.nb,.pwtrack .pwr.nb{background:transparent;box-shadow:none;border:0;color:var(--muted);font-weight:500}
-.pwr.nd,.pwtrack .pwr.nd{background:transparent;box-shadow:none;border:0;position:relative}
-.pwtrack .pwr.nd::after{content:"";width:4px;height:4px;border-radius:50%;background:var(--muted);opacity:.6}
+.pwr.nd,.pwtrack .pwr.nd{background:transparent;box-shadow:none;border:0;position:relative;display:inline-flex;align-items:center;justify-content:center;min-width:14px}
+.pwr.nd::after{content:"";width:4px;height:4px;border-radius:50%;background:var(--muted);opacity:.6}
 .pwtrack .pwwk .pwr{width:46px;height:28px;font-size:13px}
 .pwtrack .pwwk .pwr.r1{background:var(--pw1solid);color:var(--pw1solidink);box-shadow:0 2px 8px var(--pw1glow)}
 .pwtrack .pwwk .pwr.r2{background:var(--pw2solid);color:var(--pw2solidink);box-shadow:none}
 .pwtrack td:has(.pwwk){background:var(--pwwkbg)!important}
 .pwleg i.pwr{box-shadow:none}
+
+/* executive clean-up */
+.sitechip{gap:10px}
+.srcok{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#bfe58a;padding-left:10px;border-left:1px solid rgba(255,255,255,.18)}
+.srcok::before{content:"";width:7px;height:7px;border-radius:50%;background:#32d583;box-shadow:0 0 0 3px rgba(50,213,131,.18)}
+.srcok.warn{color:#fec84b}.srcok.warn::before{background:#fdb022;box-shadow:0 0 0 3px rgba(253,176,34,.2)}
+.infobtn{appearance:none;border:0;background:transparent;color:var(--muted);cursor:pointer;padding:2px;margin-left:4px;display:inline-flex;align-items:center;border-radius:50%;vertical-align:middle;opacity:.7}
+.infobtn:hover,.infobtn.on{color:var(--brand);opacity:1}
+.infobtn svg{width:15px;height:15px}
+.desc-pop{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-top:8px!important}
+.datanotes{margin:6px 0 20px;font-size:12.5px;color:var(--muted)}
+.datanotes summary{cursor:pointer;color:var(--muted);font-weight:600;list-style:none;display:inline-flex;align-items:center;gap:6px}
+.datanotes summary::before{content:"ⓘ";font-size:13px}
+.datanotes[open] summary{margin-bottom:8px}
+.datanotes .note{margin:6px 0}
+.glance{display:flex;flex-direction:column;gap:2px;margin-top:6px}
+.glrow{display:grid;grid-template-columns:14px minmax(150px,220px) 1fr auto;align-items:center;gap:14px;padding:12px 4px;border-bottom:1px solid var(--line)}
+.glrow:last-child{border-bottom:0}
+.gldot{width:10px;height:10px;border-radius:3px}
+.gldot.gsc{background:var(--gsc)}.gldot.ga{background:var(--ga)}.gldot.bing{background:#0e9f9a}.gldot.ai{background:var(--ai)}
+.glname{font-weight:600;color:var(--ink2);font-size:13.5px}
+.glmain{font-size:17px;font-weight:700;color:var(--ink);display:flex;flex-direction:column;gap:2px}
+.glmain small{font-size:12.5px;font-weight:500;color:var(--muted)}
+.glchip{font-size:12.5px;font-weight:700;border-radius:999px;padding:5px 12px;white-space:nowrap}
+.glchip.good{background:var(--pw1bg);color:var(--pw1)}.glchip.bad{background:var(--pwgbg);color:var(--pwgap)}.glchip.flat{background:var(--card2);color:var(--muted)}
+@media (max-width:640px){.glrow{grid-template-columns:12px 1fr auto}.glname{grid-column:2}.glmain{grid-column:2/4}}
 </style>
 </head>
 <body>
@@ -621,8 +647,15 @@ function headRow(h, d, first){
   sr.parentNode.removeChild(sr);
   return [$("div",{cls:"headrow"},[$("div",{cls:"headtxt"},[h, d]), sr])];
 }
-function card(id, title, kids, d){ kids = [].concat(kids); var first = kids.filter(Boolean)[0]; return $("div",{cls:"card",id:id}, headRow($("h2",{text:title}), d ? desc(d) : null, first).concat(kids)); }
-function sub(title, d, kid){ return $("div",{cls:"block"}, headRow($("h3",{text:title}), d ? desc(d) : null, kid).concat([kid])); }
+function infoToggle(h, d){
+  if (!d) return null;
+  d.hidden = true; d.classList.add("desc-pop");
+  var b = $("button",{type:"button",cls:"infobtn",title:"What does this show?","aria-label":"What does this show?","aria-expanded":"false"}); b.innerHTML = INFO;
+  b.addEventListener("click", function(){ d.hidden = !d.hidden; b.setAttribute("aria-expanded", d.hidden ? "false" : "true"); b.classList.toggle("on", !d.hidden); });
+  h.appendChild(b); return d;
+}
+function card(id, title, kids, d){ kids = [].concat(kids); var first = kids.filter(Boolean)[0]; var h = $("h2",{text:title}); return $("div",{cls:"card",id:id}, headRow(h, infoToggle(h, d ? desc(d) : null), first).concat(kids)); }
+function sub(title, d, kid){ var h = $("h3",{text:title}); return $("div",{cls:"block"}, headRow(h, infoToggle(h, d ? desc(d) : null), kid).concat([kid])); }
 function rating(r){ var c = {"Good":"good","Needs improvement":"ni","Poor":"poor"}[r] || "none"; return $("span",{cls:"rating "+c,text:r||"No data"}); }
 function pct(v){ return typeof v === "number" ? Math.round(v*1000)/10 : v; }
 function mk(c, p){ return {current:c, previous:p, change_abs:(typeof c==="number"&&typeof p==="number")?Math.round((c-p)*100)/100:null, change_pct:(typeof c==="number"&&typeof p==="number"&&p)?Math.round((c-p)/p*1000)/10:null}; }
@@ -1256,8 +1289,10 @@ function buildSite(s){
   var hasSem = sr.status === "ok" && ((B && !B.error) || (sr.current && (sr.current.files||[]).length));
   var hasBing = !!(DAILY && DAILY.sites && DAILY.sites[s.id] && DAILY.sites[s.id].bing);
   var hasPW = !!pwSnap(s.id);
-  p.appendChild($("div",{cls:"status"},[statusPill("Search Console", gsc.status), hasBing ? statusPill("Bing", "ok") : null, statusPill("GA4", ga.status), hasPW ? statusPill("Promptwatch", "ok") : null, hasSem || sr.status === "no_exports" || sr.status === "error" ? statusPill("SEMrush", srState, "loaded") : null,
-    B && B.captured_at ? $("span",{cls:"pill",text:"SEMrush read: " + B.captured_at.slice(0,10)}) : null]));
+  var srcs = [["Search Console", gsc.status], hasBing ? ["Bing", "ok"] : null, ["GA4", ga.status], hasPW ? ["Promptwatch", "ok"] : null, hasSem || sr.status === "no_exports" || sr.status === "error" ? ["SEMrush", srState] : null].filter(Boolean);
+  var bad = srcs.filter(function(x){ return x[1] !== "ok"; });
+  SRC = {n:srcs.length, bad:bad.length, list:srcs.map(function(x){ return x[0] + (x[1] === "ok" ? "" : " (" + x[1].replace(/_/g, " ") + ")"); }).join(" · ") + (B && B.captured_at ? " · SEMrush read " + B.captured_at.slice(0,10) : "")};
+  if (bad.length) p.appendChild($("div",{cls:"status"}, bad.map(function(x){ return statusPill(x[0], x[1], "loaded"); })));
 
   var names = [["overview","Overview"],["gsc","Search Console"],["bing","Bing"],["ga4","Google Analytics"],["semrush","SEMrush"],["ai","AI Search"]];
   var nav = $("div",{cls:"subnav"}), parts = {};
@@ -1278,19 +1313,31 @@ function buildSite(s){
   if (!ins.headline && !(ins.summary||[]).length){
     // automatic, numbers-only summary (used for weeks without a written summary)
     var kp = function(k, kind){ if (!k || k.current === null || k.current === undefined) return k && k.na ? "- (single day only)" : "-"; var t = fmt(k.current, kind); if (k.previous !== null && k.previous !== undefined) t += " (prev " + fmt(k.previous, kind) + (k.change_pct !== null && k.change_pct !== undefined ? ", " + (k.change_pct > 0 ? "+" : "") + k.change_pct + "%" : "") + ")"; return t; };
-    var auto = [];
+    var auto = [], glance = [];
+    var gl = function(name, cls, main, k, unit, lowerBetter, extra){
+      var pc = k && typeof k.change_pct === "number" ? k.change_pct : null, ab = k && typeof k.change_abs === "number" ? k.change_abs : null;
+      var dir = unit ? ab : (pc !== null ? pc : ab); var good = dir === null || dir === 0 ? null : (dir > 0) !== !!lowerBetter;
+      var chipTxt = dir === null ? "no comparison" : dir === 0 ? "no change" : (dir > 0 ? "▲ " : "▼ ") + (unit === "pts" ? pwF1(Math.abs(ab)) + " pts" : unit && unit !== "pts" ? fmt(Math.abs(ab)) + " " + unit : Math.abs(pc !== null ? pc : ab) + (pc !== null ? "%" : ""));
+      glance.push($("div",{cls:"glrow"},[$("span",{cls:"gldot " + cls}), $("div",{cls:"glname",text:name}), $("div",{cls:"glmain"},[main, extra ? $("small",{text:extra}) : null]),
+        $("span",{cls:"glchip " + (good === null ? "flat" : good ? "good" : "bad"),text:chipTxt})])); };
+    var cfmt = function(v){ return typeof v !== "number" ? "-" : v >= 10000 ? (Math.round(v / 100) / 10) + "K" : fmt(v); };
+    if (gsc.kpis) gl("Google Search", "gsc", cfmt(gsc.kpis.clicks.current) + " clicks", gsc.kpis.clicks, null, false, cfmt(gsc.kpis.impressions.current) + " impressions · avg. position " + fmt((gsc.kpis.avg_position || {}).current, "pos"));
+    if (ga.kpis) gl("Website visits (GA4)", "ga", cfmt(ga.kpis.sessions.current) + " sessions", ga.kpis.sessions, null, false, cfmt((ga.organic_kpis || {}).sessions ? ga.organic_kpis.sessions.current : null) + " from organic search · " + fmt((ga.kpis.key_events || {}).current) + " key events");
+    var btg = bingTotals(s.id); if (btg && !btg.none) gl("Bing", "bing", cfmt(btg.clicks.current) + " clicks", btg.clicks, null, false, cfmt(btg.impressions.current) + " impressions");
+    var atg = pwTotals(s.id); if (atg && !atg.missing) gl("AI search (Promptwatch)", "ai", "#1 on " + atg.S.r1 + " of " + atg.S.n + " prompts", atg.r1, "at #1", false, "visibility " + fmt(atg.vis.current, "pct") + (typeof atg.vis.change_abs === "number" ? " (" + (atg.vis.change_abs > 0 ? "+" : "") + pwF1(atg.vis.change_abs) + " pts)" : "") + " · mentioned in " + fmt(atg.rate.current, "pct") + " of AI answers");
     if (gsc.kpis) auto.push("Search Console - Clicks " + kp(gsc.kpis.clicks) + " · Impressions " + kp(gsc.kpis.impressions) + " · CTR " + kp(gsc.kpis.ctr_pct, "pct") + " · Avg. position " + kp(gsc.kpis.avg_position, "pos"));
     if (ga.kpis) auto.push("Google Analytics - " + (ga.kpis.totalUsers && ga.kpis.totalUsers.na ? "" : uLabel("Users", ga.kpis.totalUsers) + " " + kp(ga.kpis.totalUsers) + " · ") + "Sessions " + kp(ga.kpis.sessions) + " · Organic sessions " + kp((ga.organic_kpis||{}).sessions) + " · Key events " + kp(ga.kpis.key_events));
     var bts = bingTotals(s.id);
     if (bts && !bts.none) auto.push("Bing - Clicks " + kp(bts.clicks) + " · Impressions " + kp(bts.impressions) + " · CTR " + kp(bts.ctr_pct, "pct"));
     var ats = pwTotals(s.id);
     if (ats && !ats.missing) auto.push("AI search (Promptwatch) - #1 on " + ats.S.r1 + " of " + ats.S.n + " prompts · Visibility " + kp(ats.vis, "pct") + " · Brand mention rate " + kp(ats.rate, "pct"));
-    if (auto.length){ sum.appendChild($("div",{cls:"desc",text: s.custom ? "Automatic summary from the data for the selected dates." : "Automatic summary from the data (no written summary for this week)."})); sum.appendChild($("ul",null, auto.map(function(t){ return $("li",{text:t}); }))); }
+    if (glance.length){ sum.appendChild($("div",{cls:"glance"}, glance)); }
+    else if (auto.length){ sum.appendChild($("ul",null, auto.map(function(t){ return $("li",{text:t}); }))); }
     else sum.appendChild($("div",{cls:"empty",text:"No data for this week."}));
   }
   O.appendChild(sum);
   var period = (R.period.days === 1 ? R.period.current[0] : R.period.current[0] + " to " + R.period.current[1]) + (s.custom ? (R.period.days === 1 ? " vs " + R.period.previous[0] + " (same weekday, 7 days earlier)" : " vs previous " + R.period.days + " days") : " vs previous week");
-  function srcCard(id, cls, title, sub){ return $("div",{cls:"card kcard " + cls, id:id},[$("div",{cls:"khead"},[$("span",{cls:"kdot"}), $("h2",{text:title}), sub ? $("span",{cls:"ksub",text:sub}) : null])]); }
+  function srcCard(id, cls, title, sub){ return $("div",{cls:"card kcard " + cls, id:id, title: sub || ""},[$("div",{cls:"khead"},[$("span",{cls:"kdot"}), $("h2",{text:title})])]); }
   if (gsc.kpis){
     var bs = gsc.brand_split || {};
     var kg = srcCard("kpis-gsc-"+s.id, "gsc", "Google Search Console", period);
@@ -1586,6 +1633,12 @@ function buildSite(s){
   var hiC = highIntentCard(s); if (hiC && parts.gsc){ var dg = parts.gsc.querySelector("#daybyday-gsc-" + s.id); if (dg && dg.nextSibling) parts.gsc.insertBefore(hiC, dg.nextSibling); else placeAfterFirst(parts.gsc, hiC); }
   placeAfterFirst(parts.ga4, dayByDayCard(s, "ga"));
   if (parts.bing && parts.bing.parentNode) placeAfterFirst(parts.bing, dayByDayCard(s, "bing"));
+  // per-tab source notes go into one collapsed "About this data" box at the bottom of the tab
+  Object.keys(parts).forEach(function(k){ var host = parts[k]; if (!host || !host.parentNode) return;
+    var notes = host.querySelectorAll(":scope > .note"); if (!notes.length) return;
+    var det = $("details",{cls:"datanotes"},[$("summary",{text:"About this data"})]);
+    Array.prototype.forEach.call(notes, function(nn){ det.appendChild(nn); });
+    host.appendChild(det); });
   pruneEmpty(p);
   // keep the tab the user was on when the date filter changes (the page is rebuilt for each period)
   if (SUBTAB && SUBTAB !== "overview"){
@@ -1597,7 +1650,7 @@ function buildSite(s){
   }
   return p;
 }
-var SUBTAB = null;
+var SUBTAB = null, SRC = null;
 // ---------- SEMrush Position Tracking: rankings and pages, laid out like SEMrush ----------
 function ymdLabel(d){ var x = new Date(d + "T00:00:00Z"); return x.toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"}); }
 function trunc(v, dp){ if (typeof v !== "number") return "-"; var f = Math.pow(10, dp); return (Math.round(v * f) / f).toFixed(dp); }
@@ -1975,8 +2028,9 @@ function dayBounds(){ var mn = null, mx = null; if (DAILY) Object.keys(DAILY.sit
 var tabs = document.getElementById("tabs"), panels = document.getElementById("panels"), foot = document.getElementById("foot");
 // slim, closable info bar; closing hides it in this browser until "About these numbers" is clicked
 var NOTE_KEY = "ixseo.infobar.hidden";
-function notesHidden(){ try { return localStorage.getItem(NOTE_KEY) === "1"; } catch(e){ return !!window.__ixNoteHidden; } }
-function setNotesHidden(v){ try { if (v) localStorage.setItem(NOTE_KEY, "1"); else localStorage.removeItem(NOTE_KEY); } catch(e){} window.__ixNoteHidden = v; }
+var NOTE_SHOW = "ixseo.infobar.shown";
+function notesHidden(){ try { return localStorage.getItem(NOTE_SHOW) !== "1"; } catch(e){ return window.__ixNoteHidden !== false; } }
+function setNotesHidden(v){ try { if (v) localStorage.removeItem(NOTE_SHOW); else localStorage.setItem(NOTE_SHOW, "1"); } catch(e){} window.__ixNoteHidden = v; }
 var INFO = '<svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="7.25" stroke="currentColor" stroke-width="1.6"/><path d="M9 8v4.5M9 5.6v.1" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 function infoBar(summary, details, warnings){
   var bar = $("div",{cls:"infobar",role:"note"}), ic = $("span",{cls:"ibicon"}); ic.innerHTML = INFO;
@@ -2025,7 +2079,7 @@ function render(){
     tabs.appendChild(b); panels.appendChild(panel);
   });
   tabs.hidden = R.sites.length === 1;
-  if (R.sites.length === 1) chip.appendChild($("div",{cls:"sitechip"},[$("i",{text:"◉"}), "Website: " + R.sites[0].label]));
+  if (R.sites.length === 1) chip.appendChild($("div",{cls:"sitechip",title:"Data sources: " + (SRC ? SRC.list : "")},[$("i",{text:"◉"}), R.sites[0].label, SRC ? $("span",{cls:"srcok" + (SRC.bad ? " warn" : ""),text:(SRC.bad ? SRC.bad + " source" + (SRC.bad === 1 ? "" : "s") + " need attention" : SRC.n + " data sources live")}) : null]));
   foot.appendChild($("div",{text:"Sources: Google Search Console API, Google Analytics Data API (GA4), PageSpeed Insights API (Chrome UX Report), SEMrush. Notes:"}));
   foot.appendChild($("ul",{cls:"notes"}, (R.custom ? D.weeks[0].notes || [] : R.notes || []).map(function(n){ return $("li",{text:n}); })));
   syncNotes();
