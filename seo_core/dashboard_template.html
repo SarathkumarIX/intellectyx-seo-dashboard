@@ -907,7 +907,7 @@ function pwCountry(c){
 }
 function pwFlag(c){ if (!/^[A-Za-z]{2}$/.test(c || "")) return "🌐"; return String.fromCodePoint.apply(null, c.toUpperCase().split("").map(function(x){ return 127397 + x.charCodeAt(0); })); }
 // The LLMs the Promptwatch monitor tracks (Promptwatch -> Monitors -> Settings -> Models), always shown in this order.
-var PW_LLMS = ["ChatGPT", "AI Overview", "Copilot", "Gemini", "Meta AI", "Claude"];
+var PW_LLMS = ["ChatGPT", "AI Overview", "Gemini", "Meta AI", "Claude", "Copilot"];
 function pwModels(P, seen){
   var byLabel = {}; Object.keys(P.models || {}).forEach(function(id){ byLabel[(P.models[id] || [id])[0]] = byLabel[(P.models[id] || [id])[0]] || id; });
   (seen || []).forEach(function(m){ var l = pwLabel(P, m[0], m[1]); if (byLabel[l] === undefined || (seen || []).some(function(x){ return x[0] === m[0]; })) byLabel[l] = m[0]; });
