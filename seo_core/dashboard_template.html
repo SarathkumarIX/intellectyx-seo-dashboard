@@ -906,6 +906,13 @@ function pwCountry(c){
   try { PW_DN = PW_DN || new Intl.DisplayNames(["en"], {type:"region"}); var n = PW_DN.of(c.toUpperCase()); return n && n !== c.toUpperCase() ? n : c; } catch(e){ return c; }
 }
 function pwFlag(c){ if (!/^[A-Za-z]{2}$/.test(c || "")) return "🌐"; return String.fromCodePoint.apply(null, c.toUpperCase().split("").map(function(x){ return 127397 + x.charCodeAt(0); })); }
+// The LLMs the Promptwatch monitor tracks (Promptwatch -> Monitors -> Settings -> Models), always shown in this order.
+var PW_LLMS = ["ChatGPT", "AI Overview", "Copilot", "Gemini", "Meta AI", "Claude"];
+function pwModels(P, seen){
+  var byLabel = {}; Object.keys(P.models || {}).forEach(function(id){ byLabel[(P.models[id] || [id])[0]] = byLabel[(P.models[id] || [id])[0]] || id; });
+  (seen || []).forEach(function(m){ var l = pwLabel(P, m[0], m[1]); if (byLabel[l] === undefined || (seen || []).some(function(x){ return x[0] === m[0]; })) byLabel[l] = m[0]; });
+  return (P.monitored || PW_LLMS).map(function(l){ return [byLabel[l] || l, l]; });
+}
 function pwLabel(P, mid, fallback){ var m = (P.models || {})[mid]; return m ? m[0] : (fallback || mid); }
 function pwWindow(sid){
   var P = pwSnap(sid); if (!P) return null;
@@ -987,7 +994,8 @@ function aiPart(s, part){
   // ---- visibility by LLM (ours)
   var vh = B.vis_llm || {brands:{}, models:[], cells:[]}, selfIds = Object.keys(vh.brands).filter(function(k){ return vh.brands[k][2] === "SELF"; });
   var selfVis = {}; vh.cells.forEach(function(c){ if (selfIds.indexOf(c[0]) >= 0) selfVis[c[1]] = c[2]; });
-  var llms = vh.models.filter(function(m){ return typeof selfVis[m[0]] === "number"; }).sort(function(x, y){ return selfVis[y[0]] - selfVis[x[0]]; });
+  var MON = pwModels(P, vh.models);
+  var llms = MON.filter(function(m){ return typeof selfVis[m[0]] === "number"; }).sort(function(x, y){ return selfVis[y[0]] - selfVis[x[0]]; });
   // ---- headline bullets
   var bl = [];
   bl.push("Intellectyx is ranked #1 on " + S.r1 + " of " + N + " tracked prompts" + (PS ? " (" + (S.r1 - PS.r1 >= 0 ? "+" : "") + (S.r1 - PS.r1) + " vs " + cmpTxt + ")" : "") + " and in the top 3 on " + S.top3 + ".");
@@ -1071,12 +1079,12 @@ function aiPart(s, part){
     "Promptwatch daily rank of every tracked prompt, " + rangeTxt([tDays[0], tDays[tDays.length - 1]]) + (w.n > 1 ? " · " + (w.n === 7 && !B.synthetic ? "Week" : "Period") + " = rank for the whole " + (w.n === 7 && !B.synthetic ? "week" : "period") : "") + (useStrip ? " · one square per day (hover for the date)" : "") + (tDays.length !== 7 ? " · Days #1 = days ranked #1 out of the days the prompt had data" : "") + (!PB ? " · no comparison: Promptwatch has no data for the previous " + nn + " (" + rangeTxt([w.pa, w.pe]) + (P.first_data ? "; tracking starts " + fmtDate(P.first_data) : "") + ")" : "") + ". Source: /prompts/brand-rank (one request per day)."));
   // ---- LLM-wise prompt view
   if (full && B.rank_llm){
-    var mods = (vh.models || []).map(function(m){ return m[0]; }).filter(function(m){ return B.rank_llm[m]; });
+    var mods = MON.map(function(m){ return m[0]; });
     var lrows = trows.filter(function(r){ return S.self[r.pid]; });
-    var lcols = [{key:"prompt",label:"Prompt"}].concat(mods.map(function(m){ return {label:pwLabel(P, m), get:function(r){ var rr = B.rank_llm[m][r.pid], pos = ((B.pos_prompt || {})[r.pid] || {})[m];
+    var lcols = [{key:"prompt",label:"Prompt"}].concat(mods.map(function(m){ return {label:pwLabel(P, m), get:function(r){ var rr = (B.rank_llm[m] || {})[r.pid], pos = ((B.pos_prompt || {})[r.pid] || {})[m];
       var sub = [typeof pos === "number" && rr && rr[0] > 0 ? "pos " + pwF1(pos) : "", B.synthetic && rr ? "#1 " + rr[2] + "/" + rr[3] + "d" : ""].filter(Boolean).join(" · ");
       return pwRankCell(rr ? rr[0] : null, sub); }}; }));
-    var tot = mods.map(function(m){ return pwLabel(P, m) + " " + Object.keys(B.rank_llm[m]).filter(function(pid){ return B.rank_llm[m][pid][0] === 1; }).length; }).join(" · ");
+    var tot = mods.map(function(m){ return pwLabel(P, m) + " " + (B.rank_llm[m] ? Object.keys(B.rank_llm[m]).filter(function(pid){ return B.rank_llm[m][pid][0] === 1; }).length : "– (no answers)"); }).join(" · ");
     part.appendChild(card("ai-llm-prompts-"+s.id, "LLM-wise prompt view", [$("div",{cls:"pwtrack pwllm"},[table(lcols, lrows)]), $("div",{cls:"pwleg"},[$("span",null,[$("b",{text:"Prompts ranked #1: "}), tot])])],
       (B.synthetic ? "The brand rank Intellectyx had most often on each LLM across these days, with the number of days it was #1 (#1 x/y d)." + detTxt + " " : "") + "Brand rank of Intellectyx for each prompt using only that LLM's answers (#1 = most visible brand on that LLM). pos = position in answer on that LLM (order in which Intellectyx is named, #1 = named first). Gap = a tracked competitor is ranked, Intellectyx is not · – = no tracked brand mentioned · · = no answers. Source: /prompts/brand-rank per LLM · /performance-heatmap per prompt (metric = position)."));
   }
@@ -1132,17 +1140,19 @@ function aiPart(s, part){
     var cell = {}; vh.cells.forEach(function(c){ (cell[c[0]] || (cell[c[0]] = {}))[c[1]] = c[2]; });
     var pvh = (PB || {}).vis_llm, pself = {};
     if (pvh){ var pids2 = Object.keys(pvh.brands).filter(function(k){ return pvh.brands[k][2] === "SELF"; }); pvh.cells.forEach(function(c){ if (pids2.indexOf(c[0]) >= 0) pself[c[1]] = c[2]; }); }
-    var m0 = vh.models[0][0];
+    var m0 = MON[0][0];
     var brows = Object.keys(vh.brands).map(function(id){ var b = vh.brands[id]; return {id:id, name:b[0] + (b[2] === "SELF" ? " (you)" : ""), self:b[2] === "SELF"}; })
       .sort(function(x, y){ return (y.self - x.self) || (((cell[y.id] || {})[m0] || 0) - ((cell[x.id] || {})[m0] || 0)); });
-    var vcols = [{key:"name",label:"Brand · visibility %"}].concat(vh.models.map(function(m){ return {label:pwLabel(P, m[0], m[1]), n:1, get:function(r){
-      if (r.kind === "chg"){ var c = selfVis[m[0]], p = pself[m[0]]; if (typeof c !== "number" || typeof p !== "number") return "-"; var d = Math.round((c - p) * 10) / 10; return $("span",{cls:d > 0 ? "up" : d < 0 ? "down" : "flat", text:(d > 0 ? "▲" : d < 0 ? "▼" : "") + pwF1(Math.abs(d))}); }
-      if (r.kind === "pos"){ var v = (B.pos_llm || {})[m[0]]; return typeof v === "number" ? "#" + pwF1(v) : "-"; }
-      var x = (cell[r.id] || {})[m[0]]; return typeof x === "number" ? pwF1(x) : "-"; }}; }));
+    var vcols = [{key:"name",label:"Brand · visibility %"}].concat(MON.map(function(m){ return {label:m[1], n:1, get:function(r){
+      if (r.kind === "chg"){ var c = selfVis[m[0]], p = pself[m[0]]; if (typeof c !== "number" || typeof p !== "number") return "–"; var d = Math.round((c - p) * 10) / 10; return $("span",{cls:d > 0 ? "up" : d < 0 ? "down" : "flat", text:(d > 0 ? "▲" : d < 0 ? "▼" : "") + pwF1(Math.abs(d))}); }
+      if (r.kind === "pos"){ var v = (B.pos_llm || {})[m[0]]; return typeof v === "number" ? "#" + pwF1(v) : "–"; }
+      var x = (cell[r.id] || {})[m[0]]; return typeof x === "number" ? pwF1(x) : "–"; }}; }));
     var extra = [];
     if (pvh) extra.push({name:"Intellectyx vs prev. " + nn + " (pts)", kind:"chg"});
     if (B.pos_llm) extra.push({name:"Intellectyx position in answer", kind:"pos"});
-    part.appendChild(card("ai-llm-"+s.id, "Visibility by LLM", [table(vcols, brows.concat(extra))], "Promptwatch visibility score per brand on each LLM · " + rangeTxt([w.a, w.e]) + ". Source: /performance-heatmap (metric = visibility, position)."));
+    var noAns = MON.filter(function(m){ return !vh.cells.some(function(c){ return c[1] === m[0]; }); }).map(function(m){ return m[1]; });
+    part.appendChild(card("ai-llm-"+s.id, "Visibility by LLM", [table(vcols, brows.concat(extra)), noAns.length ? $("div",{cls:"pwleg"},[$("span",{text:"– = no answers recorded by Promptwatch for " + noAns.join(", ") + " in these dates."})]) : null],
+      "Promptwatch visibility score per brand on each of the " + MON.length + " LLMs the monitor tracks (" + MON.map(function(m){ return m[1]; }).join(", ") + ") · " + rangeTxt([w.a, w.e]) + ". Source: /performance-heatmap (metric = visibility, position)."));
   }
   // ---- brand comparison
   part.appendChild(card("ai-brands-"+s.id, "Brand comparison", [table([{label:"Brand",get:function(r){ return $("div",{cls:"pwpage"},[$("div",{cls:"t",text:r.name + (r.rel === "SELF" ? " (you)" : "")}), r.domain ? $("small",{text:r.domain}) : null]); }},
