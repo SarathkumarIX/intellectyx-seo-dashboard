@@ -184,7 +184,9 @@ h1{font-size:26px;margin:0 0 6px;font-weight:700;letter-spacing:-.015em;color:#f
 .tblwrap{margin-bottom:2px}
 .block h3{font-size:14.5px;margin:0 0 2px;font-weight:700;color:var(--ink)}
 .headrow{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px}
-.headrow>.headtxt{min-width:0;flex:1 1 auto}
+.headrow>.headtxt{min-width:0;flex:1 1 0}
+.headrow>.tsearchrow{flex:0 0 auto;margin:0}
+@media (min-width:821px){.headrow{flex-wrap:nowrap;align-items:flex-start}.headrow>.tsearchrow{margin-top:2px}}
 .headrow>.headtxt>.desc{margin:2px 0 0}
 .headrow>.headtxt>h2{margin:0}
 .card>.headrow>.headtxt>h2{display:flex;align-items:center;gap:10px}
@@ -311,6 +313,34 @@ td.n .pwrc{align-items:flex-end}
 .pwpage .t{font-weight:600;font-size:13px;line-height:1.35}.pwpage a{font-size:12px;color:var(--ink2);word-break:break-all}.pwpage small{font-size:11.5px;color:var(--muted)}
 .pwcp{display:flex;flex-direction:column;gap:4px;font-size:12.5px;min-width:280px}.pwcp .pwr{min-width:30px;font-size:11px;padding:1px 4px}
 small.muted{color:var(--muted);font-size:12px}
+
+.pwtrack td{padding:7px 6px;vertical-align:middle}
+.pwtrack th{padding:10px 6px;text-align:center}
+.pwtrack th:first-child,.pwtrack td:first-child{text-align:left;padding-left:16px}
+.pwtrack td:first-child{font-size:13px;line-height:1.35;min-width:260px;max-width:420px}
+.pwtrack td:not(:first-child){text-align:center}
+.pwtrack .pwr{display:inline-flex;align-items:center;justify-content:center;width:44px;height:26px;padding:0;border-radius:7px;font-size:12px;border-width:1px}
+.pwtrack .pwr.r1{background:linear-gradient(180deg,#2fd17f,#12b76a);border-color:#12b76a;color:#06281a;box-shadow:0 1px 6px rgba(18,183,106,.25)}
+.pwtrack .pwr.r2{background:rgba(144,195,34,.16);border-color:rgba(144,195,34,.45);color:#c8e88a}
+.pwtrack .pwr.r4{background:rgba(253,176,34,.12);border-color:rgba(253,176,34,.4);color:#fdc560}
+.pwtrack .pwr.gap{background:repeating-linear-gradient(135deg,rgba(240,68,56,.16) 0 5px,rgba(240,68,56,.08) 5px 10px);border-color:rgba(240,68,56,.45);color:#ff8a80}
+.pwtrack .pwr.nb{background:transparent;border:1px solid var(--line);color:var(--muted)}
+.pwtrack .pwr.nd{background:transparent;border:1px dashed var(--line);color:transparent}
+.pwtrack .pwrc{gap:3px}.pwtrack .pwrc small{font-size:10.5px}
+.pwtrack td:has(.pwwk){background:rgba(144,195,34,.06)!important;border-left:1px solid var(--line)}
+.pwtrack .pwwk .pwr{width:48px;height:30px;font-size:13px}
+.pwchg{display:inline-block;font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.pwchg.won{background:rgba(18,183,106,.16);color:#47cd89}
+.pwchg.lost{background:rgba(240,68,56,.16);color:#ff8a80}
+.pwchg.new{background:rgba(46,144,250,.16);color:#84caff}
+.pwchg.upc{color:#47cd89}.pwchg.dnc{color:#ff8a80}
+.pwchg.flat{color:var(--muted);font-weight:500}
+.pwdots{display:inline-flex;align-items:center;gap:8px}
+.pwdots .bars{display:inline-flex;gap:2px}
+.pwdots i{width:5px;height:16px;border-radius:2px;background:var(--line)}
+.pwdots i.on{background:#12b76a}
+.pwdots b{font-size:12px;font-weight:600;color:var(--ink2);min-width:26px;text-align:left}
+.pwllm td:not(:first-child){min-width:84px}
 </style>
 </head>
 <body>
@@ -546,6 +576,7 @@ function lineChart(points, series, opts){
 function desc(t){ return $("div",{cls:"desc",text:t}); }
 // Title (+ description) on the left and the table's search box on the right, in one row.
 function headRow(h, d, first){
+  if (first && first.classList && first.classList.contains("pwtrack") && first.firstElementChild && first.firstElementChild.classList.contains("paged")) first = first.firstElementChild;
   var sr = first && first.classList && first.classList.contains("paged") ? first.querySelector(":scope > .tsearchrow") : null;
   if (!sr) return [h, d];
   sr.parentNode.removeChild(sr);
@@ -783,6 +814,16 @@ function pwRankCell(r, sub){
   var s = $("span",{cls:"pwr " + cls, text:pwRankTxt(r)});
   return sub ? $("span",{cls:"pwrc"},[s, $("small",{text:sub})]) : s;
 }
+function pwChg(c){
+  if (!c || c === "-" || c === "–") return $("span",{cls:"pwchg flat",text:"–"});
+  var k = /Won/.test(c) ? "won" : /Lost/.test(c) ? "lost" : /New/.test(c) ? "new" : /▲/.test(c) ? "upc" : /▼/.test(c) ? "dnc" : "flat";
+  return $("span",{cls:"pwchg " + k, text:c.replace("▲ ", "▲ ").replace("▼ ", "▼ ")});
+}
+function pwDots(cells){
+  var n = 0, box = $("span",{cls:"pwdots"}), bars = $("span",{cls:"bars"});
+  (cells || []).forEach(function(c){ if (c === 1) n++; bars.appendChild($("i",{cls:c === 1 ? "on" : ""})); });
+  box.appendChild(bars); box.appendChild($("b",{text:n + "/7"})); return box;
+}
 function pwLabel(P, mid, fallback){ var m = (P.models || {})[mid]; return m ? m[0] : (fallback || mid); }
 function pwWindow(sid){
   var P = pwSnap(sid); if (!P) return null;
@@ -926,10 +967,10 @@ function aiPart(s, part){
   trows.sort(function(x, y){ return (ord(x.win) - ord(y.win)) || (y.days1 - x.days1) || (x.prompt < y.prompt ? -1 : 1); });
   var tcols = [{key:"prompt",label:"Prompt"}].concat(tDays.map(function(d, i){ var x = new Date(d + "T00:00:00Z");
     return {label:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][x.getUTCDay()] + " " + d.slice(8), get:function(r){ return r.cells[i] === undefined ? $("span",{cls:"pwr nd",title:"not fetched yet",text:"?"}) : pwRankCell(r.cells[i]); }}; }));
-  if (w.n > 1) tcols.push({label:w.n === 7 ? "Week" : "Period", get:function(r){ return pwRankCell(r.win); }});
-  tcols.push({label:"vs prev. " + nn, get:function(r){ var c = r.chg; return $("span",{cls:/▲|New/.test(c) ? "up" : /▼/.test(c) ? "down" : "flat", text:c || "-"}); }});
-  tcols.push({label:"Days #1", get:function(r){ return r.days1 + "/7"; }});
-  part.appendChild(card("ai-tracker-"+s.id, "7-day prompt tracker", [table(tcols, trows, "No prompts."), $("div",{cls:"pwleg"},[
+  if (w.n > 1) tcols.push({label:w.n === 7 ? "Week" : "Period", get:function(r){ return $("span",{cls:"pwwk"},[pwRankCell(r.win)]); }});
+  tcols.push({label:"vs prev. " + nn, get:function(r){ return pwChg(r.chg); }});
+  tcols.push({label:"Days #1", get:function(r){ return pwDots(r.cells); }});
+  part.appendChild(card("ai-tracker-"+s.id, "7-day prompt tracker", [$("div",{cls:"pwtrack"},[table(tcols, trows, "No prompts.")]), $("div",{cls:"pwleg"},[
       $("span",null,[$("i",{cls:"pwr r1"}),"#1"]), $("span",null,[$("i",{cls:"pwr r2"}),"Rank 2-3"]), $("span",null,[$("i",{cls:"pwr r4"}),"Rank 4+"]),
       $("span",null,[$("i",{cls:"pwr gap"}),"Gap: competitor ranked, we are not"]), $("span",{text:"– no tracked brand mentioned · · no data that day"})])],
     "Promptwatch daily rank of every tracked prompt, " + rangeTxt([tDays[0], tDays[6]]) + (w.n > 1 ? " · " + (w.n === 7 ? "Week" : "Period") + " = Promptwatch rank for the whole " + (w.n === 7 ? "week" : "period") : "") + ". Source: /prompts/brand-rank (one request per day)."));
@@ -940,7 +981,7 @@ function aiPart(s, part){
     var lcols = [{key:"prompt",label:"Prompt"}].concat(mods.map(function(m){ return {label:pwLabel(P, m), get:function(r){ var rr = B.rank_llm[m][r.pid], pos = ((B.pos_prompt || {})[r.pid] || {})[m];
       return pwRankCell(rr ? rr[0] : null, typeof pos === "number" && rr && rr[0] > 0 ? "pos " + pwF1(pos) : ""); }}; }));
     var tot = mods.map(function(m){ return pwLabel(P, m) + " " + Object.keys(B.rank_llm[m]).filter(function(pid){ return B.rank_llm[m][pid][0] === 1; }).length; }).join(" · ");
-    part.appendChild(card("ai-llm-prompts-"+s.id, "LLM-wise prompt view", [table(lcols, lrows), $("div",{cls:"pwleg"},[$("span",null,[$("b",{text:"Prompts ranked #1: "}), tot])])],
+    part.appendChild(card("ai-llm-prompts-"+s.id, "LLM-wise prompt view", [$("div",{cls:"pwtrack pwllm"},[table(lcols, lrows)]), $("div",{cls:"pwleg"},[$("span",null,[$("b",{text:"Prompts ranked #1: "}), tot])])],
       "Brand rank of Intellectyx for each prompt using only that LLM's answers (#1 = most visible brand on that LLM). pos = position in answer on that LLM (order in which Intellectyx is named, #1 = named first). Gap = a tracked competitor is ranked, Intellectyx is not · – = no tracked brand mentioned · · = no answers. Source: /prompts/brand-rank per LLM · /performance-heatmap per prompt (metric = position)."));
   }
   // ---- close to #1 and gaps
