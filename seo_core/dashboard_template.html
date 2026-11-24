@@ -1289,8 +1289,9 @@ function buildSite(s){
   var nav = $("div",{cls:"subnav"}), parts = {};
   names.forEach(function(n, i){
     var b = $("button",{"aria-pressed": i===0 ? "true" : "false", text:n[1]});
+    b.setAttribute("data-tab", n[0]);
     b.addEventListener("click", function(){ Array.prototype.forEach.call(nav.children, function(x){ x.setAttribute("aria-pressed","false"); }); b.setAttribute("aria-pressed","true");
-      Object.keys(parts).forEach(function(k){ parts[k].hidden = k !== n[0]; }); window.scrollTo({top: p.offsetTop - 10}); });
+      Object.keys(parts).forEach(function(k){ parts[k].hidden = k !== n[0]; }); SUBTAB = n[0]; window.scrollTo({top: p.offsetTop - 10}); });
     nav.appendChild(b); parts[n[0]] = $("div",{id:n[0]+"-"+s.id}); if (i) parts[n[0]].hidden = true;
   });
   p.appendChild(nav); names.forEach(function(n){ p.appendChild(parts[n[0]]); });
@@ -1608,8 +1609,17 @@ function buildSite(s){
     parts.ai.remove();
   }
   pruneEmpty(p);
+  // keep the tab the user was on when the date filter changes (the page is rebuilt for each period)
+  if (SUBTAB && SUBTAB !== "overview"){
+    var keep = nav.querySelector('button[data-tab="' + SUBTAB + '"]');
+    if (keep && parts[SUBTAB] && parts[SUBTAB].parentNode){
+      Array.prototype.forEach.call(nav.children, function(x){ x.setAttribute("aria-pressed", x === keep ? "true" : "false"); });
+      Object.keys(parts).forEach(function(k){ parts[k].hidden = k !== SUBTAB; });
+    }
+  }
   return p;
 }
+var SUBTAB = null;
 // ---------- SEMrush Position Tracking: rankings and pages, laid out like SEMrush ----------
 function ymdLabel(d){ var x = new Date(d + "T00:00:00Z"); return x.toLocaleDateString("en-US",{month:"short",day:"numeric",timeZone:"UTC"}); }
 function trunc(v, dp){ if (typeof v !== "number") return "-"; var f = Math.pow(10, dp); return (Math.round(v * f) / f).toFixed(dp); }
