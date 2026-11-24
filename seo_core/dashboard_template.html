@@ -127,16 +127,15 @@ h1{font-size:26px;margin:0 0 6px;font-weight:700;letter-spacing:-.015em;color:#f
 .status{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
 .pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12px;color:var(--ink2);background:var(--card)}
 .dot{width:8px;height:8px;border-radius:50%}
-.subnavwrap{position:sticky;top:0;z-index:6;display:flex;justify-content:center;margin:0 -8px 24px;padding:10px 8px;
-  background:var(--page);}
-.subnavwrap::after{content:"";position:absolute;left:0;right:0;top:100%;height:14px;background:linear-gradient(var(--page),color-mix(in srgb,var(--page) 0%,transparent));pointer-events:none}
+.subnavwrap{position:sticky;top:10px;z-index:6;display:flex;justify-content:center;margin:4px 0 24px;pointer-events:none}
+.subnavwrap .subnav{pointer-events:auto}
 .subnav{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;max-width:100%;padding:5px;border-radius:999px;
-  background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px rgba(16,24,40,.06),0 10px 30px -16px rgba(16,24,40,.35)}
+  background:var(--card);border:1px solid var(--line);box-shadow:0 1px 2px rgba(16,24,40,.05),0 6px 18px -8px rgba(16,24,40,.18)}
 .subnav button{appearance:none;font:inherit;font-size:13.5px;font-weight:600;border:0;background:transparent;color:var(--ink2);border-radius:999px;padding:9px 18px;cursor:pointer;
   transition:background .18s ease,color .18s ease,box-shadow .18s ease;display:inline-flex;align-items:center;gap:8px;outline:none}
 .subnav button:hover{background:var(--card2);color:var(--ink)}
 .subnav button:focus-visible{box-shadow:0 0 0 2px var(--brand)}
-.subnav button[aria-pressed="true"]{background:linear-gradient(180deg,#a3d13a,#86b81c);color:#14200a;box-shadow:0 6px 16px -6px rgba(144,195,34,.7),inset 0 1px 0 rgba(255,255,255,.35)}
+.subnav button[aria-pressed="true"]{background:linear-gradient(180deg,#a3d13a,#8cbf20);color:#14200a;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 1px 2px rgba(16,24,40,.12)}
 .tdot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none;transition:transform .18s}
 .subnav button:hover .tdot{transform:scale(1.25)}
 .tdot.t-overview{background:var(--brand)}.tdot.t-gsc{background:#2a78d6}.tdot.t-bing{background:#0e9f9a}.tdot.t-ga4{background:#f79009}.tdot.t-semrush{background:#7a5af8}.tdot.t-ai{background:#c43be0}
@@ -439,6 +438,28 @@ small.muted{color:var(--muted);font-size:12px}
 .gstats b{font-size:15px;font-weight:700;color:var(--ink)}
 .gstats span{font-size:11.5px;color:var(--muted);line-height:1.3}
 .gnote{margin-top:12px;font-size:12px;color:var(--muted)}
+
+/* metric tiles: value, change chip, previous value */
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 16px 14px;gap:2px;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
+.kpi:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--brand) 55%,var(--line));box-shadow:0 10px 24px -14px rgba(16,24,40,.35)}
+.kpi .l{font-size:12.5px;font-weight:600;color:var(--ink2);min-height:2.5em;line-height:1.35}
+.kpi .v{font-size:28px;font-weight:800;letter-spacing:-.025em;margin:2px 0 8px;line-height:1.1}
+.kpi .d{font-size:12px;margin-top:auto}
+.dwrap{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dwrap .chip{display:inline-flex;align-items:center;font-weight:700;font-size:11.5px;border-radius:999px;padding:3px 8px;white-space:nowrap}
+.dwrap .chip.up{background:var(--pw1bg);color:var(--pw1)}
+.dwrap .chip.down{background:var(--pwgbg);color:var(--pwgap)}
+.dwrap .vs{color:var(--muted);font-size:11.5px}
+.kpi .d .flat{color:var(--muted);font-size:11.5px}
+.kmetric .headtxt>h2::before{display:none!important}
+.kmetric .headtxt>h2{gap:10px}
+.kmetric.ai .kdot{background:var(--ai)}.kmetric.ga .kdot{background:var(--ga)}.kmetric.gsc .kdot{background:var(--gsc)}
+.kcard.gsc{border-top-color:#2a78d6}.kcard.ga{border-top-color:#f79009}.kcard.bing{border-top-color:#0e9f9a}.kcard.sem{border-top-color:#7a5af8}.kcard.ai{border-top-color:#c43be0}
+.kcard.gsc{background:linear-gradient(180deg,color-mix(in srgb,#2a78d6 7%,var(--card)) 0,var(--card) 110px)}
+.kcard.ga{background:linear-gradient(180deg,color-mix(in srgb,#f79009 7%,var(--card)) 0,var(--card) 110px)}
+.kcard.bing{background:linear-gradient(180deg,color-mix(in srgb,#0e9f9a 7%,var(--card)) 0,var(--card) 110px)}
+.kcard.sem{background:linear-gradient(180deg,color-mix(in srgb,#7a5af8 7%,var(--card)) 0,var(--card) 110px)}
+.kcard.ai{background:linear-gradient(180deg,color-mix(in srgb,#c43be0 7%,var(--card)) 0,var(--card) 110px)}
 </style>
 </head>
 <body>
@@ -497,12 +518,12 @@ function delta(k, lowerIsBetter, kind){
   if (k && k.na) return $("span",{cls:"flat",text:k.na});
   if (!k || k.previous === null || k.previous === undefined || k.current === null || k.current === undefined) return $("span",{cls:"flat",text:"no prior data"});
   var abs = k.change_abs, p = k.change_pct;
-  if (!abs) return $("span",{cls:"flat",text:"no change vs prev week"});
+  if (!abs) return $("span",{cls:"flat",text:"no change"});
   var good = lowerIsBetter ? abs < 0 : abs > 0;
   var arrow = abs > 0 ? "▲ " : "▼ ";
   var txt = (kind === "pos" || kind === "pct") ? (abs > 0 ? "+" : "") + abs.toFixed(kind==="pos"?1:2) + (kind==="pct"?" pts":"")
             : (p !== null && p !== undefined ? (p > 0 ? "+" : "") + p + "%" : (abs > 0 ? "+" : "") + fmt(abs));
-  return $("span",{cls: good ? "up" : "down", text: arrow + txt + " vs prev (" + fmt(k.previous, kind) + ")"});
+  return $("span",{cls:"dwrap"},[$("span",{cls:"chip " + (good ? "up" : "down"), text: arrow + txt.replace(/^[+-]/, "")}), $("span",{cls:"vs",text:"vs " + fmt(k.previous, kind)})]);
 }
 function kpiCard(label, k, kind, lowerIsBetter){
   return $("div",{cls:"kpi"},[$("div",{cls:"l",text:label}),$("div",{cls:"v",text:fmt(k && k.current, kind)}),$("div",{cls:"d"},[delta(k, lowerIsBetter, kind)])]);
@@ -511,7 +532,8 @@ function semKpi(label, value, change, kind, lowerIsBetter, note){
   var c = change === null || change === undefined || change === "" ? null : String(change);
   var n = c ? parseFloat(c.replace(/[^0-9+\-.]/g,"")) : NaN;
   var cls = !c || !n ? "flat" : ((n > 0) !== !!lowerIsBetter ? "up" : "down");
-  var d = $("span",{cls:cls,text: c ? ((n>0?"▲ ":n<0?"▼ ":"") + c + " " + (note || "vs prior")) : (note === undefined ? "no change reported" : note)});
+  var d = c && n ? $("span",{cls:"dwrap"},[$("span",{cls:"chip " + cls, text:(n > 0 ? "▲ " : "▼ ") + c.replace(/^[+-]/, "")}), $("span",{cls:"vs",text:note || "vs prior"})])
+    : $("span",{cls:"flat",text: c ? "no change" : (note === undefined ? "no change reported" : note)});
   return $("div",{cls:"kpi"},[$("div",{cls:"l",text:label}),$("div",{cls:"v",text: value === null || value === undefined ? "-" : (typeof value === "number" ? fmt(value, kind) : String(value))}),$("div",{cls:"d"},[d])]);
 }
 function prevDiff(cur, prev){ if (typeof cur !== "number" || typeof prev !== "number") return null; var d = Math.round((cur - prev)*100)/100; return (d>0?"+":"") + d; }
@@ -982,7 +1004,7 @@ function pwTotals(sid){
 function pwKpi(label, value, k, note, pts, lowerBetter){
   var d = k && typeof k.current === "number" && typeof k.previous === "number" ? Math.round((k.current - k.previous) * 10) / 10 : null;
   var vs = "vs prev. " + note;
-  var ch = d === null ? $("span",{cls:"flat",text:"no prior data"}) : !d ? $("span",{cls:"flat",text:"no change " + vs}) : $("span",{cls:(d > 0) !== !!lowerBetter ? "up" : "down", text:(d > 0 ? "▲ " : "▼ ") + (pts ? pwF1(Math.abs(d)) + " pts " : pwN(Math.abs(d)) + " ") + vs});
+  var ch = d === null ? $("span",{cls:"flat",text:"no prior data"}) : !d ? $("span",{cls:"flat",text:"no change " + vs}) : $("span",{cls:"dwrap"},[$("span",{cls:"chip " + ((d > 0) !== !!lowerBetter ? "up" : "down"), text:(d > 0 ? "▲ " : "▼ ") + (pts ? pwF1(Math.abs(d)) + " pts" : pwN(Math.abs(d)))}), $("span",{cls:"vs",text:vs})]);
   return $("div",{cls:"kpi"},[$("div",{cls:"l",text:label}),$("div",{cls:"v",text:value}),$("div",{cls:"d"},[ch])]);
 }
 function pwPageCell(row, sub){  // [url, title, count, avgPos]
@@ -1707,6 +1729,10 @@ function buildSite(s){
   var hiC = highIntentCard(s); if (hiC && parts.gsc){ var dg = parts.gsc.querySelector("#daybyday-gsc-" + s.id); if (dg && dg.nextSibling) parts.gsc.insertBefore(hiC, dg.nextSibling); else placeAfterFirst(parts.gsc, hiC); }
   placeAfterFirst(parts.ga4, dayByDayCard(s, "ga"));
   if (parts.bing && parts.bing.parentNode) placeAfterFirst(parts.bing, dayByDayCard(s, "bing"));
+  // first metric card of each source tab: same look as "SEMrush key metrics"
+  [["gsc-kpi-", "gsc", "Search Console key metrics"], ["bing-kpi-", "bing", "Bing key metrics"], ["ga-summary-", "ga", "Google Analytics key metrics"], ["ai-kpis-", "ai", "AI search key metrics"]].forEach(function(x){
+    var c = p.querySelector("#" + x[0] + s.id); if (!c) return; c.classList.add("kcard", x[1], "kmetric");
+    var h = c.querySelector("h2"); if (h){ var ib = h.querySelector(".infobtn"); h.textContent = ""; h.appendChild($("span",{cls:"kdot"})); h.appendChild(document.createTextNode(x[2])); if (ib) h.appendChild(ib); } });
   // per-tab source notes go into one collapsed "About this data" box at the bottom of the tab
   Object.keys(parts).forEach(function(k){ var host = parts[k]; if (!host || !host.parentNode) return;
     var notes = host.querySelectorAll(":scope > .note"); if (!notes.length) return;
