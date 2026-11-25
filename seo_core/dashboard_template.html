@@ -435,6 +435,11 @@ small.muted{color:var(--muted);font-size:12px}
   background:linear-gradient(160deg,color-mix(in srgb,var(--c) 10%,var(--card)) 0%,var(--card) 55%);cursor:pointer;overflow:hidden;transition:transform .15s ease,box-shadow .15s ease,border-color .15s ease}
 .gtile::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--c),color-mix(in srgb,var(--c) 30%,transparent))}
 .gtile:hover,.gtile:focus-visible{transform:translateY(-2px);box-shadow:0 10px 28px -12px color-mix(in srgb,var(--c) 45%,transparent);border-color:color-mix(in srgb,var(--c) 45%,var(--line));outline:none}
+.gpend{font-size:11.5px;font-weight:600;color:#9a6200;background:color-mix(in srgb,#f79009 12%,transparent);border-radius:8px;padding:5px 9px;margin-top:-2px}
+.pendbar{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#9a6200;background:color-mix(in srgb,#f79009 10%,var(--card));border:1px solid color-mix(in srgb,#f79009 30%,var(--line));border-radius:12px;padding:10px 14px;margin:0 0 16px}
+.pendbar::before{content:"";width:8px;height:8px;border-radius:50%;background:#f79009;flex:none;animation:pendpulse 1.6s ease-in-out infinite}
+@keyframes pendpulse{50%{opacity:.35}}
+@media (prefers-color-scheme:dark){.gpend,.pendbar{color:#fdb022}}
 .gtile.gsc{--c:#2a78d6}.gtile.ga{--c:#f79009}.gtile.bing{--c:#0e9f9a}.gtile.ai{--c:#c43be0}
 .gtop{display:flex;align-items:center;gap:10px}
 .gicon{width:30px;height:30px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;letter-spacing:.02em;color:#fff;background:var(--c);box-shadow:0 4px 12px -4px var(--c)}
@@ -1330,6 +1335,12 @@ function pwSynth(P, a, e){
   return B;
 }
 function uLabel(base, k){ return k && k.avg ? base + " (avg. per day)" : base; }
+// Search Console days Google has not closed yet (it counts days on US Pacific time)
+function gscOpenDays(s){
+  var ds = DAILY && DAILY.sites && DAILY.sites[s.id]; if (!ds || !ds.gsc_open || !R.custom) return [];
+  return ds.gsc_open.filter(function(d){ return d >= R.period.current[0] && d <= R.period.current[1]; });
+}
+function gscOpenText(days){ return "Search Console figures for " + days.map(ymdLabel).join(", ") + " are still coming in (Google closes its day at about 3:30 PM IST) · complete in the 4:41 PM IST update"; }
 function dayByDayCard(s, which){
   if (!DAILY || !DAILY.sites || !DAILY.sites[s.id]) return null;
   var site = DAILY.sites[s.id], a = R.period.current[0], b = R.period.current[1], one = a === b;
@@ -1472,6 +1483,7 @@ function buildSite(s){
     var prevTxt = !s.custom ? "Compared with the previous week" : R.period.days === 1 ? "Search and website figures compared with the same weekday 7 days earlier; AI search with the previous day" : "Compared with the previous " + R.period.days + " days";
     if (gsc.kpis) gl("Google Search", "gsc", cfmt(gsc.kpis.clicks.current), "clicks from Google", gsc.kpis.clicks, null, false,
       [[cfmt(gsc.kpis.impressions.current), "impressions"], [fmt((gsc.kpis.avg_position || {}).current, "pos"), "avg. position"]], series("gsc", "totals", "clicks"), "#2a78d6", "gsc");
+    var gOpen = gscOpenDays(s); if (gOpen.length && glance.length){ glance[glance.length - 1].appendChild($("div",{cls:"gpend",text:"Still coming in: " + gOpen.map(ymdLabel).join(", ") + " · complete at 4:41 PM IST"})); }
     if (ga.kpis) gl("Website visits", "ga", cfmt(ga.kpis.sessions.current), "sessions (GA4)", ga.kpis.sessions, null, false,
       [[cfmt((ga.organic_kpis || {}).sessions ? ga.organic_kpis.sessions.current : null), "from organic search"], [fmt((ga.kpis.key_events || {}).current), "key events"]], series("ga", "totals", "sessions"), "#f79009", "ga4");
     var btg = bingTotals(s.id); if (btg && !btg.none){ var bv = []; ((dsite || {}).bing || {}).daily && dsite.bing.daily.forEach(function(r){ if (r.date >= ga0 && r.date <= gb0) bv.push(r.clicks); });
@@ -1599,6 +1611,7 @@ function buildSite(s){
   if (!gsc.kpis){ G.appendChild($("div",{cls:"note",text:"Search Console is not connected for this site."})); }
   else {
     G.appendChild($("div",{cls:"note",text:"Property: " + (gsc.property||"") + " · Web search · " + R.period.current[0] + " to " + R.period.current[1] + " vs " + R.period.previous[0] + " to " + R.period.previous[1]}));
+    var gOpen2 = gscOpenDays(s); if (gOpen2.length) G.appendChild($("div",{cls:"pendbar",text:gscOpenText(gOpen2)}));
     var bs2 = gsc.brand_split || {};
     G.appendChild(card("gsc-kpi-"+s.id, "Performance overview", [$("div",{cls:"kpis kpis7"},[kpiCard("Clicks", gsc.kpis.clicks), kpiCard("Impressions", gsc.kpis.impressions),
       kpiCard("CTR", gsc.kpis.ctr_pct, "pct"), kpiCard("Avg. position", gsc.kpis.avg_position, "pos", true), kpiCard("Non-brand clicks", bs2.nonbrand_clicks),

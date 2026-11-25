@@ -197,6 +197,13 @@ def pull_exact_users(cfg: dict, site: dict, last: dt.date, errors: list) -> dict
     return out
 
 
+def gsc_day_closed(d: dt.date) -> bool:
+    """Search Console counts days in US Pacific time; a day's numbers are near-final ~2 h after PT midnight
+    (about 3:30 PM IST in winter, 2:30 PM IST in summer). Before that the latest day is still filling in."""
+    close = dt.datetime.combine(d + dt.timedelta(days=1), dt.time(2, 0), ZoneInfo("America/Los_Angeles"))
+    return dt.datetime.now(dt.timezone.utc) >= close
+
+
 def refresh(site_ids: list[str] | None = None, days: int | None = None, force: bool = False,
             progress: dict | None = None) -> dict:
     """Pull every missing day (and re-pull the last few days) for the configured window."""
@@ -220,6 +227,8 @@ def refresh(site_ids: list[str] | None = None, days: int | None = None, force: b
                     rec0 = json.loads(f.read_text())
                     pulled = dt.date.fromisoformat(rec0.get("pulled_on", "1970-01-01"))
                     stale = (pulled - d).days < REFRESH_RECENT_DAYS
+                    if rec0.get("gsc_closed") is False:
+                        stale = True
                     # days in the query→URL window that were saved before that table existed
                     if not stale and d >= qp_first and site.get("gsc_property") and "query_page" not in (rec0.get("gsc") or {}):
                         stale = True
@@ -252,7 +261,7 @@ def refresh(site_ids: list[str] | None = None, days: int | None = None, force: b
             for d in ch:
                 k = _iso(d)
                 rec = {"date": k, "pulled_on": _iso(today), "key_event_metric": ke,
-                       "ga": ga.get(k, {}), "gsc": gs.get(k, {})}
+                       "gsc_closed": gsc_day_closed(d), "ga": ga.get(k, {}), "gsc": gs.get(k, {})}
                 (sdir / f"{k}.json").write_text(json.dumps(rec, separators=(",", ":"), default=str))
                 written += 1
         bing.refresh(cfg, site, errors)  # Bing Webmaster Tools snapshot (only when a Bing API key is set)
@@ -295,6 +304,7 @@ def payload(cfg: dict, site_ids: list[str]) -> str | None:
                 continue
         days = [r["date"] for r in recs]
         site: dict[str, Any] = {"days": days, "pulled_on": [r.get("pulled_on") for r in recs],
+                                "gsc_open": [r["date"] for r in recs if r.get("gsc_closed") is False],
                                 "key_event_metric": next((r.get("key_event_metric") for r in reversed(recs) if r.get("key_event_metric")), "keyEvents"),
                                 "ga": {}, "gsc": {}}
         for src in ("ga", "gsc"):
