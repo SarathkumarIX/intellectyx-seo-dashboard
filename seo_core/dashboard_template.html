@@ -516,6 +516,23 @@ header.top .sub,#period .pcmp,.pnav .sep,.pchip small{color:var(--hink2)}
 .calday.on{background:var(--brand);color:var(--brand-ink)}
 .rangebox label{color:var(--hink2)}
 .rangebox input{color:var(--hink);background:var(--hctl);border:1px solid var(--hctlb);color-scheme:light dark}
+/* header: deep teal-navy (#001b25) in both themes, with soft brand glows */
+header.top{--hbg:radial-gradient(55% 140% at 100% 0%,rgba(144,195,34,.24) 0%,rgba(144,195,34,0) 62%),radial-gradient(45% 130% at 0% 100%,rgba(0,170,200,.16) 0%,rgba(0,170,200,0) 60%),linear-gradient(135deg,#00293a 0%,#001b25 52%,#00121a 100%);
+  --hink:#f4f9f6;--hink2:#9db6bd;--hline:rgba(255,255,255,.07);--hctl:rgba(255,255,255,.06);--hctlb:rgba(255,255,255,.13);--hctlhov:rgba(255,255,255,.12);--hpop:#03283a;--hdis:#3d5961;
+  border-color:#00323f;box-shadow:0 1px 2px rgba(0,20,28,.25),0 18px 40px -18px rgba(0,27,37,.55);position:relative;overflow:visible}
+header.top::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(rgba(255,255,255,.07) 1px,transparent 1.3px) 0 0/20px 20px;
+  -webkit-mask:linear-gradient(110deg,transparent 35%,#000 100%);mask:linear-gradient(110deg,transparent 35%,#000 100%)}
+header.top>*{position:relative}
+header.top::after{background:linear-gradient(90deg,#90c322,#c4e57a 45%,rgba(0,170,200,.6) 80%,rgba(0,170,200,0))}
+header.top h1{color:#fff;text-shadow:0 1px 18px rgba(144,195,34,.18)}
+header.top .eyebrow,header.top .wplabel,header.top #period .plab,header.top .noteopen{color:#b9e35e}
+header.top .eyebrow::before{background:#b9e35e}
+header.top .srcok{color:#6ee7a8}
+header.top .pchip svg{color:#b9e35e}
+header.top .seg button[aria-pressed="true"]{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 4px 14px -4px rgba(144,195,34,.55)}
+header.top .calpop{box-shadow:0 22px 48px -14px rgba(0,0,0,.6)}
+header.top .calday.on{color:#0d1606}
 </style>
 </head>
 <body>
