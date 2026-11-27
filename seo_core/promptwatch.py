@@ -345,11 +345,7 @@ def pull(cfg: dict, site: dict, prev: dict | None = None, max_calls: int | None 
         out["errors"].append({"call": "visibility", "error": str(e)})
     try:  # AI referral visits per platform per day (sums for custom date ranges)
         t = cl.get("/analytics/visitors/trend", startDate=_iso(end - dt.timedelta(days=59)), endDate=_iso(end), timezone="UTC") or {}
-        s0 = end - dt.timedelta(days=59)
-        ds = t.get("dates") or []
-        # Promptwatch labels the days like "Sep 25"; store ISO dates (one label per day from the start date)
-        iso = [_iso(s0 + dt.timedelta(days=i)) for i in range(len(ds))]
-        out["ai_visits_daily"] = {"dates": iso, "labels": ds, "series": [[x.get("name"), x.get("data") or []] for x in t.get("series") or []]}
+        out["ai_visits_daily"] = {"dates": t.get("dates") or [], "series": [[x.get("name"), x.get("data") or []] for x in t.get("series") or []]}
     except PromptwatchError as e:
         out["errors"].append({"call": "ai_visits_daily", "error": str(e)})
         if prev and "ai_visits_daily" in prev:
