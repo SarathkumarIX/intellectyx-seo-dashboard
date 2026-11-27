@@ -1,10 +1,15 @@
 name: Daily SEO dashboard refresh
 
 on:
+  # GitHub cron is always written in UTC. Times below in IST (Asia/Kolkata = UTC + 5:30).
+  # GitHub starts scheduled runs late (often 4-8 hours) or skips some, so the refresh is tried
+  # every hour through the night: whichever run starts first has the new day ready before 11:00 IST.
+  # Each run only re-pulls the last few days, so extra runs are cheap.
   schedule:
-    # GitHub often starts scheduled runs late or skips them when busy, so try three times a day
-    # (06:47, 09:47 and 15:47 IST). Each run only re-pulls the last few days, so extra runs are cheap.
-    - cron: "17 1,4,10 * * *"
+    - cron: "41 19-23 * * *"   # 01:11, 02:11, 03:11, 04:11, 05:11 IST
+    - cron: "41 0-4 * * *"     # 06:11, 07:11, 08:11, 09:11, 10:11 IST
+    - cron: "41 10 * * *"      # 16:11 IST - Search Console closes yesterday (US Pacific day) around 15:30 IST
+    - cron: "41 15 * * *"      # 21:11 IST - evening top-up
   workflow_dispatch: {}
 
 permissions:
